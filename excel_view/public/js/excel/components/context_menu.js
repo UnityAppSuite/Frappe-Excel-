@@ -47,19 +47,14 @@ frappe.views.excel.ContextMenu = class ContextMenu {
 				remove_row: {
 					name: () => {
 						const sel = board.hot.getSelected();
-						const count =
-							sel && sel.length ? Math.abs(sel[0][2] - sel[0][0]) + 1 : 1;
-						return count > 1
-							? __("Remove {0} rows", [count])
-							: __("Remove row");
+						const count = sel && sel.length ? Math.abs(sel[0][2] - sel[0][0]) + 1 : 1;
+						return count > 1 ? __("Remove {0} rows", [count]) : __("Remove row");
 					},
 					callback: (key, selection) => {
 						const start = Math.min(selection[0].start.row, selection[0].end.row);
 						const end = Math.max(selection[0].start.row, selection[0].end.row);
 						frappe.confirm(
-							__("Delete {0} record(s)? This cannot be undone.", [
-								end - start + 1,
-							]),
+							__("Delete {0} record(s)? This cannot be undone.", [end - start + 1]),
 							() => board.data_manager.delete_rows(start, end)
 						);
 					},
@@ -67,30 +62,30 @@ frappe.views.excel.ContextMenu = class ContextMenu {
 				},
 
 				// V3.1 — Hide / Unhide rows (HOT 6: uses board._hide_rows / _unhide_all_rows)
-			hide_row: {
-				name: () => {
-					const sel = board.hot.getSelected();
-					const count = sel?.length ? Math.abs(sel[0][2] - sel[0][0]) + 1 : 1;
-					return count > 1 ? __("Hide {0} Rows", [count]) : __("Hide Row");
+				hide_row: {
+					name: () => {
+						const sel = board.hot.getSelected();
+						const count = sel?.length ? Math.abs(sel[0][2] - sel[0][0]) + 1 : 1;
+						return count > 1 ? __("Hide {0} Rows", [count]) : __("Hide Row");
+					},
+					callback: (key, selection) => {
+						const rows = [];
+						selection.forEach(({ start, end }) => {
+							const r1 = Math.min(start.row, end.row);
+							const r2 = Math.max(start.row, end.row);
+							for (let r = r1; r <= r2; r++) rows.push(r);
+						});
+						board._hide_rows(rows);
+					},
 				},
-				callback: (key, selection) => {
-					const rows = [];
-					selection.forEach(({ start, end }) => {
-						const r1 = Math.min(start.row, end.row);
-						const r2 = Math.max(start.row, end.row);
-						for (let r = r1; r <= r2; r++) rows.push(r);
-					});
-					board._hide_rows(rows);
+
+				show_rows: {
+					name: () => __("Unhide Rows"),
+					disabled: () => !board._hidden_rows?.length,
+					callback: () => board._unhide_all_rows(),
 				},
-			},
 
-			show_rows: {
-				name: () => __("Unhide Rows"),
-				disabled: () => !board._hidden_rows?.length,
-				callback: () => board._unhide_all_rows(),
-			},
-
-			sep1: "---------",
+				sep1: "---------",
 
 				// ── Clipboard ─────────────────────────────────────────────────
 				copy: {
@@ -167,7 +162,11 @@ frappe.views.excel.ContextMenu = class ContextMenu {
 						// Collect unique column indices from all HOT selection ranges
 						const cols = new Set();
 						selection.forEach(({ start, end }) => {
-							for (let c = Math.min(start.col, end.col); c <= Math.max(start.col, end.col); c++) {
+							for (
+								let c = Math.min(start.col, end.col);
+								c <= Math.max(start.col, end.col);
+								c++
+							) {
 								cols.add(c);
 							}
 						});
@@ -193,10 +192,7 @@ frappe.views.excel.ContextMenu = class ContextMenu {
 						return __("Freeze up to column: {0}", [label]);
 					},
 					callback: (key, selection) => {
-						const col = Math.max(
-							selection[0].start.col,
-							selection[0].end.col
-						);
+						const col = Math.max(selection[0].start.col, selection[0].end.col);
 						board._set_freeze(col + 1);
 					},
 				},
@@ -222,14 +218,14 @@ frappe.views.excel.ContextMenu = class ContextMenu {
 					name: () => __("Remove Blank Column"),
 					callback: (key, selection) => {
 						const start_col = Math.min(selection[0].start.col, selection[0].end.col);
-						const end_col   = Math.max(selection[0].start.col, selection[0].end.col);
+						const end_col = Math.max(selection[0].start.col, selection[0].end.col);
 						board._remove_blank_columns(start_col, end_col);
 					},
 					disabled: () => {
 						const sel = board.hot.getSelected();
 						if (!sel?.length) return true;
 						const start_col = Math.min(sel[0][1], sel[0][3]);
-						const end_col   = Math.max(sel[0][1], sel[0][3]);
+						const end_col = Math.max(sel[0][1], sel[0][3]);
 						for (let c = start_col; c <= end_col; c++) {
 							if (board.columns[c]?._is_blank_col) return false;
 						}
@@ -249,7 +245,7 @@ frappe.views.excel.ContextMenu = class ContextMenu {
 						const sel = board.hot.getSelected();
 						if (!sel?.length) return __("Remove formula column");
 						const start_col = Math.min(sel[0][1], sel[0][3]);
-						const end_col   = Math.max(sel[0][1], sel[0][3]);
+						const end_col = Math.max(sel[0][1], sel[0][3]);
 						let count = 0;
 						for (let c = start_col; c <= end_col; c++) {
 							if (board.columns[c]?._is_formula_col) count++;
@@ -259,28 +255,21 @@ frappe.views.excel.ContextMenu = class ContextMenu {
 							: __("Remove formula column");
 					},
 					callback: (key, selection) => {
-						const start_col = Math.min(
-							selection[0].start.col,
-							selection[0].end.col
-						);
-						const end_col = Math.max(
-							selection[0].start.col,
-							selection[0].end.col
-						);
+						const start_col = Math.min(selection[0].start.col, selection[0].end.col);
+						const end_col = Math.max(selection[0].start.col, selection[0].end.col);
 						board._remove_formula_columns(start_col, end_col);
 					},
 					disabled: () => {
 						const sel = board.hot.getSelected();
 						if (!sel?.length) return true;
 						const start_col = Math.min(sel[0][1], sel[0][3]);
-						const end_col   = Math.max(sel[0][1], sel[0][3]);
+						const end_col = Math.max(sel[0][1], sel[0][3]);
 						for (let c = start_col; c <= end_col; c++) {
 							if (board.columns[c]?._is_formula_col) return false;
 						}
 						return true; // no formula col in selection → greyed out
 					},
 				},
-
 
 				// ── Fill Column ───────────────────────────────────────────────
 				fill_column: {
@@ -300,6 +289,38 @@ frappe.views.excel.ContextMenu = class ContextMenu {
 				},
 
 				sep5: "---------",
+
+				// ── Filter by this value ──────────────────────────────────────
+				// Adds a filter on the clicked cell's column and value (an empty cell
+				// filters for "not set"). Uses the same filter bar as the funnel.
+				filter_by_value: {
+					name: () => __("Filter by this value"),
+					disabled: () => {
+						const sel = board.hot.getSelectedLast();
+						const col = sel && board.columns[Math.min(sel[1], sel[3])];
+						return (
+							!col ||
+							/^_/.test(col.data) ||
+							!!col._is_formula_col ||
+							!!col._is_blank_col ||
+							!!col._is_join_col
+						);
+					},
+					callback: () => {
+						const sel = board.hot.getSelectedLast();
+						if (!sel) return;
+						const col = board.columns[Math.min(sel[1], sel[3])];
+						const rec = board.list_view.data[Math.min(sel[0], sel[2])];
+						if (!col || !rec || /^_/.test(col.data)) return;
+						const v = rec[col.data];
+						const empty = v === null || v === undefined || v === "";
+						board.list_view.filter_area.add([
+							[board.doctype, col.data, empty ? "is" : "=", empty ? "not set" : v],
+						]);
+					},
+				},
+
+				sep5b: "---------",
 
 				// ── Open form ─────────────────────────────────────────────────
 				open_form: {

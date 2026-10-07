@@ -40,7 +40,15 @@ frappe.views.excel.ExcelToolbar = class ExcelToolbar {
 	}
 
 	_render() {
-		const fonts = ["Calibri","Arial","Times New Roman","Courier New","Georgia","Verdana","Trebuchet MS"];
+		const fonts = [
+			"Calibri",
+			"Arial",
+			"Times New Roman",
+			"Courier New",
+			"Georgia",
+			"Verdana",
+			"Trebuchet MS",
+		];
 		const sizes = [8, 9, 10, 11, 12, 14, 16, 18, 20, 24, 28, 36, 48];
 
 		$(this.wrapper).html(`
@@ -64,26 +72,47 @@ frappe.views.excel.ExcelToolbar = class ExcelToolbar {
 					<div class="ev-tab-pane ev-tab-pane--active" data-tab="home">
 						<!-- Font -->
 						<select class="ev-tb-select ev-tb-font-family" data-ev-tip="${__("Font")}">
-							${fonts.map(f => `<option value="${f}"${f==="Calibri"?" selected":""}>${f}</option>`).join("")}
+							${fonts
+								.map(
+									(f) =>
+										`<option value="${f}"${
+											f === "Calibri" ? " selected" : ""
+										}>${f}</option>`
+								)
+								.join("")}
 						</select>
 						<select class="ev-tb-select ev-tb-font-size" data-ev-tip="${__("Font Size")}">
-							${sizes.map(s => `<option value="${s}"${s===12?" selected":""}>${s}</option>`).join("")}
+							${sizes.map((s) => `<option value="${s}"${s === 12 ? " selected" : ""}>${s}</option>`).join("")}
 						</select>
-						<button class="ev-tb-btn ev-tb-font-grow" data-ev-tip="${__("Grow Font")}"><b>A</b><sup style="font-size:8px;line-height:1">▲</sup></button>
-						<button class="ev-tb-btn ev-tb-font-shrink" data-ev-tip="${__("Shrink Font")}"><b>A</b><sub style="font-size:8px;line-height:1">▼</sub></button>
+						<button class="ev-tb-btn ev-tb-font-grow" data-ev-tip="${__(
+							"Grow Font"
+						)}"><b>A</b><sup style="font-size:8px;line-height:1">▲</sup></button>
+						<button class="ev-tb-btn ev-tb-font-shrink" data-ev-tip="${__(
+							"Shrink Font"
+						)}"><b>A</b><sub style="font-size:8px;line-height:1">▼</sub></button>
 						<div class="ev-tb-sep"></div>
 						<!-- Style -->
-						<button class="ev-tb-btn ev-fmt-btn ev-btn-bold" data-fmt="bold" data-ev-tip="${__("Bold")} (Ctrl+B)"><b>B</b></button>
-						<button class="ev-tb-btn ev-fmt-btn ev-btn-italic" data-fmt="italic" data-ev-tip="${__("Italic")} (Ctrl+I)"><i>I</i></button>
-						<button class="ev-tb-btn ev-fmt-btn ev-btn-underline" data-fmt="underline" data-ev-tip="${__("Underline")} (Ctrl+U)"><u>U</u></button>
-						<button class="ev-tb-btn ev-fmt-btn ev-btn-strike" data-fmt="strike" data-ev-tip="${__("Strikethrough")}"><s>S</s></button>
+						<button class="ev-tb-btn ev-fmt-btn ev-btn-bold" data-fmt="bold" data-ev-tip="${__(
+							"Bold"
+						)} (Ctrl+B)"><b>B</b></button>
+						<button class="ev-tb-btn ev-fmt-btn ev-btn-italic" data-fmt="italic" data-ev-tip="${__(
+							"Italic"
+						)} (Ctrl+I)"><i>I</i></button>
+						<button class="ev-tb-btn ev-fmt-btn ev-btn-underline" data-fmt="underline" data-ev-tip="${__(
+							"Underline"
+						)} (Ctrl+U)"><u>U</u></button>
+						<button class="ev-tb-btn ev-fmt-btn ev-btn-strike" data-fmt="strike" data-ev-tip="${__(
+							"Strikethrough"
+						)}"><s>S</s></button>
 						<div class="ev-tb-sep"></div>
 						<!-- Colors + Borders -->
 						<button class="ev-tb-btn ev-color-trigger" data-type="color" data-ev-tip="${__("Font Color")}">
 							<span class="ev-color-a">A</span>
 							<span class="ev-tb-color-bar ev-text-bar" style="background:${this._last_text_color}"></span>
 						</button>
-						<button class="ev-tb-btn ev-color-trigger ev-color-fill-btn" data-type="bg" data-ev-tip="${__("Fill Color")}">
+						<button class="ev-tb-btn ev-color-trigger ev-color-fill-btn" data-type="bg" data-ev-tip="${__(
+							"Fill Color"
+						)}">
 							<svg width="13" height="13" viewBox="0 0 14 14" fill="none"><path d="M2 10l7-7 3 3-7 7H2v-3z" stroke="currentColor" stroke-width="1.2" fill="rgba(100,100,100,0.12)"/><path d="M11 1l2 2" stroke="currentColor" stroke-width="1.5"/></svg>
 							<span class="ev-tb-color-bar ev-bg-bar" style="background:${this._last_bg_color}"></span>
 						</button>
@@ -109,7 +138,9 @@ frappe.views.excel.ExcelToolbar = class ExcelToolbar {
 							<button class="ev-tb-btn ev-merge-btn" data-ev-tip="${__("Merge & Center")}">
 								<svg width="13" height="13" viewBox="0 0 14 14" fill="currentColor"><rect x="1" y="1" width="5" height="12" rx="1" opacity=".35"/><rect x="8" y="1" width="5" height="12" rx="1" opacity=".35"/><path d="M4 6.5l-2 1.5 2 1.5V8h6v1.5l2-1.5-2-1.5V8H4z"/></svg>
 							</button>
-							<button class="ev-tb-btn ev-merge-dropdown-arrow" data-ev-tip="${__("Merge options")}"><svg width="7" height="7" viewBox="0 0 8 8" fill="currentColor"><path d="M1 2l3 3 3-3"/></svg></button>
+							<button class="ev-tb-btn ev-merge-dropdown-arrow" data-ev-tip="${__(
+								"Merge options"
+							)}"><svg width="7" height="7" viewBox="0 0 8 8" fill="currentColor"><path d="M1 2l3 3 3-3"/></svg></button>
 							<div class="ev-merge-popup hide">
 								<div class="ev-border-item" data-merge="center">${__("Merge & Center")}</div>
 								<div class="ev-border-item" data-merge="across">${__("Merge Across")}</div>
@@ -121,12 +152,18 @@ frappe.views.excel.ExcelToolbar = class ExcelToolbar {
 						<div class="ev-tb-sep"></div>
 						<!-- Number -->
 						<button class="ev-tb-btn ev-num-currency" data-ev-tip="${__("Currency")}"><b>$</b></button>
-						<button class="ev-tb-btn ev-fmt-btn ev-num-percent" data-fmt="numfmt_pct" data-ev-tip="${__("Percent Style")}"><b>%</b></button>
+						<button class="ev-tb-btn ev-fmt-btn ev-num-percent" data-fmt="numfmt_pct" data-ev-tip="${__(
+							"Percent Style"
+						)}"><b>%</b></button>
 						<button class="ev-tb-btn ev-num-comma" data-ev-tip="${__("Comma Style")}"><b>,</b></button>
-						<button class="ev-tb-btn ev-num-inc-dec" data-decimal="inc" data-ev-tip="${__("Increase Decimal")}">
+						<button class="ev-tb-btn ev-num-inc-dec" data-decimal="inc" data-ev-tip="${__(
+							"Increase Decimal"
+						)}">
 							<svg width="14" height="14" viewBox="0 0 14 14" fill="currentColor"><text x="0" y="12" font-size="10">.0</text><text x="9" y="9" font-size="8">+</text></svg>
 						</button>
-						<button class="ev-tb-btn ev-num-inc-dec" data-decimal="dec" data-ev-tip="${__("Decrease Decimal")}">
+						<button class="ev-tb-btn ev-num-inc-dec" data-decimal="dec" data-ev-tip="${__(
+							"Decrease Decimal"
+						)}">
 							<svg width="14" height="14" viewBox="0 0 14 14" fill="currentColor"><text x="0" y="12" font-size="10">.0</text><text x="9" y="9" font-size="8">–</text></svg>
 						</button>
 						<select class="ev-tb-select ev-numfmt-select" data-ev-tip="${__("Number Format")}">
@@ -202,12 +239,54 @@ frappe.views.excel.ExcelToolbar = class ExcelToolbar {
 							<span class="ev-fn-sigma">Σ</span>
 						</button>
 						<div class="ev-tb-sep"></div>
-						${this._fn_group_btn("financial", `<b>$</b>`, __("Financial"), ["FRAPPE_SUM","FRAPPE_AVG","FRAPPE_COUNT","GL_BALANCE","ITEM_PRICE","STOCK_QTY"])}
-						${this._fn_group_btn("logical", `<b>IF</b>`, __("Logical"), ["IF","AND","OR","NOT","IFERROR","IFS"])}
-						${this._fn_group_btn("text", `<b>Aα</b>`, __("Text"), ["CONCAT","LEFT","RIGHT","MID","UPPER","LOWER","LEN","TRIM"])}
-						${this._fn_group_btn("date", `<svg width="13" height="13" viewBox="0 0 16 16" fill="currentColor"><rect x="1" y="3" width="14" height="12" rx="2" fill="none" stroke="currentColor" stroke-width="1.3"/><line x1="1" y1="7" x2="15" y2="7" stroke="currentColor" stroke-width="1.3"/><rect x="4" y="1" width="2" height="4" rx="1"/><rect x="10" y="1" width="2" height="4" rx="1"/></svg>`, __("Date"), ["TODAY","NOW","DATE","YEAR","MONTH","DAY","DAYS","NETWORKDAYS"])}
-						${this._fn_group_btn("lookup", `<svg width="13" height="13" viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.4"><circle cx="6.5" cy="6.5" r="4"/><line x1="9.5" y1="9.5" x2="14" y2="14"/></svg>`, __("Lookup"), ["VLOOKUP","HLOOKUP","INDEX","MATCH","FRAPPE_GET"])}
-						${this._fn_group_btn("math", `<b>∑</b>`, __("Math"), ["ROUND","ABS","FLOOR","CEILING","MOD","POWER","SUMIF","COUNTIF"])}
+						${this._fn_group_btn("financial", `<b>$</b>`, __("Financial"), [
+							"FRAPPE_SUM",
+							"FRAPPE_AVG",
+							"FRAPPE_COUNT",
+							"GL_BALANCE",
+							"ITEM_PRICE",
+							"STOCK_QTY",
+						])}
+						${this._fn_group_btn("logical", `<b>IF</b>`, __("Logical"), [
+							"IF",
+							"AND",
+							"OR",
+							"NOT",
+							"IFERROR",
+							"IFS",
+						])}
+						${this._fn_group_btn("text", `<b>Aα</b>`, __("Text"), [
+							"CONCAT",
+							"LEFT",
+							"RIGHT",
+							"MID",
+							"UPPER",
+							"LOWER",
+							"LEN",
+							"TRIM",
+						])}
+						${this._fn_group_btn(
+							"date",
+							`<svg width="13" height="13" viewBox="0 0 16 16" fill="currentColor"><rect x="1" y="3" width="14" height="12" rx="2" fill="none" stroke="currentColor" stroke-width="1.3"/><line x1="1" y1="7" x2="15" y2="7" stroke="currentColor" stroke-width="1.3"/><rect x="4" y="1" width="2" height="4" rx="1"/><rect x="10" y="1" width="2" height="4" rx="1"/></svg>`,
+							__("Date"),
+							["TODAY", "NOW", "DATE", "YEAR", "MONTH", "DAY", "DAYS", "NETWORKDAYS"]
+						)}
+						${this._fn_group_btn(
+							"lookup",
+							`<svg width="13" height="13" viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.4"><circle cx="6.5" cy="6.5" r="4"/><line x1="9.5" y1="9.5" x2="14" y2="14"/></svg>`,
+							__("Lookup"),
+							["VLOOKUP", "HLOOKUP", "INDEX", "MATCH", "FRAPPE_GET"]
+						)}
+						${this._fn_group_btn("math", `<b>∑</b>`, __("Math"), [
+							"ROUND",
+							"ABS",
+							"FLOOR",
+							"CEILING",
+							"MOD",
+							"POWER",
+							"SUMIF",
+							"COUNTIF",
+						])}
 						<div class="ev-tb-sep"></div>
 						<button class="ev-tb-btn ev-show-formulas-btn" data-ev-tip="${__("Show Formulas")}">
 							<svg width="14" height="14" viewBox="0 0 16 16" fill="currentColor"><path d="M10.5 8a2.5 2.5 0 1 1-5 0 2.5 2.5 0 0 1 5 0z"/><path d="M0 8s3-5.5 8-5.5S16 8 16 8s-3 5.5-8 5.5S0 8 0 8zm8 3.5a3.5 3.5 0 1 0 0-7 3.5 3.5 0 0 0 0 7z"/></svg>
@@ -222,17 +301,24 @@ frappe.views.excel.ExcelToolbar = class ExcelToolbar {
 
 						<!-- Data -->
 						<div class="ev-getdata-wrap">
-							<button class="ev-tb-btn ev-get-data-btn" data-ev-tip="${__("Get Data — import from Reports, CSV, JSON, PDF, Web API")}">
+							<button class="ev-tb-btn ev-get-data-btn" data-ev-tip="${__(
+								"Get Data — import from Reports, CSV, JSON, PDF, Web API"
+							)}">
 								<svg width="14" height="14" viewBox="0 0 16 16" fill="currentColor"><path d="M.5 9.9a.5.5 0 0 1 .5.5v2.5a1 1 0 0 0 1 1h12a1 1 0 0 0 1-1v-2.5a.5.5 0 0 1 1 0v2.5a2 2 0 0 1-2 2H2a2 2 0 0 1-2-2v-2.5a.5.5 0 0 1 .5-.5z"/><path d="M7.646 11.854a.5.5 0 0 0 .708 0l3-3a.5.5 0 0 0-.708-.708L8.5 10.293V1.5a.5.5 0 0 0-1 0v8.793L5.354 8.146a.5.5 0 1 0-.708.708l3 3z"/></svg>
 								<svg width="7" height="7" viewBox="0 0 8 8" fill="currentColor"><path d="M1 2l3 3 3-3"/></svg>
 							</button>
 						</div>
-						<button class="ev-tb-btn ev-smart-lookup-btn" data-rs-panel="smart_lookup" data-ev-tip="${__("Smart Lookup — suggest join columns between sheets")}">
+						<button class="ev-tb-btn ev-smart-lookup-btn" data-rs-panel="smart_lookup" data-ev-tip="${__(
+							"Smart Lookup — suggest join columns between sheets"
+						)}">
 							<svg width="14" height="14" viewBox="0 0 16 16" fill="currentColor"><path d="M11.5 2a.5.5 0 0 1 .5.5v11a.5.5 0 0 1-1 0v-11a.5.5 0 0 1 .5-.5zm-3 3a.5.5 0 0 1 .5.5v8a.5.5 0 0 1-1 0v-8a.5.5 0 0 1 .5-.5zm-3 3a.5.5 0 0 1 .5.5v5a.5.5 0 0 1-1 0v-5a.5.5 0 0 1 .5-.5zm-3 3a.5.5 0 0 1 .5.5v2a.5.5 0 0 1-1 0v-2a.5.5 0 0 1 .5-.5z"/></svg>
 						</button>
 						<div class="ev-tb-sep"></div>
 						<button class="ev-tb-btn ev-filter-toggle-btn" data-ev-tip="${__("Toggle Filters")}">
 							<svg width="14" height="14" viewBox="0 0 14 14" fill="currentColor"><path d="M1 3h12v1.5L9 9v4l-4-2V9L1 4.5z" opacity=".85"/></svg>
+						</button>
+						<button class="ev-tb-btn ev-clear-filters-btn" data-ev-tip="${__("Clear Filters")}">
+							<svg width="14" height="14" viewBox="0 0 14 14" fill="currentColor"><path d="M1 3h12v1.5L9 9v4l-4-2V9L1 4.5z" opacity=".5"/><path d="M9 9l4 4m0-4l-4 4" stroke="#c0392b" stroke-width="1.6" fill="none"/></svg>
 						</button>
 						<div class="ev-tb-sep"></div>
 						<button class="ev-tb-btn ev-insert-record-btn" data-ev-tip="${__("Insert new record")}">
@@ -245,13 +331,19 @@ frappe.views.excel.ExcelToolbar = class ExcelToolbar {
 							<svg width="14" height="14" viewBox="0 0 14 14" fill="none" stroke="#c62828" stroke-width="1.3" stroke-linejoin="round"><path d="M2 4h10l-1 8H3L2 4zm4 2v5m2-5v5M5 2h4l1 2H4z"/></svg>
 						</button>
 						<div class="ev-tb-sep"></div>
-						<button class="ev-tb-btn ev-bulk-add-btn" data-ev-tip="${__("Bulk Add — add multiple blank rows")}">
+						<button class="ev-tb-btn ev-bulk-add-btn" data-ev-tip="${__(
+							"Bulk Add — add multiple blank rows"
+						)}">
 							<svg width="14" height="14" viewBox="0 0 16 16" fill="currentColor"><path d="M8 2a.5.5 0 0 1 .5.5v5h5a.5.5 0 0 1 0 1h-5v5a.5.5 0 0 1-1 0v-5h-5a.5.5 0 0 1 0-1h5v-5A.5.5 0 0 1 8 2z"/></svg>
 						</button>
-						<button class="ev-tb-btn ev-bulk-import-btn" data-ev-tip="${__("Bulk Import — import rows from CSV or report")}">
+						<button class="ev-tb-btn ev-bulk-import-btn" data-ev-tip="${__(
+							"Bulk Import — import rows from CSV or report"
+						)}">
 							<svg width="14" height="14" viewBox="0 0 16 16" fill="currentColor"><path d="M.5 9.9a.5.5 0 0 1 .5.5v2.5a1 1 0 0 0 1 1h12a1 1 0 0 0 1-1v-2.5a.5.5 0 0 1 1 0v2.5a2 2 0 0 1-2 2H2a2 2 0 0 1-2-2v-2.5a.5.5 0 0 1 .5-.5z"/><path d="M7.646 1.146a.5.5 0 0 1 .708 0l3 3a.5.5 0 0 1-.708.708L8.5 2.707V11.5a.5.5 0 0 1-1 0V2.707L5.354 4.854a.5.5 0 1 0-.708-.708l3-3z"/></svg>
 						</button>
-						${frappe.user.has_role("System Manager") ? `
+						${
+							frappe.user.has_role("System Manager")
+								? `
 						<div class="ev-tb-sep"></div>
 						<button class="ev-tb-btn ev-perm-btn" data-rs-panel="permissions"
 								data-ev-tip="${__("Manage permissions")}">
@@ -259,7 +351,9 @@ frappe.views.excel.ExcelToolbar = class ExcelToolbar {
 								<path d="M8 1a4 4 0 1 1 0 8A4 4 0 0 1 8 1zm0 1a3 3 0 1 0 0 6A3 3 0 0 0 8 2z"/>
 								<path d="M3 14s-1 0-1-1 1-4 6-4 6 3 6 4-1 1-1 1H3zm1.001-1h8l-.001-.02c-.01-.266-.108-.994-.629-1.66C10.925 10.72 9.87 10 8 10c-1.87 0-2.925.72-3.37 1.32-.521.666-.619 1.394-.629 1.66z"/>
 							</svg>
-						</button>` : ""}
+						</button>`
+								: ""
+						}
 					</div><!-- /data pane -->
 
 					<!-- VIEW TAB ──────────────────────────────────────────────── -->
@@ -325,7 +419,9 @@ frappe.views.excel.ExcelToolbar = class ExcelToolbar {
 						<div class="ev-tb-sep"></div>
 						<!-- Period picker — compact pill with dynamic label -->
 						<div class="ev-period-wrap">
-							<button class="ev-tb-btn ev-tb-right-btn ev-period-btn" data-ev-tip="${__("Formula date period filter")}">
+							<button class="ev-tb-btn ev-tb-right-btn ev-period-btn" data-ev-tip="${__(
+								"Formula date period filter"
+							)}">
 								<svg width="12" height="12" viewBox="0 0 16 16" fill="currentColor"><path d="M11 6.5a.5.5 0 0 1 .5-.5h1a.5.5 0 0 1 .5.5v1a.5.5 0 0 1-.5.5h-1a.5.5 0 0 1-.5-.5v-1zm-3 0a.5.5 0 0 1 .5-.5h1a.5.5 0 0 1 .5.5v1a.5.5 0 0 1-.5.5h-1a.5.5 0 0 1-.5-.5v-1zm-5 3a.5.5 0 0 1 .5-.5h1a.5.5 0 0 1 .5.5v1a.5.5 0 0 1-.5.5h-1a.5.5 0 0 1-.5-.5v-1zm3 0a.5.5 0 0 1 .5-.5h1a.5.5 0 0 1 .5.5v1a.5.5 0 0 1-.5.5h-1a.5.5 0 0 1-.5-.5v-1zM3.5 0a.5.5 0 0 1 .5.5V1h8V.5a.5.5 0 0 1 1 0V1h1a2 2 0 0 1 2 2v11a2 2 0 0 1-2 2H2a2 2 0 0 1-2-2V3a2 2 0 0 1 2-2h1V.5a.5.5 0 0 1 .5-.5zM2 2a1 1 0 0 0-1 1v1h14V3a1 1 0 0 0-1-1H2zm13 3H1v9a1 1 0 0 0 1 1h12a1 1 0 0 0 1-1V5z"/></svg>
 								<span class="ev-period-label">${__("This Month")}</span>
 								<svg width="7" height="7" viewBox="0 0 8 8" fill="currentColor"><path d="M1 2l3 3 3-3"/></svg>
@@ -333,7 +429,9 @@ frappe.views.excel.ExcelToolbar = class ExcelToolbar {
 							<div class="ev-period-dropdown hide">
 								<div class="ev-period-item" data-period="today">${__("Today")}</div>
 								<div class="ev-period-item" data-period="this_week">${__("This Week")}</div>
-								<div class="ev-period-item ev-period-item--active" data-period="this_month">${__("This Month")}</div>
+								<div class="ev-period-item ev-period-item--active" data-period="this_month">${__(
+									"This Month"
+								)}</div>
 								<div class="ev-period-item" data-period="last_month">${__("Last Month")}</div>
 								<div class="ev-period-item" data-period="this_quarter">${__("This Quarter")}</div>
 								<div class="ev-period-item" data-period="last_quarter">${__("Last Quarter")}</div>
@@ -349,7 +447,9 @@ frappe.views.excel.ExcelToolbar = class ExcelToolbar {
 							<button class="ev-tb-btn ev-tb-save-btn ev-wb-save-btn" data-ev-tip="${__("Save View")}">
 								<svg width="13" height="13" viewBox="0 0 16 16" fill="currentColor"><path d="M2 2a1 1 0 0 0-1 1v10a1 1 0 0 0 1 1h12a1 1 0 0 0 1-1V5.5L11.5 1H3a1 1 0 0 0-1 1zm0 1h9l3 3.5V13H2V3zm3 6h6v1H5v-1zm0-2h6v1H5V7z"/></svg>
 							</button>
-							<button class="ev-tb-btn ev-wb-deselect-btn hide" data-ev-tip="${__("Deselect workbook")}">×</button>
+							<button class="ev-tb-btn ev-wb-deselect-btn hide" data-ev-tip="${__(
+								"Deselect workbook"
+							)}">×</button>
 							<button class="ev-tb-btn ev-wb-dropdown-arrow" data-ev-tip="${__("More options")}">
 								<svg width="7" height="7" viewBox="0 0 8 8" fill="currentColor"><path d="M1 2l3 3 3-3"/></svg>
 							</button>
@@ -377,17 +477,17 @@ frappe.views.excel.ExcelToolbar = class ExcelToolbar {
 		this.$toolbar = $(this.wrapper).find(".ev-toolbar-outer");
 		this.$palette = $(this.wrapper).find(".ev-palette-popup");
 		this.$font_family = this.$toolbar.find(".ev-tb-font-family");
-		this.$font_size   = this.$toolbar.find(".ev-tb-font-size");
-		this.$numfmt_sel  = this.$toolbar.find(".ev-numfmt-select");
+		this.$font_size = this.$toolbar.find(".ev-tb-font-size");
+		this.$numfmt_sel = this.$toolbar.find(".ev-numfmt-select");
 		this.$border_popup = $(this.wrapper).find(".ev-border-main-popup");
 	}
 
 	// ── Helper: function group dropdown button ────────────────────────────────
 
 	_fn_group_btn(id, icon_html, label, fns) {
-		const items = fns.map(f =>
-			`<div class="ev-border-item ev-fn-item" data-fn="${f}">${f}</div>`
-		).join("");
+		const items = fns
+			.map((f) => `<div class="ev-border-item ev-fn-item" data-fn="${f}">${f}</div>`)
+			.join("");
 		return `
 			<div class="ev-fn-group-wrap" data-group="${id}">
 				<button class="ev-tb-btn ev-fn-group-btn" data-ev-tip="${label}">
@@ -403,18 +503,35 @@ frappe.views.excel.ExcelToolbar = class ExcelToolbar {
 
 	_palette_html() {
 		const THEME_BASES = [
-			"#FFFFFF","#000000","#EEECE1","#1F497D",
-			"#4F81BD","#C0504D","#9BBB59","#8064A2","#4BACC6","#F79646",
+			"#FFFFFF",
+			"#000000",
+			"#EEECE1",
+			"#1F497D",
+			"#4F81BD",
+			"#C0504D",
+			"#9BBB59",
+			"#8064A2",
+			"#4BACC6",
+			"#F79646",
 		];
 		const VARIATIONS = [0.5, 0.35, 0.25, -0.25, -0.5];
 		const STANDARD = [
-			"#C00000","#FF0000","#FFC000","#FFFF00","#92D050",
-			"#00B050","#00B0F0","#0070C0","#002060","#7030A0",
+			"#C00000",
+			"#FF0000",
+			"#FFC000",
+			"#FFFF00",
+			"#92D050",
+			"#00B050",
+			"#00B0F0",
+			"#0070C0",
+			"#002060",
+			"#7030A0",
 		];
-		const swatch = (c) => `<span class="ev-swatch" data-color="${c}" style="background:${c}" title="${c}"></span>`;
+		const swatch = (c) =>
+			`<span class="ev-swatch" data-color="${c}" style="background:${c}" title="${c}"></span>`;
 		let theme_html = THEME_BASES.map(swatch).join("");
 		for (const f of VARIATIONS) {
-			theme_html += THEME_BASES.map(c => swatch(this._vary_color(c, f))).join("");
+			theme_html += THEME_BASES.map((c) => swatch(this._vary_color(c, f))).join("");
 		}
 		return `
 			<div class="ev-pal-section">
@@ -449,7 +566,8 @@ frappe.views.excel.ExcelToolbar = class ExcelToolbar {
 	// ── Border popup HTML ─────────────────────────────────────────────────────
 
 	_border_popup_html() {
-		const item = (key, label) => `<div class="ev-border-item" data-border="${key}">${label}</div>`;
+		const item = (key, label) =>
+			`<div class="ev-border-item" data-border="${key}">${label}</div>`;
 		return `
 			<div class="ev-border-controls">
 				<div class="ev-border-ctrl-row">
@@ -476,19 +594,19 @@ frappe.views.excel.ExcelToolbar = class ExcelToolbar {
 				</div>
 			</div>
 			<div class="ev-border-sep"></div>
-			${item("none",        "🚫 " + __("No Border"))}
-			${item("all",         "⊞ " + __("All Borders"))}
-			${item("outside",     "□ " + __("Outside Borders"))}
-			${item("thick_box",   "■ " + __("Thick Box Border"))}
+			${item("none", "🚫 " + __("No Border"))}
+			${item("all", "⊞ " + __("All Borders"))}
+			${item("outside", "□ " + __("Outside Borders"))}
+			${item("thick_box", "■ " + __("Thick Box Border"))}
 			<div class="ev-border-sep"></div>
-			${item("bottom",      "─ " + __("Bottom Border"))}
-			${item("top",         "‾ " + __("Top Border"))}
-			${item("left",        "│ " + __("Left Border"))}
-			${item("right",       "│ " + __("Right Border"))}
+			${item("bottom", "─ " + __("Bottom Border"))}
+			${item("top", "‾ " + __("Top Border"))}
+			${item("left", "│ " + __("Left Border"))}
+			${item("right", "│ " + __("Right Border"))}
 			<div class="ev-border-sep"></div>
-			${item("thick_bottom","═ " + __("Thick Bottom Border"))}
-			${item("double_bottom","═ " + __("Double Bottom Border"))}
-			${item("top_thick_bottom","T " + __("Top and Thick Bottom"))}
+			${item("thick_bottom", "═ " + __("Thick Bottom Border"))}
+			${item("double_bottom", "═ " + __("Double Bottom Border"))}
+			${item("top_thick_bottom", "T " + __("Top and Thick Bottom"))}
 		`;
 	}
 
@@ -525,7 +643,7 @@ frappe.views.excel.ExcelToolbar = class ExcelToolbar {
 		});
 		$w.on("click", ".ev-period-item", (e) => {
 			const period = $(e.currentTarget).data("period");
-			const fm     = frappe.views.excel.formula_manager;
+			const fm = frappe.views.excel.formula_manager;
 			if (!fm) return;
 
 			if (period === "custom") {
@@ -533,7 +651,7 @@ frappe.views.excel.ExcelToolbar = class ExcelToolbar {
 					title: __("Custom Date Range"),
 					fields: [
 						{ fieldname: "from_date", fieldtype: "Date", label: __("From"), reqd: 1 },
-						{ fieldname: "to_date",   fieldtype: "Date", label: __("To"),   reqd: 1 },
+						{ fieldname: "to_date", fieldtype: "Date", label: __("To"), reqd: 1 },
 					],
 					primary_action_label: __("Apply"),
 					primary_action({ from_date, to_date }) {
@@ -563,21 +681,25 @@ frappe.views.excel.ExcelToolbar = class ExcelToolbar {
 		});
 
 		// ── Font family / size ──────────────────────────────────────────────
-		this.$font_family.on("change", () => this._apply_format({ font: this.$font_family.val() }));
-		this.$font_size.on("change", () => this._apply_format({ size: parseInt(this.$font_size.val(), 10) }));
+		this.$font_family.on("change", () =>
+			this._apply_format({ font: this.$font_family.val() })
+		);
+		this.$font_size.on("change", () =>
+			this._apply_format({ size: parseInt(this.$font_size.val(), 10) })
+		);
 
 		// ── Font grow / shrink ──────────────────────────────────────────────
 		$w.on("click", ".ev-tb-font-grow", () => {
 			const cur = parseInt(this.$font_size.val(), 10) || 12;
-			const sizes = [8,9,10,11,12,14,16,18,20,24,28,36,48];
-			const next = sizes.find(s => s > cur) || cur;
+			const sizes = [8, 9, 10, 11, 12, 14, 16, 18, 20, 24, 28, 36, 48];
+			const next = sizes.find((s) => s > cur) || cur;
 			this.$font_size.val(next);
 			this._apply_format({ size: next });
 		});
 		$w.on("click", ".ev-tb-font-shrink", () => {
 			const cur = parseInt(this.$font_size.val(), 10) || 12;
-			const sizes = [8,9,10,11,12,14,16,18,20,24,28,36,48];
-			const prev = [...sizes].reverse().find(s => s < cur) || cur;
+			const sizes = [8, 9, 10, 11, 12, 14, 16, 18, 20, 24, 28, 36, 48];
+			const prev = [...sizes].reverse().find((s) => s < cur) || cur;
 			this.$font_size.val(prev);
 			this._apply_format({ size: prev });
 		});
@@ -587,13 +709,16 @@ frappe.views.excel.ExcelToolbar = class ExcelToolbar {
 			e.stopPropagation();
 			this._show_palette(e.currentTarget, $(e.currentTarget).data("type"));
 		});
-		this.$palette.on("click", ".ev-swatch", (e) => this._pick_color($(e.currentTarget).data("color")));
+		this.$palette.on("click", ".ev-swatch", (e) =>
+			this._pick_color($(e.currentTarget).data("color"))
+		);
 		this.$palette.on("click", ".ev-pal-more-btn", (e) => {
 			e.stopPropagation();
 			const $panel = this.$palette.find(".ev-pal-custom-panel");
 			$panel.toggleClass("hide");
 			if (!$panel.hasClass("hide")) {
-				const cur = this._color_target === "color" ? this._last_text_color : this._last_bg_color;
+				const cur =
+					this._color_target === "color" ? this._last_text_color : this._last_bg_color;
 				const safe = /^#[0-9A-Fa-f]{6}$/.test(cur) ? cur : "#000000";
 				$panel.find(".ev-custom-color").val(safe);
 				$panel.find(".ev-hex-input").val(safe);
@@ -608,7 +733,9 @@ frappe.views.excel.ExcelToolbar = class ExcelToolbar {
 		});
 		this.$palette.on("click", ".ev-hex-apply-btn", () => {
 			const hex = this.$palette.find(".ev-hex-input").val().trim().toLowerCase();
-			const color = /^#[0-9a-f]{6}$/.test(hex) ? hex : this.$palette.find(".ev-custom-color").val();
+			const color = /^#[0-9a-f]{6}$/.test(hex)
+				? hex
+				: this.$palette.find(".ev-custom-color").val();
 			this._pick_color(color);
 		});
 
@@ -617,8 +744,9 @@ frappe.views.excel.ExcelToolbar = class ExcelToolbar {
 			e.stopPropagation();
 			const btn = e.currentTarget;
 			const rect = btn.getBoundingClientRect();
-			const wr   = this.wrapper.getBoundingClientRect();
-			this.$border_popup.css({ top: rect.bottom - wr.top + 2, left: rect.left - wr.left })
+			const wr = this.wrapper.getBoundingClientRect();
+			this.$border_popup
+				.css({ top: rect.bottom - wr.top + 2, left: rect.left - wr.left })
 				.toggleClass("hide");
 		});
 		$w.on("click", ".ev-border-main-popup .ev-border-item", (e) => {
@@ -629,7 +757,9 @@ frappe.views.excel.ExcelToolbar = class ExcelToolbar {
 		// Border color/style/width controls — keep popup open while changing
 		$w.on("input change", ".ev-border-color-pick", (e) => {
 			this._border_color = e.currentTarget.value;
-			this.$border_popup.find(".ev-border-color-preview").css("background", this._border_color);
+			this.$border_popup
+				.find(".ev-border-color-preview")
+				.css("background", this._border_color);
 		});
 		$w.on("change", ".ev-border-style-sel", (e) => {
 			this._border_style = e.currentTarget.value;
@@ -644,7 +774,10 @@ frappe.views.excel.ExcelToolbar = class ExcelToolbar {
 		$w.on("click", ".ev-merge-btn", () => this._do_merge("center"));
 		$w.on("click", ".ev-merge-dropdown-arrow", (e) => {
 			e.stopPropagation();
-			$(e.currentTarget).closest(".ev-merge-wrap").find(".ev-merge-popup").toggleClass("hide");
+			$(e.currentTarget)
+				.closest(".ev-merge-wrap")
+				.find(".ev-merge-popup")
+				.toggleClass("hide");
 		});
 		$w.on("click", ".ev-merge-popup .ev-border-item", (e) => {
 			const mode = $(e.currentTarget).data("merge");
@@ -695,8 +828,10 @@ frappe.views.excel.ExcelToolbar = class ExcelToolbar {
 			} else {
 				const sel = this.board.hot?.getSelectedLast();
 				if (!sel) return;
-				const r1 = Math.min(sel[0], sel[2]), r2 = Math.max(sel[0], sel[2]);
-				const c1 = Math.min(sel[1], sel[3]), c2 = Math.max(sel[1], sel[3]);
+				const r1 = Math.min(sel[0], sel[2]),
+					r2 = Math.max(sel[0], sel[2]);
+				const c1 = Math.min(sel[1], sel[3]),
+					c2 = Math.max(sel[1], sel[3]);
 				// Capture per-cell format grid so multi-cell source paints proportionally
 				this._paint_rows = r2 - r1 + 1;
 				this._paint_cols = c2 - c1 + 1;
@@ -727,19 +862,24 @@ frappe.views.excel.ExcelToolbar = class ExcelToolbar {
 		// ── Insert tab: Dashboard widgets ──────────────────────────────────
 		const _check_dashboard = () => {
 			if (!this.board.sheet_manager?.get_current()?.is_dashboard) {
-				frappe.show_alert({ message: __("Switch to a Dashboard sheet first"), indicator: "orange" }, 3);
+				frappe.show_alert(
+					{ message: __("Switch to a Dashboard sheet first"), indicator: "orange" },
+					3
+				);
 				return false;
 			}
 			return true;
 		};
 		$w.on("click", ".ev-dash-numcard-btn", () => {
-			if (_check_dashboard()) this.board.dashboard_manager?._open_widget_modal("number_card");
+			if (_check_dashboard())
+				this.board.dashboard_manager?._open_widget_modal("number_card");
 		});
 		$w.on("click", ".ev-dash-chart-btn", () => {
 			if (_check_dashboard()) this.board.dashboard_manager?._open_widget_modal("chart");
 		});
 		$w.on("click", ".ev-dash-date-btn", () => {
-			if (_check_dashboard()) this.board.dashboard_manager?._open_widget_modal("date_filter");
+			if (_check_dashboard())
+				this.board.dashboard_manager?._open_widget_modal("date_filter");
 		});
 
 		// ── Formulas tab: AutoSum ───────────────────────────────────────────
@@ -748,7 +888,7 @@ frappe.views.excel.ExcelToolbar = class ExcelToolbar {
 		// ── Formulas tab: function group dropdowns (portal — avoids ribbon clip) ──
 		$w.on("click", ".ev-fn-group-btn", (e) => {
 			e.stopPropagation();
-			const $btn  = $(e.currentTarget);
+			const $btn = $(e.currentTarget);
 			const $wrap = $btn.closest(".ev-fn-group-wrap");
 			const group = $wrap.data("group");
 
@@ -760,17 +900,23 @@ frappe.views.excel.ExcelToolbar = class ExcelToolbar {
 			$("#ev-fn-portal").remove();
 
 			// Collect fn items from the hidden inline popup
-			const fns = $wrap.find(".ev-fn-item").map(function () {
-				return $(this).data("fn");
-			}).get();
+			const fns = $wrap
+				.find(".ev-fn-item")
+				.map(function () {
+					return $(this).data("fn");
+				})
+				.get();
 
-			const items_html = fns.map((f) =>
-				`<div class="ev-fn-portal-item" data-fn="${f}"
+			const items_html = fns
+				.map(
+					(f) =>
+						`<div class="ev-fn-portal-item" data-fn="${f}"
 					style="padding:6px 14px;cursor:pointer;font-size:12px;white-space:nowrap;
 					       color:var(--text-color);"
 					onmouseenter="this.style.background='var(--bg-color)'"
 					onmouseleave="this.style.background=''">${f}</div>`
-			).join("");
+				)
+				.join("");
 
 			const rect = $btn[0].getBoundingClientRect();
 			const $portal = $(`
@@ -783,7 +929,9 @@ frappe.views.excel.ExcelToolbar = class ExcelToolbar {
 					       overflow-y:auto;max-height:280px">
 					${items_html}
 				</div>
-			`).appendTo(document.body).data("group", group);
+			`)
+				.appendTo(document.body)
+				.data("group", group);
 
 			$portal.on("click", ".ev-fn-portal-item", (ev) => {
 				const fn = $(ev.currentTarget).data("fn");
@@ -807,7 +955,16 @@ frappe.views.excel.ExcelToolbar = class ExcelToolbar {
 		// ── Data tab: Filter ────────────────────────────────────────────────
 		$w.on("click", ".ev-filter-toggle-btn", (e) => {
 			$(e.currentTarget).toggleClass("ev-active");
-			this.board.list_view?.$page?.find(".page-form")?.slideToggle(150);
+			// The stylesheet hides .page-form until .ev-show-filters is on the page wrapper;
+			// slideToggle alone cannot beat that rule's !important.
+			$(e.currentTarget).closest(".ev-page").toggleClass("ev-show-filters");
+		});
+		$w.on("click", ".ev-clear-filters-btn", async () => {
+			const lv = this.board.list_view;
+			if (!lv?.filter_area) return;
+			await lv.filter_area.clear();
+			lv.refresh();
+			frappe.show_alert({ message: __("Filters cleared"), indicator: "green" }, 2);
 		});
 
 		// ── Data tab: Get Data ───────────────────────────────────────────────
@@ -817,8 +974,8 @@ frappe.views.excel.ExcelToolbar = class ExcelToolbar {
 
 		// ── Data tab: Duplicate / Insert / Delete ───────────────────────────
 		$w.on("click", ".ev-duplicate-record-btn", () => this._duplicate_record());
-		$w.on("click", ".ev-insert-record-btn",    () => this._insert_record_dialog());
-		$w.on("click", ".ev-delete-records-btn",   () => this._delete_selected());
+		$w.on("click", ".ev-insert-record-btn", () => this._insert_record_dialog());
+		$w.on("click", ".ev-delete-records-btn", () => this._delete_selected());
 
 		// Bulk Add — prompt for row count then enter bulk-add mode
 		$w.on("click", ".ev-bulk-add-btn", () => {
@@ -839,7 +996,10 @@ frappe.views.excel.ExcelToolbar = class ExcelToolbar {
 		// Bulk Import — open Get Data in import mode → Column Mapper → bulk-add with data
 		$w.on("click", ".ev-bulk-import-btn", () => {
 			if (!this.board.list_view?.can_write) {
-				frappe.show_alert({ message: __("You don't have write permission"), indicator: "red" }, 3);
+				frappe.show_alert(
+					{ message: __("You don't have write permission"), indicator: "red" },
+					3
+				);
 				return;
 			}
 			this._gd_import_mode = true;
@@ -850,11 +1010,16 @@ frappe.views.excel.ExcelToolbar = class ExcelToolbar {
 		$w.on("click", ".ev-freeze-trigger", (e) => {
 			e.stopPropagation();
 			const existing = $("#ev-freeze-portal");
-			if (existing.length) { existing.remove(); return; }
+			if (existing.length) {
+				existing.remove();
+				return;
+			}
 
 			const rect = e.currentTarget.getBoundingClientRect();
 			const $portal = $(`
-				<div id="ev-freeze-portal" class="ev-freeze-popup" style="position:fixed;top:${rect.bottom + 2}px;left:${rect.left}px;z-index:10000">
+				<div id="ev-freeze-portal" class="ev-freeze-popup" style="position:fixed;top:${
+					rect.bottom + 2
+				}px;left:${rect.left}px;z-index:10000">
 					<div class="ev-border-item" data-freeze="first_col">${__("Freeze First Column")}</div>
 					<div class="ev-border-item" data-freeze="first_row">${__("Freeze First Row")}</div>
 					<div class="ev-border-item" data-freeze="selection">${__("Freeze at Selection")}</div>
@@ -871,10 +1036,12 @@ frappe.views.excel.ExcelToolbar = class ExcelToolbar {
 
 		// ── View tab: Gridlines ─────────────────────────────────────────────
 		$w.on("click", ".ev-gridlines-btn", (e) => {
-			const $cb   = $w.find(".ev-gridlines-toggle");
-			const show  = !$cb.prop("checked");
+			const $cb = $w.find(".ev-gridlines-toggle");
+			const show = !$cb.prop("checked");
 			$cb.prop("checked", show);
-			$(this.board.$wrapper).find(".ev-hot-container").toggleClass("ev-hide-gridlines", !show);
+			$(this.board.$wrapper)
+				.find(".ev-hot-container")
+				.toggleClass("ev-hide-gridlines", !show);
 			$(e.currentTarget).toggleClass("ev-active", show);
 			// Save as "hidden" flag so load logic (excel_hide_gridlines truthy = hidden) is consistent
 			frappe.model.user_settings.save(this.board.doctype, "excel_hide_gridlines", !show);
@@ -885,9 +1052,9 @@ frappe.views.excel.ExcelToolbar = class ExcelToolbar {
 			const enabled = !this.board._focus_enabled;
 			this.board._toggle_focus_cell(enabled);
 			$(e.currentTarget).toggleClass("ev-active", enabled);
-			$(this.wrapper).find(".ev-focus-label").text(
-				enabled ? __("Focus: ON") : __("Focus Cell")
-			);
+			$(this.wrapper)
+				.find(".ev-focus-label")
+				.text(enabled ? __("Focus: ON") : __("Focus Cell"));
 		});
 
 		// ── View tab: Focus Color picker ─────────────────────────────────────
@@ -896,8 +1063,26 @@ frappe.views.excel.ExcelToolbar = class ExcelToolbar {
 			const rect = e.currentTarget.getBoundingClientRect();
 			$("#ev-focus-color-portal").remove();
 			const COLORS = [
-				"#000000","#7f7f7f","#c00000","#ff0000","#ff7f00","#ffff00","#00b050","#00b0f0","#0070c0","#7030a0",
-				"#ffffff","#d9d9d9","#ffd966","#f4b183","#a9d18e","#9dc3e6","#5b9bd5","#ed7d31","#a5a5a5","#ffc000",
+				"#000000",
+				"#7f7f7f",
+				"#c00000",
+				"#ff0000",
+				"#ff7f00",
+				"#ffff00",
+				"#00b050",
+				"#00b0f0",
+				"#0070c0",
+				"#7030a0",
+				"#ffffff",
+				"#d9d9d9",
+				"#ffd966",
+				"#f4b183",
+				"#a9d18e",
+				"#9dc3e6",
+				"#5b9bd5",
+				"#ed7d31",
+				"#a5a5a5",
+				"#ffc000",
 			];
 			const $portal = $(`
 				<div id="ev-focus-color-portal"
@@ -906,9 +1091,11 @@ frappe.views.excel.ExcelToolbar = class ExcelToolbar {
 					       border:1px solid var(--border-color);border-radius:4px;
 					       padding:8px;box-shadow:0 4px 14px rgba(0,0,0,.18);">
 					<div style="display:grid;grid-template-columns:repeat(10,16px);gap:2px;">
-						${COLORS.map(c => `<div class="ev-focus-swatch-item" data-color="${c}"
+						${COLORS.map(
+							(c) => `<div class="ev-focus-swatch-item" data-color="${c}"
 							style="width:16px;height:16px;background:${c};border:1px solid rgba(0,0,0,.25);cursor:pointer;border-radius:2px;"
-							title="${c}"></div>`).join("")}
+							title="${c}"></div>`
+						).join("")}
 					</div>
 				</div>
 			`).appendTo(document.body);
@@ -918,7 +1105,10 @@ frappe.views.excel.ExcelToolbar = class ExcelToolbar {
 				$(this.wrapper).find(".ev-focus-color-swatch").css("background", color);
 				$portal.remove();
 			});
-			setTimeout(() => $(document).one("click.ev-focus-portal", () => $portal.remove()), 100);
+			setTimeout(
+				() => $(document).one("click.ev-focus-portal", () => $portal.remove()),
+				100
+			);
 		});
 
 		// ── View tab: Full Page toggle ──────────────────────────────────────
@@ -934,8 +1124,8 @@ frappe.views.excel.ExcelToolbar = class ExcelToolbar {
 		});
 
 		// ── Zoom controls (Home + View tabs) ───────────────────────────────
-		$w.on("click", ".ev-zoom-in",      () => this.board.zoom_in());
-		$w.on("click", ".ev-zoom-out",     () => this.board.zoom_out());
+		$w.on("click", ".ev-zoom-in", () => this.board.zoom_in());
+		$w.on("click", ".ev-zoom-out", () => this.board.zoom_out());
 		$w.on("click", ".ev-zoom-display", () => this.board.zoom_reset());
 
 		// Keyboard shortcuts: Ctrl/Cmd + Plus / Minus / 0
@@ -953,7 +1143,6 @@ frappe.views.excel.ExcelToolbar = class ExcelToolbar {
 				this.board.zoom_reset();
 			}
 		});
-
 
 		// ── Close popups on outside click ───────────────────────────────────
 		$(document).on("click.ev-toolbar", (e) => {
@@ -979,12 +1168,16 @@ frappe.views.excel.ExcelToolbar = class ExcelToolbar {
 
 	_switch_tab(tab) {
 		this._active_tab = tab;
-		$(this.wrapper).find(".ev-ribbon-tab").each((_, el) => {
-			$(el).toggleClass("ev-ribbon-tab--active", $(el).data("tab") === tab);
-		});
-		$(this.wrapper).find(".ev-tab-pane").each((_, el) => {
-			$(el).toggleClass("ev-tab-pane--active", $(el).data("tab") === tab);
-		});
+		$(this.wrapper)
+			.find(".ev-ribbon-tab")
+			.each((_, el) => {
+				$(el).toggleClass("ev-ribbon-tab--active", $(el).data("tab") === tab);
+			});
+		$(this.wrapper)
+			.find(".ev-tab-pane")
+			.each((_, el) => {
+				$(el).toggleClass("ev-tab-pane--active", $(el).data("tab") === tab);
+			});
 	}
 
 	// ── Public API ────────────────────────────────────────────────────────────
@@ -994,34 +1187,42 @@ frappe.views.excel.ExcelToolbar = class ExcelToolbar {
 		const fmt = this.board.format_store?.[`${row}:${col}`] || {};
 
 		// Toggle buttons
-		const ALIGN_MAP  = { alignLeft: "left", alignCenter: "center", alignRight: "right" };
+		const ALIGN_MAP = { alignLeft: "left", alignCenter: "center", alignRight: "right" };
 		const VALIGN_MAP = { valignTop: "top", valignMiddle: "middle", valignBottom: "bottom" };
-		$(this.wrapper).find(".ev-fmt-btn").each((_, btn) => {
-			const f = $(btn).data("fmt");
-			if (!f) return;
-			if (f.startsWith("align")) {
-				const val = ALIGN_MAP[f];
-				let all = true;
-				outer: for (let r = range.r1; r <= range.r2; r++) {
-					for (let c = range.c1; c <= range.c2; c++) {
-						if ((this.board.format_store?.[`${r}:${c}`]?.align || null) !== val) { all = false; break outer; }
+		$(this.wrapper)
+			.find(".ev-fmt-btn")
+			.each((_, btn) => {
+				const f = $(btn).data("fmt");
+				if (!f) return;
+				if (f.startsWith("align")) {
+					const val = ALIGN_MAP[f];
+					let all = true;
+					outer: for (let r = range.r1; r <= range.r2; r++) {
+						for (let c = range.c1; c <= range.c2; c++) {
+							if ((this.board.format_store?.[`${r}:${c}`]?.align || null) !== val) {
+								all = false;
+								break outer;
+							}
+						}
 					}
-				}
-				$(btn).toggleClass("ev-active", all);
-			} else if (f.startsWith("valign")) {
-				const val = VALIGN_MAP[f];
-				let all = true;
-				outer2: for (let r = range.r1; r <= range.r2; r++) {
-					for (let c = range.c1; c <= range.c2; c++) {
-						const cv = this.board.format_store?.[`${r}:${c}`]?.valign || "middle";
-						if (cv !== val) { all = false; break outer2; }
+					$(btn).toggleClass("ev-active", all);
+				} else if (f.startsWith("valign")) {
+					const val = VALIGN_MAP[f];
+					let all = true;
+					outer2: for (let r = range.r1; r <= range.r2; r++) {
+						for (let c = range.c1; c <= range.c2; c++) {
+							const cv = this.board.format_store?.[`${r}:${c}`]?.valign || "middle";
+							if (cv !== val) {
+								all = false;
+								break outer2;
+							}
+						}
 					}
+					$(btn).toggleClass("ev-active", all);
+				} else if (f !== "numfmt_pct") {
+					$(btn).toggleClass("ev-active", this._all_have(range, f));
 				}
-				$(btn).toggleClass("ev-active", all);
-			} else if (f !== "numfmt_pct") {
-				$(btn).toggleClass("ev-active", this._all_have(range, f));
-			}
-		});
+			});
 
 		// Dropdowns (top-left cell)
 		this.$font_family.val(fmt.font || "Calibri");
@@ -1030,9 +1231,9 @@ frappe.views.excel.ExcelToolbar = class ExcelToolbar {
 
 		// Color bars
 		const tc = fmt.color || "#000000";
-		const bc = fmt.bg    || "#FFFF00";
+		const bc = fmt.bg || "#FFFF00";
 		this._last_text_color = tc;
-		this._last_bg_color   = bc;
+		this._last_bg_color = bc;
 		$(this.wrapper).find(".ev-text-bar").css("background", tc);
 		$(this.wrapper).find(".ev-bg-bar").css("background", bc);
 	}
@@ -1043,7 +1244,7 @@ frappe.views.excel.ExcelToolbar = class ExcelToolbar {
 	 * @param {boolean} [force] - explicit on/off; omit to flip current state
 	 */
 	_toggle_full_page(force) {
-		const enable = (typeof force === "boolean") ? force : !this._full_page_mode;
+		const enable = typeof force === "boolean" ? force : !this._full_page_mode;
 		if (enable === this._full_page_mode) return;
 		this._full_page_mode = enable;
 
@@ -1051,7 +1252,9 @@ frappe.views.excel.ExcelToolbar = class ExcelToolbar {
 
 		const $btn = $(this.wrapper).find(".ev-fullpage-btn");
 		$btn.toggleClass("ev-active", enable);
-		$btn.find(".ev-fullpage-label").text(enable ? __("Back to Default View") : __("Full Page"));
+		$btn.find(".ev-fullpage-label").text(
+			enable ? __("Back to Default View") : __("Full Page")
+		);
 		$btn.find(".ev-fp-icon-enter").toggle(!enable);
 		$btn.find(".ev-fp-icon-exit").toggle(enable);
 
@@ -1073,7 +1276,6 @@ frappe.views.excel.ExcelToolbar = class ExcelToolbar {
 		$(this.wrapper).find(".ev-zoom-pct").text(pct);
 	}
 
-
 	/** Sync View-tab UI state (gridlines + focus cell) from current board state. */
 	_sync_view_state() {
 		const hidden = frappe.get_user_settings(this.board.doctype)?.excel_hide_gridlines;
@@ -1087,7 +1289,9 @@ frappe.views.excel.ExcelToolbar = class ExcelToolbar {
 			$(this.wrapper).find(".ev-focus-label").text(__("Focus: ON"));
 		}
 		if (this.board._focus_color) {
-			$(this.wrapper).find(".ev-focus-color-swatch").css("background", this.board._focus_color);
+			$(this.wrapper)
+				.find(".ev-focus-color-swatch")
+				.css("background", this.board._focus_color);
 		}
 	}
 
@@ -1140,7 +1344,8 @@ frappe.views.excel.ExcelToolbar = class ExcelToolbar {
 	apply_paint(row, col) {
 		if (!this._painting || !this._paint_grid) return;
 		if (!this.board.format_store) this.board.format_store = {};
-		const nRows = this._paint_rows, nCols = this._paint_cols;
+		const nRows = this._paint_rows,
+			nCols = this._paint_cols;
 		for (let dr = 0; dr < nRows; dr++) {
 			for (let dc = 0; dc < nCols; dc++) {
 				const k = `${row + dr}:${col + dc}`;
@@ -1190,11 +1395,17 @@ frappe.views.excel.ExcelToolbar = class ExcelToolbar {
 		let recorded_fmt = null;
 		if (fmt_key.startsWith("align")) {
 			const val = { alignLeft: "left", alignCenter: "center", alignRight: "right" }[fmt_key];
-			this._apply_to_range(range, (fmt) => { fmt.align = fmt.align === val ? null : val; });
+			this._apply_to_range(range, (fmt) => {
+				fmt.align = fmt.align === val ? null : val;
+			});
 			recorded_fmt = { align: val };
 		} else if (fmt_key.startsWith("valign")) {
-			const val = { valignTop: "top", valignMiddle: "middle", valignBottom: "bottom" }[fmt_key];
-			this._apply_to_range(range, (fmt) => { fmt.valign = val; });
+			const val = { valignTop: "top", valignMiddle: "middle", valignBottom: "bottom" }[
+				fmt_key
+			];
+			this._apply_to_range(range, (fmt) => {
+				fmt.valign = val;
+			});
 			recorded_fmt = { valign: val };
 		} else if (fmt_key === "numfmt_pct") {
 			this._apply_format({ numfmt: "percentage" });
@@ -1202,7 +1413,9 @@ frappe.views.excel.ExcelToolbar = class ExcelToolbar {
 			return;
 		} else {
 			const all_on = this._all_have(range, fmt_key);
-			this._apply_to_range(range, (fmt) => { fmt[fmt_key] = !all_on; });
+			this._apply_to_range(range, (fmt) => {
+				fmt[fmt_key] = !all_on;
+			});
 			recorded_fmt = { [fmt_key]: !all_on };
 		}
 		// V3.1 — Record for F4 Repeat Last Action
@@ -1267,36 +1480,38 @@ frappe.views.excel.ExcelToolbar = class ExcelToolbar {
 		const c = this._border_color;
 		const s = this._border_style;
 		const w = this._border_width;
-		const thin   = `${w}px ${s} ${c}`;
-		const thick  = `${Math.max(2, parseInt(w)+1)}px ${s} ${c}`;
-		const dbl    = `${Math.max(2, parseInt(w))}px double ${c}`;
+		const thin = `${w}px ${s} ${c}`;
+		const thick = `${Math.max(2, parseInt(w) + 1)}px ${s} ${c}`;
+		const dbl = `${Math.max(2, parseInt(w))}px double ${c}`;
 
 		const PRESETS = {
-			none:             { top:"", right:"", bottom:"", left:"" },
-			all:              { top:thin, right:thin, bottom:thin, left:thin },
-			thick_box:        { top:thick, right:thick, bottom:thick, left:thick },
-			bottom:           { top:"", right:"", bottom:thin, left:"" },
-			top:              { top:thin, right:"", bottom:"", left:"" },
-			left:             { top:"", right:"", bottom:"", left:thin },
-			right:            { top:"", right:thin, bottom:"", left:"" },
-			thick_bottom:     { top:"", right:"", bottom:thick, left:"" },
-			double_bottom:    { top:"", right:"", bottom:dbl, left:"" },
-			top_thick_bottom: { top:thin, right:"", bottom:thick, left:"" },
+			none: { top: "", right: "", bottom: "", left: "" },
+			all: { top: thin, right: thin, bottom: thin, left: thin },
+			thick_box: { top: thick, right: thick, bottom: thick, left: thick },
+			bottom: { top: "", right: "", bottom: thin, left: "" },
+			top: { top: thin, right: "", bottom: "", left: "" },
+			left: { top: "", right: "", bottom: "", left: thin },
+			right: { top: "", right: thin, bottom: "", left: "" },
+			thick_bottom: { top: "", right: "", bottom: thick, left: "" },
+			double_bottom: { top: "", right: "", bottom: dbl, left: "" },
+			top_thick_bottom: { top: thin, right: "", bottom: thick, left: "" },
 		};
 
 		if (preset === "outside") {
 			// Apply per-cell, only outer edges
 			this._apply_to_range(range, (fmt, r, c) => {
 				fmt.borders = {
-					top:    r === range.r1 ? thin : "",
+					top: r === range.r1 ? thin : "",
 					bottom: r === range.r2 ? thin : "",
-					left:   c === range.c1 ? thin : "",
-					right:  c === range.c2 ? thin : "",
+					left: c === range.c1 ? thin : "",
+					right: c === range.c2 ? thin : "",
 				};
 			});
 		} else if (PRESETS[preset]) {
 			const b = PRESETS[preset];
-			this._apply_to_range(range, (fmt) => { fmt.borders = { ...b }; });
+			this._apply_to_range(range, (fmt) => {
+				fmt.borders = { ...b };
+			});
 		}
 
 		// Mirror top-edge border onto column header bottom for selected columns
@@ -1308,21 +1523,24 @@ frappe.views.excel.ExcelToolbar = class ExcelToolbar {
 
 	_apply_header_borders(range, preset, thin, thick) {
 		const fs = this.board.format_store;
-		const c1 = range.c1, c2 = range.c2;
+		const c1 = range.c1,
+			c2 = range.c2;
 		for (let c = c1; c <= c2; c++) {
 			const key = `h_${c}`;
 			if (!fs[key]) fs[key] = {};
 			if (preset === "none") {
-				fs[key].borders = { top:"", right:"", bottom:"", left:"" };
+				fs[key].borders = { top: "", right: "", bottom: "", left: "" };
 			} else if (["all", "outside", "thick_box"].includes(preset)) {
 				const w = preset === "thick_box" ? thick : thin;
 				fs[key].borders = {
-					top: "", bottom: w,
+					top: "",
+					bottom: w,
 					left: c === c1 ? w : "",
 					right: c === c2 ? w : "",
 				};
 			} else if (preset === "top") {
-				if (!fs[key].borders) fs[key].borders = { top:"", right:"", bottom:"", left:"" };
+				if (!fs[key].borders)
+					fs[key].borders = { top: "", right: "", bottom: "", left: "" };
 				fs[key].borders.bottom = thin;
 			} else {
 				// other presets don't affect headers
@@ -1347,30 +1565,36 @@ frappe.views.excel.ExcelToolbar = class ExcelToolbar {
 			// center or cells
 			plugin.merge(range.r1, range.c1, range.r2, range.c2);
 			if (mode === "center") {
-				this._apply_to_range(range, (fmt) => { fmt.align = "center"; fmt.valign = "middle"; });
+				this._apply_to_range(range, (fmt) => {
+					fmt.align = "center";
+					fmt.valign = "middle";
+				});
 			}
 		}
 		hot.render();
 	}
 
 	_apply_freeze(mode) {
-		const hot   = this.board.hot;
+		const hot = this.board.hot;
 		const board = this.board;
-		const sel   = hot.getSelectedLast();
+		const sel = hot.getSelectedLast();
 
-		let cols = board._frozen_cols || 0;   // keep current col freeze by default
-		let rows = board._frozen_rows || 0;   // keep current row freeze by default
+		let cols = board._frozen_cols || 0; // keep current col freeze by default
+		let rows = board._frozen_rows || 0; // keep current row freeze by default
 
 		if (mode === "first_col") {
-			cols = 1; rows = 0;
+			cols = 1;
+			rows = 0;
 		} else if (mode === "first_row") {
-			cols = 0; rows = 1;
+			cols = 0;
+			rows = 1;
 		} else if (mode === "selection" && sel) {
 			// Excel "Freeze Panes": freeze everything to-the-left AND above selected cell
-			cols = Math.min(sel[1], sel[3]);   // col index = count of cols to freeze
-			rows = Math.min(sel[0], sel[2]);   // row index = count of rows to freeze
+			cols = Math.min(sel[1], sel[3]); // col index = count of cols to freeze
+			rows = Math.min(sel[0], sel[2]); // row index = count of rows to freeze
 		} else if (mode === "unfreeze") {
-			cols = 0; rows = 0;
+			cols = 0;
+			rows = 0;
 		}
 
 		// Apply col freeze via _set_freeze (handles CSS class + persistence + alert)
@@ -1404,7 +1628,10 @@ frappe.views.excel.ExcelToolbar = class ExcelToolbar {
 		const col_idx = Math.min(sel[1], sel[3]);
 		const col_cfg = this.board.columns?.[col_idx];
 		if (!col_cfg?.data) {
-			frappe.show_alert({ message: __("Select a column to sort by"), indicator: "orange" }, 3);
+			frappe.show_alert(
+				{ message: __("Select a column to sort by"), indicator: "orange" },
+				3
+			);
 			return;
 		}
 		const lv = this.board.list_view;
@@ -1417,7 +1644,10 @@ frappe.views.excel.ExcelToolbar = class ExcelToolbar {
 
 	async _delete_selected() {
 		if (!this.board.list_view?.can_write) {
-			frappe.show_alert({ message: __("You don't have permission to delete"), indicator: "red" }, 3);
+			frappe.show_alert(
+				{ message: __("You don't have permission to delete"), indicator: "red" },
+				3
+			);
 			return;
 		}
 		const sel = this.board.hot?.getSelectedLast();
@@ -1431,7 +1661,7 @@ frappe.views.excel.ExcelToolbar = class ExcelToolbar {
 		}
 		if (!names.length) return;
 
-		const confirmed = await new Promise(resolve => {
+		const confirmed = await new Promise((resolve) => {
 			frappe.confirm(
 				__("Delete {0} record(s)? This cannot be undone.", [names.length]),
 				() => resolve(true),
@@ -1448,7 +1678,10 @@ frappe.views.excel.ExcelToolbar = class ExcelToolbar {
 			frappe.show_progress(__("Deleting..."), done, names.length);
 		}
 		frappe.hide_progress();
-		frappe.show_alert({ message: __("Deleted {0} record(s)", [names.length]), indicator: "green" }, 3);
+		frappe.show_alert(
+			{ message: __("Deleted {0} record(s)", [names.length]), indicator: "green" },
+			3
+		);
 		this.board.list_view.refresh();
 	}
 
@@ -1458,16 +1691,18 @@ frappe.views.excel.ExcelToolbar = class ExcelToolbar {
 			{
 				fieldtype: "Int",
 				fieldname: "n",
-				label:     __("How many blank rows?"),
-				default:   10,
-				description: __("Fill them in, or paste directly from Excel/Google Sheets (Ctrl+V). Then click Create Records."),
+				label: __("How many blank rows?"),
+				default: 10,
+				description: __(
+					"Fill them in, or paste directly from Excel/Google Sheets (Ctrl+V). Then click Create Records."
+				),
 			},
 			({ n }) => {
 				const count = Math.min(Math.max(parseInt(n) || 10, 1), 500);
 				this.board._enter_bulk_add_mode(count);
 			},
 			__("Bulk Add Rows"),
-			__("Add Rows"),
+			__("Add Rows")
 		);
 	}
 
@@ -1480,20 +1715,27 @@ frappe.views.excel.ExcelToolbar = class ExcelToolbar {
 	 */
 	async _duplicate_record() {
 		if (!this.board.list_view?.can_write) {
-			frappe.show_alert({ message: __("You don't have write permission"), indicator: "red" }, 3);
+			frappe.show_alert(
+				{ message: __("You don't have write permission"), indicator: "red" },
+				3
+			);
 			return;
 		}
 
 		const selections = this.board.hot?.getSelected() || [];
 		if (!selections.length) {
-			frappe.show_alert({ message: __("Select row(s) to duplicate"), indicator: "orange" }, 3);
+			frappe.show_alert(
+				{ message: __("Select row(s) to duplicate"), indicator: "orange" },
+				3
+			);
 			return;
 		}
 
 		// Collect unique row indices from all selection ranges
 		const row_set = new Set();
 		for (const [r1, , r2] of selections) {
-			const from = Math.min(r1, r2), to = Math.max(r1, r2);
+			const from = Math.min(r1, r2),
+				to = Math.max(r1, r2);
 			for (let r = from; r <= to; r++) row_set.add(r);
 		}
 		const row_indices = [...row_set].sort((a, b) => a - b);
@@ -1502,9 +1744,22 @@ frappe.views.excel.ExcelToolbar = class ExcelToolbar {
 			// Single row — existing inline insert dialog
 			const row_data = this.board.list_view.data?.[row_indices[0]];
 			if (!row_data || row_data._is_new) return;
-			const SYSTEM = new Set(["name","creation","modified","modified_by","owner",
-				"docstatus","idx","_user_tags","_comments","_assign","_liked_by","_seen",
-				"amended_from","naming_series"]);
+			const SYSTEM = new Set([
+				"name",
+				"creation",
+				"modified",
+				"modified_by",
+				"owner",
+				"docstatus",
+				"idx",
+				"_user_tags",
+				"_comments",
+				"_assign",
+				"_liked_by",
+				"_seen",
+				"amended_from",
+				"naming_series",
+			]);
 			const prefill = {};
 			for (const [k, v] of Object.entries(row_data)) {
 				if (!SYSTEM.has(k) && !k.startsWith("_") && v != null && v !== "") prefill[k] = v;
@@ -1525,26 +1780,56 @@ frappe.views.excel.ExcelToolbar = class ExcelToolbar {
 	 */
 	_detect_patterns(is_duplicate) {
 		if (is_duplicate) return {};
-		const dt   = this.board.doctype;
+		const dt = this.board.doctype;
 		const meta = frappe.get_meta(dt);
 		if (!meta) return {};
 
 		const SCALAR_TYPES = new Set([
-			"Data","Link","Select","Date","Datetime","Time","Int","Float","Currency",
-			"Percent","Small Text","Text","Long Text","Check","Dynamic Link",
-			"Date Range","Phone","Autocomplete","Color","Rating",
+			"Data",
+			"Link",
+			"Select",
+			"Date",
+			"Datetime",
+			"Time",
+			"Int",
+			"Float",
+			"Currency",
+			"Percent",
+			"Small Text",
+			"Text",
+			"Long Text",
+			"Check",
+			"Dynamic Link",
+			"Date Range",
+			"Phone",
+			"Autocomplete",
+			"Color",
+			"Rating",
 		]);
-		const SKIP_FNS = new Set(["name","creation","modified","modified_by",
-			"owner","docstatus","idx","naming_series"]);
-		const meta_fields = (meta.fields || []).filter(f =>
-			SCALAR_TYPES.has(f.fieldtype) && !f.read_only && !f.hidden && !SKIP_FNS.has(f.fieldname));
+		const SKIP_FNS = new Set([
+			"name",
+			"creation",
+			"modified",
+			"modified_by",
+			"owner",
+			"docstatus",
+			"idx",
+			"naming_series",
+		]);
+		const meta_fields = (meta.fields || []).filter(
+			(f) =>
+				SCALAR_TYPES.has(f.fieldtype) &&
+				!f.read_only &&
+				!f.hidden &&
+				!SKIP_FNS.has(f.fieldname)
+		);
 
 		const freq = {};
 		(this.board.list_view.data || [])
-			.filter(r => !r._is_new)
+			.filter((r) => !r._is_new)
 			.slice(0, 40)
-			.forEach(row => {
-				meta_fields.forEach(f => {
+			.forEach((row) => {
+				meta_fields.forEach((f) => {
 					const v = row[f.fieldname];
 					if (v != null && v !== "") {
 						freq[f.fieldname] = freq[f.fieldname] || {};
@@ -1568,12 +1853,18 @@ frappe.views.excel.ExcelToolbar = class ExcelToolbar {
 	 */
 	_insert_record_dialog(prefill = {}, is_duplicate = false) {
 		if (!this.board.list_view?.can_write) {
-			frappe.show_alert({ message: __("You don't have write permission"), indicator: "red" }, 3);
+			frappe.show_alert(
+				{ message: __("You don't have write permission"), indicator: "red" },
+				3
+			);
 			return;
 		}
-		const dt   = this.board.doctype;
+		const dt = this.board.doctype;
 		const meta = frappe.get_meta(dt);
-		if (!meta) { frappe.new_doc(dt); return; }
+		if (!meta) {
+			frappe.new_doc(dt);
+			return;
+		}
 
 		const pattern_defaults = this._detect_patterns(is_duplicate);
 		// Pattern hints are lowest priority — board's model defaults + prefill override them
@@ -1583,10 +1874,12 @@ frappe.views.excel.ExcelToolbar = class ExcelToolbar {
 	_insert_autosum() {
 		const sel = this.board.hot?.getSelectedLast();
 		if (!sel) return;
-		const c    = Math.min(sel[1], sel[3]);
-		const r1   = Math.min(sel[0], sel[2]);
-		const r2   = Math.max(sel[0], sel[2]);
-		const col_letter = this.board._col_letter ? this.board._col_letter(c + 1) : String.fromCharCode(65 + c);
+		const c = Math.min(sel[1], sel[3]);
+		const r1 = Math.min(sel[0], sel[2]);
+		const r2 = Math.max(sel[0], sel[2]);
+		const col_letter = this.board._col_letter
+			? this.board._col_letter(c + 1)
+			: String.fromCharCode(65 + c);
 		const formula = `=SUM(${col_letter}${r1 + 1}:${col_letter}${r2 + 1})`;
 		this.board.hot.setDataAtCell(r2 + 1, c, formula);
 	}
@@ -1607,15 +1900,20 @@ frappe.views.excel.ExcelToolbar = class ExcelToolbar {
 				// Move cursor to end — prevents browser select-all-on-focus replacing the prefix
 				setTimeout(() => {
 					const ta = editor?.TEXTAREA;
-					if (ta) { const n = ta.value.length; ta.setSelectionRange(n, n); }
+					if (ta) {
+						const n = ta.value.length;
+						ta.setSelectionRange(n, n);
+					}
 				}, 0);
-			} catch (_) {}
+			} catch (_) {
+				// the editor closed before it could be moved to the end of the text
+			}
 		}, 0);
 	}
 
 	_open_name_manager() {
-		const doctype   = this.board.doctype;
-		const hf        = this.board.formula_bridge?.hf;
+		const doctype = this.board.doctype;
+		const hf = this.board.formula_bridge?.hf;
 
 		const dialog = new frappe.ui.Dialog({
 			title: __("Name Manager"),
@@ -1623,18 +1921,32 @@ frappe.views.excel.ExcelToolbar = class ExcelToolbar {
 		});
 
 		const render = () => {
-			const rows = Object.entries(frappe.get_user_settings(doctype)?.excel_named_ranges || {});
+			const rows = Object.entries(
+				frappe.get_user_settings(doctype)?.excel_named_ranges || {}
+			);
 			dialog.get_field("nm_body").$wrapper.html(`
 				<table class="table table-bordered" style="font-size:13px">
 					<thead><tr><th>${__("Name")}</th><th>${__("Range")}</th><th></th></tr></thead>
 					<tbody>
-					${rows.map(([n, ref]) => `
+					${rows
+						.map(
+							([n, ref]) => `
 						<tr>
 							<td>${frappe.utils.escape_html(n)}</td>
 							<td><code>${frappe.utils.escape_html(ref)}</code></td>
-							<td><button class="btn btn-xs btn-danger ev-nm-del" data-name="${frappe.utils.escape_html(n)}">${__("Delete")}</button></td>
-						</tr>`).join("")}
-					${!rows.length ? `<tr><td colspan="3" class="text-muted text-center">${__("No named ranges")}</td></tr>` : ""}
+							<td><button class="btn btn-xs btn-danger ev-nm-del" data-name="${frappe.utils.escape_html(
+								n
+							)}">${__("Delete")}</button></td>
+						</tr>`
+						)
+						.join("")}
+					${
+						!rows.length
+							? `<tr><td colspan="3" class="text-muted text-center">${__(
+									"No named ranges"
+							  )}</td></tr>`
+							: ""
+					}
 					</tbody>
 				</table>
 				<div style="display:flex;gap:8px;margin-top:10px">
@@ -1643,23 +1955,39 @@ frappe.views.excel.ExcelToolbar = class ExcelToolbar {
 					<button class="btn btn-sm btn-primary ev-nm-add">${__("Add")}</button>
 				</div>
 			`);
-			dialog.get_field("nm_body").$wrapper.off("click").on("click", ".ev-nm-del", (e) => {
-				const name = $(e.currentTarget).data("name");
-				const nr = frappe.get_user_settings(doctype)?.excel_named_ranges || {};
-				delete nr[name];
-				frappe.model.user_settings.save(doctype, "excel_named_ranges", nr);
-				hf?.removeNamedExpression(name);
-				render();
-			}).on("click", ".ev-nm-add", () => {
-				const name = dialog.get_field("nm_body").$wrapper.find(".ev-nm-name").val().trim();
-				const ref  = dialog.get_field("nm_body").$wrapper.find(".ev-nm-ref").val().trim();
-				if (!name || !ref) return;
-				const nr = frappe.get_user_settings(doctype)?.excel_named_ranges || {};
-				nr[name] = ref;
-				frappe.model.user_settings.save(doctype, "excel_named_ranges", nr);
-				try { hf?.addNamedExpression(name, `=${ref}`); } catch(e) { /* ignore */ }
-				render();
-			});
+			dialog
+				.get_field("nm_body")
+				.$wrapper.off("click")
+				.on("click", ".ev-nm-del", (e) => {
+					const name = $(e.currentTarget).data("name");
+					const nr = frappe.get_user_settings(doctype)?.excel_named_ranges || {};
+					delete nr[name];
+					frappe.model.user_settings.save(doctype, "excel_named_ranges", nr);
+					hf?.removeNamedExpression(name);
+					render();
+				})
+				.on("click", ".ev-nm-add", () => {
+					const name = dialog
+						.get_field("nm_body")
+						.$wrapper.find(".ev-nm-name")
+						.val()
+						.trim();
+					const ref = dialog
+						.get_field("nm_body")
+						.$wrapper.find(".ev-nm-ref")
+						.val()
+						.trim();
+					if (!name || !ref) return;
+					const nr = frappe.get_user_settings(doctype)?.excel_named_ranges || {};
+					nr[name] = ref;
+					frappe.model.user_settings.save(doctype, "excel_named_ranges", nr);
+					try {
+						hf?.addNamedExpression(name, `=${ref}`);
+					} catch (e) {
+						/* ignore */
+					}
+					render();
+				});
 		};
 
 		dialog.show();
@@ -1683,9 +2011,14 @@ frappe.views.excel.ExcelToolbar = class ExcelToolbar {
 		const panel = $sb.data("panel");
 		$sb.removeClass("ev-right-sidebar--open ev-right-sidebar--wide");
 		$sb.data("panel", null);
-		if (panel) this.board.$wrapper.find(`[data-rs-panel="${panel}"]`).removeClass("ev-tb-btn--active");
+		if (panel)
+			this.board.$wrapper
+				.find(`[data-rs-panel="${panel}"]`)
+				.removeClass("ev-tb-btn--active");
 		// Clear content after CSS transition finishes
-		setTimeout(() => { if (!$sb.hasClass("ev-right-sidebar--open")) $sb.empty(); }, 250);
+		setTimeout(() => {
+			if (!$sb.hasClass("ev-right-sidebar--open")) $sb.empty();
+		}, 250);
 	}
 
 	// ─── PERMISSIONS PANEL ────────────────────────────────────────────────────
@@ -1705,7 +2038,7 @@ frappe.views.excel.ExcelToolbar = class ExcelToolbar {
 		$sb.addClass("ev-right-sidebar--wide");
 
 		const panel = new frappe.views.excel.PermissionPanel({
-			board:   this.board,
+			board: this.board,
 			toolbar: this,
 		});
 		const $content = panel.build_panel_dom();
@@ -1725,8 +2058,11 @@ frappe.views.excel.ExcelToolbar = class ExcelToolbar {
 		}
 
 		const sm = this.board.sheet_manager;
-		const sheets = (sm.get_all() || []).filter(s =>
-			(s.columns_config?.length > 0 || s._columns?.length > 0) && !s.is_dashboard && !s.is_blank
+		const sheets = (sm.get_all() || []).filter(
+			(s) =>
+				(s.columns_config?.length > 0 || s._columns?.length > 0) &&
+				!s.is_dashboard &&
+				!s.is_blank
 		);
 
 		const $panel = this._build_slk_panel(sheets);
@@ -1737,9 +2073,14 @@ frappe.views.excel.ExcelToolbar = class ExcelToolbar {
 		const sm = this.board.sheet_manager;
 		const cur = sm.get_current();
 
-		const opts_html = sheets.map(s =>
-			`<option value="${frappe.utils.escape_html(s.id)}">${frappe.utils.escape_html(s.doctype ? `${s.label} (${s.doctype})` : s.label)}</option>`
-		).join("");
+		const opts_html = sheets
+			.map(
+				(s) =>
+					`<option value="${frappe.utils.escape_html(s.id)}">${frappe.utils.escape_html(
+						s.doctype ? `${s.label} (${s.doctype})` : s.label
+					)}</option>`
+			)
+			.join("");
 
 		const $panel = $(`
 			<div class="ev-rs-panel" data-rs-panel="smart_lookup">
@@ -1760,13 +2101,16 @@ frappe.views.excel.ExcelToolbar = class ExcelToolbar {
 					</button>
 				</div>
 				<div class="ev-rs-body">
-					${sheets.length < 2 ? `
+					${
+						sheets.length < 2
+							? `
 						<div class="ev-slk-empty">
 							<svg width="36" height="36" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"><rect x="3" y="3" width="7" height="7" rx="1"/><rect x="14" y="3" width="7" height="7" rx="1"/><rect x="3" y="14" width="7" height="7" rx="1"/><path d="M14 17.5h7M17.5 14v7"/></svg>
 							<div>${__("Load data into at least 2 sheets to use Smart Lookup.")}</div>
 							<div style="margin-top:6px;font-size:11px">${__("Use Data → Get Data to add sheets.")}</div>
 						</div>
-					` : `
+					`
+							: `
 						<div class="ev-rs-field">
 							<div class="ev-rs-label">
 								<span class="ev-slk-lbl-badge ev-slk-lbl-badge--dest">IN</span>
@@ -1784,7 +2128,9 @@ frappe.views.excel.ExcelToolbar = class ExcelToolbar {
 							<div class="ev-rs-hint">${__("Reference sheet — columns from here get joined")}</div>
 						</div>
 						<div style="display:flex;gap:6px;margin-top:2px">
-							<button class="btn btn-xs btn-default ev-slk-swap-btn" style="flex:0 0 auto" title="${__("Swap sheets")}">
+							<button class="btn btn-xs btn-default ev-slk-swap-btn" style="flex:0 0 auto" title="${__(
+								"Swap sheets"
+							)}">
 								<svg width="11" height="11" viewBox="0 0 16 16" fill="currentColor"><path d="M11.534 7h3.932a.25.25 0 0 1 .192.41l-1.966 2.36a.25.25 0 0 1-.384 0l-1.966-2.36a.25.25 0 0 1 .192-.41zm-11 2h3.932a.25.25 0 0 0 .192-.41L2.692 6.23a.25.25 0 0 0-.384 0L.342 8.59A.25.25 0 0 0 .534 9z"/><path fill-rule="evenodd" d="M8 3c-1.552 0-2.94.707-3.857 1.818a.5.5 0 1 1-.771-.636A6.002 6.002 0 0 1 13.917 7H12.9A5.002 5.002 0 0 0 8 3zM3.1 9a5.002 5.002 0 0 0 8.757 2.182.5.5 0 1 1 .771.636A6.002 6.002 0 0 1 2.083 9H3.1z"/></svg>
 								${__("Swap")}
 							</button>
@@ -1812,14 +2158,15 @@ frappe.views.excel.ExcelToolbar = class ExcelToolbar {
 								<div class="ev-slk-expand-list"></div>
 							</div>
 						</div>
-					`}
+					`
+					}
 				</div>
 			</div>
 		`);
 
 		// Set default selections
 		if (cur?.id) $panel.find(".ev-slk-src-select").val(cur.id);
-		const other = sheets.find(s => s.id !== cur?.id);
+		const other = sheets.find((s) => s.id !== cur?.id);
 		if (other) $panel.find(".ev-slk-tgt-select").val(other.id);
 
 		$panel.find(".ev-rs-close").on("click", () => this._close_right_sidebar());
@@ -1827,15 +2174,20 @@ frappe.views.excel.ExcelToolbar = class ExcelToolbar {
 		$panel.find(".ev-slk-swap-btn").on("click", () => {
 			const $src = $panel.find(".ev-slk-src-select");
 			const $tgt = $panel.find(".ev-slk-tgt-select");
-			const src_val = $src.val(), tgt_val = $tgt.val();
-			$src.val(tgt_val); $tgt.val(src_val);
+			const src_val = $src.val(),
+				tgt_val = $tgt.val();
+			$src.val(tgt_val);
+			$tgt.val(src_val);
 		});
 
 		$panel.find(".ev-slk-analyze-btn").on("click", () => {
 			const src = sm._sheets.get($panel.find(".ev-slk-src-select").val());
 			const tgt = sm._sheets.get($panel.find(".ev-slk-tgt-select").val());
 			if (!src || !tgt || src.id === tgt.id) {
-				frappe.show_alert({ message: __("Select two different sheets"), indicator: "orange" }, 3);
+				frappe.show_alert(
+					{ message: __("Select two different sheets"), indicator: "orange" },
+					3
+				);
 				return;
 			}
 			this._run_slk_analysis($panel, src, tgt);
@@ -1846,37 +2198,53 @@ frappe.views.excel.ExcelToolbar = class ExcelToolbar {
 
 	_run_slk_analysis($panel, src, tgt) {
 		const $results = $panel.find(".ev-slk-results-wrap");
-		const $head    = $panel.find(".ev-slk-results-head");
-		const $cards   = $panel.find(".ev-slk-cards-list");
-		const $apply   = $panel.find(".ev-slk-apply-wrap");
+		const $head = $panel.find(".ev-slk-results-head");
+		const $cards = $panel.find(".ev-slk-cards-list");
+		const $apply = $panel.find(".ev-slk-apply-wrap");
 
 		$results.show();
 		$apply.hide();
 		$head.text(__("Analyzing…"));
-		$cards.html(`<div class="ev-slk-empty" style="padding:16px 0">${__("Running 3-layer detection…")}</div>`);
-
-		const src_headers = (src.columns_config || []).map(c => ({
-			fieldname: c.fieldname || c.data || c.key || "",
-			label: c.label || c.title || c.fieldname || "",
-			fieldtype: c._df?.fieldtype || "Data",
-			options: c._df?.options || "",
-		})).filter(h => h.fieldname && !h.fieldname.startsWith("_")
-			&& !(src._hidden_col_keys?.has(h.fieldname)));
-
-		const tgt_headers = (tgt.columns_config || []).map(c => ({
-			fieldname: c.fieldname || c.data || c.key || "",
-			label: c.label || c.title || c.fieldname || "",
-			fieldtype: c._df?.fieldtype || "Data",
-			options: c._df?.options || "",
-		})).filter(h => h.fieldname && !h.fieldname.startsWith("_")
-			&& !(tgt._hidden_col_keys?.has(h.fieldname)));
-
-		const src_sample = (src.data || []).slice(0, 200).map(row =>
-			src_headers.map(h => String(row[h.fieldname] ?? ""))
+		$cards.html(
+			`<div class="ev-slk-empty" style="padding:16px 0">${__(
+				"Running 3-layer detection…"
+			)}</div>`
 		);
-		const tgt_sample = (tgt.data || []).slice(0, 200).map(row =>
-			tgt_headers.map(h => String(row[h.fieldname] ?? ""))
-		);
+
+		const src_headers = (src.columns_config || [])
+			.map((c) => ({
+				fieldname: c.fieldname || c.data || c.key || "",
+				label: c.label || c.title || c.fieldname || "",
+				fieldtype: c._df?.fieldtype || "Data",
+				options: c._df?.options || "",
+			}))
+			.filter(
+				(h) =>
+					h.fieldname &&
+					!h.fieldname.startsWith("_") &&
+					!src._hidden_col_keys?.has(h.fieldname)
+			);
+
+		const tgt_headers = (tgt.columns_config || [])
+			.map((c) => ({
+				fieldname: c.fieldname || c.data || c.key || "",
+				label: c.label || c.title || c.fieldname || "",
+				fieldtype: c._df?.fieldtype || "Data",
+				options: c._df?.options || "",
+			}))
+			.filter(
+				(h) =>
+					h.fieldname &&
+					!h.fieldname.startsWith("_") &&
+					!tgt._hidden_col_keys?.has(h.fieldname)
+			);
+
+		const src_sample = (src.data || [])
+			.slice(0, 200)
+			.map((row) => src_headers.map((h) => String(row[h.fieldname] ?? "")));
+		const tgt_sample = (tgt.data || [])
+			.slice(0, 200)
+			.map((row) => tgt_headers.map((h) => String(row[h.fieldname] ?? "")));
 
 		frappe.call({
 			method: "excel_view.api.smart_lookup_suggest",
@@ -1885,51 +2253,73 @@ frappe.views.excel.ExcelToolbar = class ExcelToolbar {
 				target_doctype: tgt.doctype || "",
 				source_headers: JSON.stringify(src_headers),
 				target_headers: JSON.stringify(tgt_headers),
-				source_sample:  JSON.stringify(src_sample),
-				target_sample:  JSON.stringify(tgt_sample),
+				source_sample: JSON.stringify(src_sample),
+				target_sample: JSON.stringify(tgt_sample),
 			},
 			callback: (r) => {
 				const suggestions = r.message || [];
 				if (!suggestions.length) {
 					$head.text(__("No matches found"));
-					$cards.html(`<div class="ev-slk-empty">${__("No join columns detected. The sheets may not share matching fields or overlapping data.")}</div>`);
+					$cards.html(
+						`<div class="ev-slk-empty">${__(
+							"No join columns detected. The sheets may not share matching fields or overlapping data."
+						)}</div>`
+					);
 					return;
 				}
 
 				const strategy_label = {
-					primary_key_match:  __("Primary Key"),
-					link_field:         __("Link Field"),
-					header_match:       __("Header Match"),
+					primary_key_match: __("Primary Key"),
+					link_field: __("Link Field"),
+					header_match: __("Header Match"),
 					data_content_match: __("Data Content"),
-					data_overlap:       __("Data Overlap"),
+					data_overlap: __("Data Overlap"),
 				};
 				const strategy_icon = {
-					primary_key_match:  "🔑",
-					link_field:         "🔗",
-					header_match:       "🔤",
+					primary_key_match: "🔑",
+					link_field: "🔗",
+					header_match: "🔤",
 					data_content_match: "📊",
-					data_overlap:       "📊",
+					data_overlap: "📊",
 				};
 
 				$head.text(`${__("Suggested joins")} — ${src.label} → ${tgt.label}`);
 
 				// Build fieldname → human label maps so cards show readable names
-				const src_lbl = Object.fromEntries(src_headers.map(h => [h.fieldname, h.label || h.fieldname]));
-				const tgt_lbl = Object.fromEntries(tgt_headers.map(h => [h.fieldname, h.label || h.fieldname]));
+				const src_lbl = Object.fromEntries(
+					src_headers.map((h) => [h.fieldname, h.label || h.fieldname])
+				);
+				const tgt_lbl = Object.fromEntries(
+					tgt_headers.map((h) => [h.fieldname, h.label || h.fieldname])
+				);
 
 				// Auto-expand highest-confidence card only if >95%, else first card
-				const top_idx = suggestions.findIndex(s => s.confidence >= 0.95) === -1 ? 0 : suggestions.findIndex(s => s.confidence >= 0.95);
+				const top_idx =
+					suggestions.findIndex((s) => s.confidence >= 0.95) === -1
+						? 0
+						: suggestions.findIndex((s) => s.confidence >= 0.95);
 
-				$cards.html(suggestions.map((s, i) => {
-					const pct = Math.round(s.confidence * 100);
-					const bar_color = pct >= 80 ? "#217346" : pct >= 50 ? "#f59700" : "#888";
-					const src_display = frappe.utils.escape_html(src_lbl[s.source_col] || s.source_col);
-					const tgt_display = frappe.utils.escape_html(tgt_lbl[s.target_col] || s.target_col);
-					const is_expanded = i === top_idx;
-					return `<div class="ev-slk-card ${is_expanded ? "ev-slk-card--expanded" : "ev-slk-card--collapsed"}" data-idx="${i}">
+				$cards.html(
+					suggestions
+						.map((s, i) => {
+							const pct = Math.round(s.confidence * 100);
+							const bar_color =
+								pct >= 80 ? "#217346" : pct >= 50 ? "#f59700" : "#888";
+							const src_display = frappe.utils.escape_html(
+								src_lbl[s.source_col] || s.source_col
+							);
+							const tgt_display = frappe.utils.escape_html(
+								tgt_lbl[s.target_col] || s.target_col
+							);
+							const is_expanded = i === top_idx;
+							return `<div class="ev-slk-card ${
+								is_expanded ? "ev-slk-card--expanded" : "ev-slk-card--collapsed"
+							}" data-idx="${i}">
 						<div class="ev-slk-card-hdr">
 							<span class="ev-slk-card-hdr-left">
-								<span class="ev-slk-strategy">${strategy_icon[s.strategy] || "🔍"} ${strategy_label[s.strategy] || s.strategy}</span>
+								<span class="ev-slk-strategy">${strategy_icon[s.strategy] || "🔍"} ${
+								strategy_label[s.strategy] || s.strategy
+							}</span>
 								<span class="ev-slk-cols-inline">${src_display} → ${tgt_display}</span>
 							</span>
 							<span class="ev-slk-card-hdr-right">
@@ -1947,7 +2337,9 @@ frappe.views.excel.ExcelToolbar = class ExcelToolbar {
 							<div class="ev-slk-bar"><div class="ev-slk-bar-fill" style="width:${pct}%;background:${bar_color}"></div></div>
 						</div>
 					</div>`;
-				}).join(""));
+						})
+						.join("")
+				);
 
 				// Auto-select + show field picker for top card immediately
 				const $top_card = $cards.find(`.ev-slk-card[data-idx="${top_idx}"]`);
@@ -1960,16 +2352,18 @@ frappe.views.excel.ExcelToolbar = class ExcelToolbar {
 				// Card click → accordion: expand clicked, collapse others, update field picker
 				$cards.off("click", ".ev-slk-card").on("click", ".ev-slk-card", (e) => {
 					const $card = $(e.currentTarget);
-					const idx   = +$card.data("idx");
+					const idx = +$card.data("idx");
 					const is_same = $card.hasClass("ev-slk-card--selected");
 
 					// Accordion: collapse all, expand clicked
-					$cards.find(".ev-slk-card")
+					$cards
+						.find(".ev-slk-card")
 						.removeClass("ev-slk-card--selected ev-slk-card--expanded")
 						.addClass("ev-slk-card--collapsed");
 					$cards.find(".ev-slk-chevron").text("▸");
 
-					$card.removeClass("ev-slk-card--collapsed")
+					$card
+						.removeClass("ev-slk-card--collapsed")
 						.addClass("ev-slk-card--selected ev-slk-card--expanded");
 					$card.find(".ev-slk-chevron").text("▾");
 
@@ -1985,10 +2379,13 @@ frappe.views.excel.ExcelToolbar = class ExcelToolbar {
 					if (suggestion == null) return;
 					const checked = [...$apply.find(".ev-slk-chip--selected")];
 					if (!checked.length) {
-						frappe.show_alert({ message: __("Select at least one column"), indicator: "orange" }, 2);
+						frappe.show_alert(
+							{ message: __("Select at least one column"), indicator: "orange" },
+							2
+						);
 						return;
 					}
-					const return_fields = checked.map(el => ({
+					const return_fields = checked.map((el) => ({
 						fieldname: el.dataset.fn,
 						label: el.dataset.lbl,
 					}));
@@ -2006,7 +2403,7 @@ frappe.views.excel.ExcelToolbar = class ExcelToolbar {
 	}
 
 	_populate_field_picker($apply, src_sheet, tgt_sheet, suggestion) {
-		const $key   = $apply.find(".ev-slk-join-key");
+		const $key = $apply.find(".ev-slk-join-key");
 		const $chips = $apply.find(".ev-slk-field-chips");
 
 		// Join key pill
@@ -2021,7 +2418,7 @@ frappe.views.excel.ExcelToolbar = class ExcelToolbar {
 
 		// Build field chips from target sheet columns (skip the join column itself)
 		const skip = new Set([suggestion.target_col, "_meta"]);
-		const pickable = (tgt_sheet.columns_config || []).filter(c => {
+		const pickable = (tgt_sheet.columns_config || []).filter((c) => {
 			const fn = c.fieldname || c.data || "";
 			return fn && !fn.startsWith("_") && !skip.has(fn);
 		});
@@ -2032,13 +2429,22 @@ frappe.views.excel.ExcelToolbar = class ExcelToolbar {
 			<button class="ev-slk-chip-toggle" data-all="0">${__("Select all")}</button>
 		`);
 
-		$chips.html(pickable.map(c => {
-			const fn  = c.fieldname || c.data || "";
-			const lbl = c.label || c.title || fn;
-			return `<button class="ev-slk-chip" data-fn="${frappe.utils.escape_html(fn)}" data-lbl="${frappe.utils.escape_html(lbl)}">
+		$chips.html(
+			pickable
+				.map((c) => {
+					const fn = c.fieldname || c.data || "";
+					const lbl = c.label || c.title || fn;
+					return `<button class="ev-slk-chip" data-fn="${frappe.utils.escape_html(
+						fn
+					)}" data-lbl="${frappe.utils.escape_html(lbl)}">
 				${frappe.utils.escape_html(lbl)}
 			</button>`;
-		}).join("") || `<span class="ev-slk-chips-empty text-muted" style="font-size:11px">${__("No columns available")}</span>`);
+				})
+				.join("") ||
+				`<span class="ev-slk-chips-empty text-muted" style="font-size:11px">${__(
+					"No columns available"
+				)}</span>`
+		);
 
 		// Toggle chip selection on click
 		$chips.off("click.chip").on("click.chip", ".ev-slk-chip", (e) => {
@@ -2075,24 +2481,29 @@ frappe.views.excel.ExcelToolbar = class ExcelToolbar {
 	}
 
 	_open_slk_column_picker(src_sheet, tgt_sheet, candidate) {
-		const pickable = (tgt_sheet.columns_config || []).filter(c => {
+		const pickable = (tgt_sheet.columns_config || []).filter((c) => {
 			const fn = c.fieldname || c.data || "";
 			return fn && !fn.startsWith("_");
 		});
-		const fields_html = pickable.map(c => {
-			const fn = c.fieldname || c.data || "";
-			const lbl = c.label || c.title || fn;
-			return `<label class="ev-ilk-field-row">
-				<input type="checkbox" data-fieldname="${frappe.utils.escape_html(fn)}" data-label="${frappe.utils.escape_html(lbl)}">
+		const fields_html = pickable
+			.map((c) => {
+				const fn = c.fieldname || c.data || "";
+				const lbl = c.label || c.title || fn;
+				return `<label class="ev-ilk-field-row">
+				<input type="checkbox" data-fieldname="${frappe.utils.escape_html(
+					fn
+				)}" data-label="${frappe.utils.escape_html(lbl)}">
 				<span>${frappe.utils.escape_html(lbl)}</span>
 			</label>`;
-		}).join("");
+			})
+			.join("");
 
 		const d = new frappe.ui.Dialog({
 			title: __("Lookup from {0}", [tgt_sheet.label]),
-			fields: [{
-				fieldtype: "HTML",
-				options: `
+			fields: [
+				{
+					fieldtype: "HTML",
+					options: `
 					<p style="font-size:12px;color:var(--text-muted)">
 						${__("Join key:")} <b>${frappe.utils.escape_html(candidate.src_field)}</b>
 						→ <b>${frappe.utils.escape_html(candidate.tgt_field)}</b>
@@ -2102,15 +2513,22 @@ frappe.views.excel.ExcelToolbar = class ExcelToolbar {
 						${fields_html}
 					</div>
 				`,
-			}],
+				},
+			],
 			primary_action_label: __("Add Lookup Columns"),
 			primary_action: () => {
 				const checked = [...d.$wrapper.find(".ev-ilk-field-list input:checked")];
 				if (!checked.length) {
-					frappe.show_alert({ message: __("Select at least one field"), indicator: "orange" }, 3);
+					frappe.show_alert(
+						{ message: __("Select at least one field"), indicator: "orange" },
+						3
+					);
 					return;
 				}
-				const return_fields = checked.map(el => ({ fieldname: el.dataset.fieldname, label: el.dataset.label }));
+				const return_fields = checked.map((el) => ({
+					fieldname: el.dataset.fieldname,
+					label: el.dataset.label,
+				}));
 				d.hide();
 				this._apply_client_side_lookup(src_sheet, tgt_sheet, candidate, return_fields);
 			},
@@ -2128,13 +2546,26 @@ frappe.views.excel.ExcelToolbar = class ExcelToolbar {
 		};
 		const tgt_data = _sheet_data(tgt_sheet);
 		const tgt_map = new Map();
-		tgt_data.forEach(row => {
-			const key = String(row[candidate.tgt_field] ?? "").trim().toLowerCase();
+		tgt_data.forEach((row) => {
+			const key = String(row[candidate.tgt_field] ?? "")
+				.trim()
+				.toLowerCase();
 			if (key) tgt_map.set(key, row);
 		});
 
+		// Offline cache for restoring this lookup later (same shape as _slk_join in excel_board.js):
+		// { join_key: { return_field: value } }. Never saved to user_settings, only used in-session.
+		const value_cache = {};
+		tgt_map.forEach((row, key) => {
+			const entry = {};
+			return_fields.forEach((f) => {
+				entry[f.fieldname] = row[f.fieldname] ?? "";
+			});
+			value_cache[key] = entry;
+		});
+
 		const board = this.board;
-		const new_cols = return_fields.map(f => ({
+		const new_cols = return_fields.map((f) => ({
 			data: `_slk_${f.fieldname}`,
 			title: `${f.label} [${tgt_sheet.label}]`,
 			readOnly: true,
@@ -2142,11 +2573,13 @@ frappe.views.excel.ExcelToolbar = class ExcelToolbar {
 		}));
 
 		const _do_join = () => {
-			_sheet_data(src_sheet).forEach(row => {
-				const key    = String(row[candidate.src_field] ?? "").trim().toLowerCase();
+			_sheet_data(src_sheet).forEach((row) => {
+				const key = String(row[candidate.src_field] ?? "")
+					.trim()
+					.toLowerCase();
 				const tgt_row = tgt_map.get(key);
-				return_fields.forEach(f => {
-					row[`_slk_${f.fieldname}`] = tgt_row ? (tgt_row[f.fieldname] ?? "") : "";
+				return_fields.forEach((f) => {
+					row[`_slk_${f.fieldname}`] = tgt_row ? tgt_row[f.fieldname] ?? "" : "";
 				});
 			});
 
@@ -2155,19 +2588,23 @@ frappe.views.excel.ExcelToolbar = class ExcelToolbar {
 
 			const is_base = src_sheet.id === sm._get_sheet0_id();
 			if (is_base) {
-				const existing_keys = new Set(board._master_columns.map(c => c.data));
-				const truly_new = new_cols.filter(c => !existing_keys.has(c.data));
+				const existing_keys = new Set(board._master_columns.map((c) => c.data));
+				const truly_new = new_cols.filter((c) => !existing_keys.has(c.data));
 				if (truly_new.length) {
 					board._master_columns.push(...truly_new);
-					board.columns = board._master_columns.filter(c => !board._hidden_col_keys.has(c.data));
+					board.columns = board._master_columns.filter(
+						(c) => !board._hidden_col_keys.has(c.data)
+					);
 					board.hot?.updateSettings({ columns: board.columns });
 					board.hot?.render();
 				}
 			} else if (sm.get_current()?.id === src_sheet.id) {
 				if (src_sheet._columns) {
 					// Secondary sheet uses _columns — inject directly, skip _apply_sheet
-					const existing = new Set(src_sheet._columns.map(c => c.data));
-					new_cols.forEach(c => { if (!existing.has(c.data)) src_sheet._columns.push(c); });
+					const existing = new Set(src_sheet._columns.map((c) => c.data));
+					new_cols.forEach((c) => {
+						if (!existing.has(c.data)) src_sheet._columns.push(c);
+					});
 					board.columns = src_sheet._columns;
 					board.hot?.updateSettings({ columns: board.columns });
 					board.hot?.loadData(src_sheet.data || []);
@@ -2179,14 +2616,18 @@ frappe.views.excel.ExcelToolbar = class ExcelToolbar {
 
 		// If the join-key field was not fetched for a secondary DocType sheet, get it now
 		const src_rows = _sheet_data(src_sheet);
-		const join_key_missing = src_sheet.doctype
-			&& src_rows.length > 0
-			&& !(candidate.src_field in src_rows[0]);
+		const join_key_missing =
+			src_sheet.doctype && src_rows.length > 0 && !(candidate.src_field in src_rows[0]);
 		if (join_key_missing) {
-			frappe.db.get_list(src_sheet.doctype, { fields: ["name", candidate.src_field], limit: 0 })
-				.then(rows => {
-					const key_map = new Map(rows.map(r => [r.name, r[candidate.src_field] ?? ""]));
-					src_rows.forEach(row => { row[candidate.src_field] = key_map.get(row.name) ?? ""; });
+			frappe.db
+				.get_list(src_sheet.doctype, { fields: ["name", candidate.src_field], limit: 0 })
+				.then((rows) => {
+					const key_map = new Map(
+						rows.map((r) => [r.name, r[candidate.src_field] ?? ""])
+					);
+					src_rows.forEach((row) => {
+						row[candidate.src_field] = key_map.get(row.name) ?? "";
+					});
 					_do_join();
 				});
 		} else {
@@ -2195,40 +2636,54 @@ frappe.views.excel.ExcelToolbar = class ExcelToolbar {
 		// Persist lookup config to board state + user_settings
 		if (!board._applied_lookups) board._applied_lookups = [];
 		// Remove any existing config for same tgt+fields to avoid duplicates
-		board._applied_lookups = board._applied_lookups.filter(c =>
-			!(c.tgt_sheet_label === tgt_sheet.label && c.src_field === candidate.src_field)
+		board._applied_lookups = board._applied_lookups.filter(
+			(c) => !(c.tgt_sheet_label === tgt_sheet.label && c.src_field === candidate.src_field)
 		);
 		// tgt_source: persisted so _reapply_smart_lookups can fetch FRESH data on restore
 		// instead of relying on stale _value_cache.
 		const tgt_source = tgt_sheet.doctype
 			? { doctype: tgt_sheet.doctype }
 			: tgt_sheet.report_meta?.name
-				? {
-					report_name:    tgt_sheet.report_meta.name,
+			? {
+					report_name: tgt_sheet.report_meta.name,
 					report_filters: tgt_sheet.report_meta.current_filters || {},
 					// Column key order so result rows can be re-keyed correctly
-					col_keys: (tgt_sheet.columns_config || []).map(c => c.data),
-				}
-				: null; // blank/formula sheet — cache is the only option
+					col_keys: (tgt_sheet.columns_config || []).map((c) => c.data),
+			  }
+			: null; // blank/formula sheet — cache is the only option
 		board._applied_lookups.push({
-			src_sheet_id:      src_sheet.id,      // ephemeral — used within-session only
-			src_sheet_label:   src_sheet.label,   // persistent identifier for cross-session restore
+			src_sheet_id: src_sheet.id, // ephemeral — used within-session only
+			src_sheet_label: src_sheet.label, // persistent identifier for cross-session restore
 			src_sheet_doctype: src_sheet.doctype || null,
-			tgt_sheet_id:    tgt_sheet.id,
+			tgt_sheet_id: tgt_sheet.id,
 			tgt_sheet_label: tgt_sheet.label,
 			tgt_source,
-			src_field:       candidate.src_field,
-			tgt_field:       candidate.tgt_field,
+			src_field: candidate.src_field,
+			tgt_field: candidate.tgt_field,
 			return_fields,
-			_value_cache:    value_cache,
+			_value_cache: value_cache,
 		});
 		// Sync-patch to avoid race condition with concurrent saves.
 		// Never save data values (_value_cache, _fresh_rows) to user_settings — only config.
-		const _slk_save = board._applied_lookups.map(({ _fresh_rows: _f, _value_cache: _v, ...rest }) => rest);
-		if (!frappe.model.user_settings[board.doctype]) frappe.model.user_settings[board.doctype] = {};
+		const _slk_save = board._applied_lookups.map(
+			({ _fresh_rows: _f, _value_cache: _v, ...rest }) => rest
+		);
+		if (!frappe.model.user_settings[board.doctype])
+			frappe.model.user_settings[board.doctype] = {};
 		frappe.model.user_settings[board.doctype].excel_smart_lookups = _slk_save;
-		frappe.model.user_settings.update(board.doctype, frappe.model.user_settings[board.doctype]);
-		frappe.show_alert({ message: __(`Added ${return_fields.length} lookup column(s) from ${tgt_sheet.label}`), indicator: "green" }, 3);
+		frappe.model.user_settings.update(
+			board.doctype,
+			frappe.model.user_settings[board.doctype]
+		);
+		frappe.show_alert(
+			{
+				message: __(
+					`Added ${return_fields.length} lookup column(s) from ${tgt_sheet.label}`
+				),
+				indicator: "green",
+			},
+			3
+		);
 	}
 
 	// ─── EXPAND RELATIONSHIP ──────────────────────────────────────────────────
@@ -2237,56 +2692,82 @@ frappe.views.excel.ExcelToolbar = class ExcelToolbar {
 		const $wrap = $panel.find(".ev-slk-expand-wrap");
 		const $list = $panel.find(".ev-slk-expand-list");
 
-		if (!tgt_sheet?.doctype) { $wrap.hide(); return; }
+		if (!tgt_sheet?.doctype) {
+			$wrap.hide();
+			return;
+		}
 
 		$wrap.show();
 		$list.html(`<div class="ev-slk-expand-loading">${__("Discovering relationships…")}</div>`);
 
 		frappe.call({
 			method: "excel_view.api.find_related_doctypes",
-			args:   { source_doctype: tgt_sheet.doctype, max_hops: 1 },
+			args: { source_doctype: tgt_sheet.doctype, max_hops: 1 },
 			callback: (r) => {
 				const related = r.message || [];
 				if (!related.length) {
-					$list.html(`<div class="ev-slk-expand-empty">${__("No direct relationships found.")}</div>`);
+					$list.html(
+						`<div class="ev-slk-expand-empty">${__(
+							"No direct relationships found."
+						)}</div>`
+					);
 					return;
 				}
 
-				$list.html(related.map((rel, i) => {
-					const badge = rel.cardinality === "1:N"
-						? `<span class="ev-slk-card-badge ev-slk-card-badge--1n">1:N</span>`
-						: `<span class="ev-slk-card-badge ev-slk-card-badge--n1">N:1</span>`;
-					const agg_opts = rel.cardinality === "1:N"
-						? `<select class="ev-slk-agg-select form-control form-control-sm" data-rel-idx="${i}">
+				$list.html(
+					related
+						.map((rel, i) => {
+							const badge =
+								rel.cardinality === "1:N"
+									? `<span class="ev-slk-card-badge ev-slk-card-badge--1n">1:N</span>`
+									: `<span class="ev-slk-card-badge ev-slk-card-badge--n1">N:1</span>`;
+							const agg_opts =
+								rel.cardinality === "1:N"
+									? `<select class="ev-slk-agg-select form-control form-control-sm" data-rel-idx="${i}">
 							<option value="count">${__("Count")}</option>
 							<option value="sum">${__("Sum")}</option>
 							<option value="average">${__("Average")}</option>
 							<option value="latest">${__("Latest row")}</option>
-						</select>` : "";
-					return `<div class="ev-slk-expand-card" data-rel-idx="${i}">
+						</select>`
+									: "";
+							return `<div class="ev-slk-expand-card" data-rel-idx="${i}">
 						<div class="ev-slk-expand-card-head">
 							${badge}
 							<span class="ev-slk-expand-dt">${frappe.utils.escape_html(rel.doctype)}</span>
-							${rel.via ? `<span class="ev-slk-expand-via">${__("via")} ${frappe.utils.escape_html(rel.via)}</span>` : ""}
+							${
+								rel.via
+									? `<span class="ev-slk-expand-via">${__(
+											"via"
+									  )} ${frappe.utils.escape_html(rel.via)}</span>`
+									: ""
+							}
 						</div>
-						<div class="ev-slk-expand-join">${__("Join:")} <b>${frappe.utils.escape_html(rel.join_label || rel.join_field)}</b></div>
+						<div class="ev-slk-expand-join">${__("Join:")} <b>${frappe.utils.escape_html(
+								rel.join_label || rel.join_field
+							)}</b></div>
 						${agg_opts}
 						<button class="btn btn-xs ev-slk-expand-add-btn" data-rel-idx="${i}">
 							+ ${__("Add to Sheet")}
 						</button>
 					</div>`;
-				}).join(""));
+						})
+						.join("")
+				);
 
 				$panel.data("slk_related", related);
 
-				$list.off("click", ".ev-slk-expand-add-btn").on("click", ".ev-slk-expand-add-btn", (e) => {
-					e.stopPropagation();
-					const ri  = +$(e.currentTarget).data("rel-idx");
-					const rel = ($panel.data("slk_related") || [])[ri];
-					if (!rel) return;
-					const agg = $list.find(`.ev-slk-agg-select[data-rel-idx="${ri}"]`).val() || "latest";
-					this._apply_expand_rel(src_sheet, tgt_sheet, rel, agg, suggestion);
-				});
+				$list
+					.off("click", ".ev-slk-expand-add-btn")
+					.on("click", ".ev-slk-expand-add-btn", (e) => {
+						e.stopPropagation();
+						const ri = +$(e.currentTarget).data("rel-idx");
+						const rel = ($panel.data("slk_related") || [])[ri];
+						if (!rel) return;
+						const agg =
+							$list.find(`.ev-slk-agg-select[data-rel-idx="${ri}"]`).val() ||
+							"latest";
+						this._apply_expand_rel(src_sheet, tgt_sheet, rel, agg, suggestion);
+					});
 			},
 		});
 	}
@@ -2299,65 +2780,95 @@ frappe.views.excel.ExcelToolbar = class ExcelToolbar {
 			return [];
 		};
 		const join_field = suggestion?.source_col || "name";
-		const src_vals = [...new Set(
-			_sheet_data(src_sheet)
-				.map(r => String(r[join_field] ?? "").trim())
-				.filter(Boolean)
-		)].slice(0, 500);
+		const src_vals = [
+			...new Set(
+				_sheet_data(src_sheet)
+					.map((r) => String(r[join_field] ?? "").trim())
+					.filter(Boolean)
+			),
+		].slice(0, 500);
 
 		if (!src_vals.length) {
-			frappe.show_alert({ message: __("No source values to expand"), indicator: "orange" }, 3);
+			frappe.show_alert(
+				{ message: __("No source values to expand"), indicator: "orange" },
+				3
+			);
 			return;
 		}
 
 		frappe.show_alert({ message: __("Fetching {0}…", [rel.doctype]), indicator: "blue" }, 2);
 
 		frappe.call({
-			method:   "excel_view.api.expand_relationship",
+			method: "excel_view.api.expand_relationship",
 			args: {
 				source_doctype: tgt_sheet.doctype,
 				target_doctype: rel.doctype,
-				join_field:     rel.join_field,
-				source_values:  JSON.stringify(src_vals),
-				agg_preset:     agg_preset,
-				return_fields:  "[]",
+				join_field: rel.join_field,
+				source_values: JSON.stringify(src_vals),
+				agg_preset: agg_preset,
+				return_fields: "[]",
 			},
 			callback: (r) => {
 				const res = r.message || {};
 				if (res.error) {
-					frappe.msgprint({ title: __("Expand Error"), message: res.error, indicator: "red" });
+					frappe.msgprint({
+						title: __("Expand Error"),
+						message: res.error,
+						indicator: "red",
+					});
 					return;
 				}
 				const rows = res.rows || [];
 				if (!rows.length) {
-					frappe.show_alert({ message: __("No data found in {0}", [rel.doctype]), indicator: "orange" }, 3);
+					frappe.show_alert(
+						{
+							message: __("No data found in {0}", [rel.doctype]),
+							indicator: "orange",
+						},
+						3
+					);
 					return;
 				}
 
 				const exp_map = new Map();
-				rows.forEach(row => exp_map.set(String(row._src_key ?? "").trim().toLowerCase(), row));
+				rows.forEach((row) =>
+					exp_map.set(
+						String(row._src_key ?? "")
+							.trim()
+							.toLowerCase(),
+						row
+					)
+				);
 
-				const return_cols = (res.columns || []).filter(c => c.fieldname !== "_src_key");
-				_sheet_data(src_sheet).forEach(row => {
-					const key = String(row[join_field] ?? "").trim().toLowerCase();
+				const return_cols = (res.columns || []).filter((c) => c.fieldname !== "_src_key");
+				_sheet_data(src_sheet).forEach((row) => {
+					const key = String(row[join_field] ?? "")
+						.trim()
+						.toLowerCase();
 					const exp = exp_map.get(key);
-					return_cols.forEach(col => {
-						row[`_exp_${col.fieldname}`] = exp ? (exp[col.fieldname] ?? "") : "";
+					return_cols.forEach((col) => {
+						row[`_exp_${col.fieldname}`] = exp ? exp[col.fieldname] ?? "" : "";
 					});
 				});
 
-				const new_cols = return_cols.map(col => ({
-					data:           `_exp_${col.fieldname}`,
-					title:          `${col.label} [${rel.doctype}·${agg_preset}]`,
-					readOnly:       true,
+				const new_cols = return_cols.map((col) => ({
+					data: `_exp_${col.fieldname}`,
+					title: `${col.label} [${rel.doctype}·${agg_preset}]`,
+					readOnly: true,
 					_is_lookup_col: true,
 				}));
 				src_sheet.columns_config = [...(src_sheet.columns_config || []), ...new_cols];
 				if (sm.get_current()?.id === src_sheet.id) sm._apply_sheet(src_sheet);
-				frappe.show_alert({
-					message:   __("Added {0} column(s) from {1}", [return_cols.length, rel.doctype]),
-					indicator: "green",
-				}, 3);
+				frappe.show_alert(
+					{
+						message: __("Added {0} column(s) from {1}", [
+							return_cols.length,
+							rel.doctype,
+						]),
+						indicator: "green",
+					},
+					3
+				);
 			},
 		});
 	}
@@ -2378,11 +2889,19 @@ frappe.views.excel.ExcelToolbar = class ExcelToolbar {
 				return;
 			}
 
-			const SKIP_TYPES = new Set(["Section Break","Column Break","Tab Break","HTML","Heading","Button","Fold"]);
+			const SKIP_TYPES = new Set([
+				"Section Break",
+				"Column Break",
+				"Tab Break",
+				"HTML",
+				"Heading",
+				"Button",
+				"Fold",
+			]);
 			// For import, include all non-structural fields (even read_only/hidden —
 			// bulk insert can set any field regardless of form-level read_only).
-			const usable = (meta.fields || []).filter(f =>
-				!SKIP_TYPES.has(f.fieldtype) && f.fieldname
+			const usable = (meta.fields || []).filter(
+				(f) => !SKIP_TYPES.has(f.fieldtype) && f.fieldname
 			);
 
 			const matched = this._bi_match_fields(headers, fieldnames, usable);
@@ -2392,21 +2911,25 @@ frappe.views.excel.ExcelToolbar = class ExcelToolbar {
 			// ── Select options (built once, pre-selected per row) ────────────────────────
 			const _select_opts = (pre_fn) =>
 				`<option value=""${!pre_fn ? " selected" : ""}>— ${__("Skip")} —</option>` +
-				usable.map(f => {
-					const lbl = __(f.label || f.fieldname);
-					return `<option value="${esc(f.fieldname)}"${f.fieldname === pre_fn ? " selected" : ""}>${esc(lbl)}</option>`;
-				}).join("");
+				usable
+					.map((f) => {
+						const lbl = __(f.label || f.fieldname);
+						return `<option value="${esc(f.fieldname)}"${
+							f.fieldname === pre_fn ? " selected" : ""
+						}>${esc(lbl)}</option>`;
+					})
+					.join("");
 
 			// ── Detect child table columns (Frappe standard formats) ──────────────────────
 			// Format 1: "Field Label (table_fieldname)"  e.g. "Rate (items)"
 			// Format 2: "table_fieldname.child_fieldname" e.g. "items.rate"
-			const table_flds_meta = (meta.fields || []).filter(f => f.fieldtype === "Table");
-			const CHILD_LABEL_RE  = /^(.+?)\s*\((\w+)\)\s*$/;
-			const CHILD_DOT_RE    = /^(\w+)\.(\w+)$/;
-			const child_col_cfg   = [];
+			const table_flds_meta = (meta.fields || []).filter((f) => f.fieldtype === "Table");
+			const CHILD_LABEL_RE = /^(.+?)\s*\((\w+)\)\s*$/;
+			const CHILD_DOT_RE = /^(\w+)\.(\w+)$/;
+			const child_col_cfg = [];
 
 			const parent_rows_html = [];
-			const child_groups   = {};   // table_field → { label, rows: html[] }
+			const child_groups = {}; // table_field → { label, rows: html[] }
 
 			headers.forEach((h, i) => {
 				const h_t = h.trim();
@@ -2415,9 +2938,10 @@ frappe.views.excel.ExcelToolbar = class ExcelToolbar {
 				const dot_m = h_t.match(CHILD_DOT_RE);
 				if (dot_m) {
 					const [, tbl, cfld] = dot_m;
-					const tbl_meta = table_flds_meta.find(f => f.fieldname === tbl);
+					const tbl_meta = table_flds_meta.find((f) => f.fieldname === tbl);
 					if (tbl_meta) {
-						if (!child_groups[tbl]) child_groups[tbl] = { label: __(tbl_meta.label || tbl), rows: [] };
+						if (!child_groups[tbl])
+							child_groups[tbl] = { label: __(tbl_meta.label || tbl), rows: [] };
 						child_groups[tbl].rows.push(`<div class="ev-bi-child-col-row">
 							<span class="ev-bi-cc-src">${esc(h_t)}</span>
 							<span class="ev-bi-cc-arrow">\u2192</span>
@@ -2432,15 +2956,20 @@ frappe.views.excel.ExcelToolbar = class ExcelToolbar {
 				const lbl_m = h_t.match(CHILD_LABEL_RE);
 				if (lbl_m) {
 					const [, lbl, tbl] = lbl_m;
-					const tbl_meta = table_flds_meta.find(f => f.fieldname === tbl);
+					const tbl_meta = table_flds_meta.find((f) => f.fieldname === tbl);
 					if (tbl_meta) {
-						if (!child_groups[tbl]) child_groups[tbl] = { label: __(tbl_meta.label || tbl), rows: [] };
+						if (!child_groups[tbl])
+							child_groups[tbl] = { label: __(tbl_meta.label || tbl), rows: [] };
 						child_groups[tbl].rows.push(`<div class="ev-bi-child-col-row">
 							<span class="ev-bi-cc-src">${esc(h_t)}</span>
 							<span class="ev-bi-cc-arrow">\u2192</span>
 							<span class="ev-bi-cc-fn">${esc(lbl.trim())}</span>
 						</div>`);
-						child_col_cfg.push({ src_idx: i, table_field: tbl, child_field_label: lbl.trim() });
+						child_col_cfg.push({
+							src_idx: i,
+							table_field: tbl,
+							child_field_label: lbl.trim(),
+						});
 						return;
 					}
 				}
@@ -2451,11 +2980,12 @@ frappe.views.excel.ExcelToolbar = class ExcelToolbar {
 				const pre_fn = matched[i] || "";
 				if (!pre_fn) {
 					const fn_norm = h_t.toLowerCase().replace(/[\s\-]+/g, "_");
-					const has_field = usable.some(f =>
-						f.fieldname === fn_norm ||
-						(f.label || "").toLowerCase().replace(/\s+/g, "_") === fn_norm
+					const has_field = usable.some(
+						(f) =>
+							f.fieldname === fn_norm ||
+							(f.label || "").toLowerCase().replace(/\s+/g, "_") === fn_norm
 					);
-					if (!has_field) return;   // no meta match → skip mapper row silently
+					if (!has_field) return; // no meta match → skip mapper row silently
 				}
 				parent_rows_html.push(`<tr class="${pre_fn ? "ev-bi-row--matched" : ""}">
 					<td class="ev-bi-src-col">${esc(h_t)}</td>
@@ -2468,34 +2998,41 @@ frappe.views.excel.ExcelToolbar = class ExcelToolbar {
 			});
 
 			// \u2500\u2500 Child groups HTML \u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500
-			const child_groups_html = Object.entries(child_groups).map(([, grp]) =>
-				`<div class="ev-bi-child-group">
+			const child_groups_html = Object.entries(child_groups)
+				.map(
+					([, grp]) =>
+						`<div class="ev-bi-child-group">
 					<div class="ev-bi-child-grp-hdr">
 						<span class="ev-bi-child-grp-lbl">${esc(grp.label)}</span>
 						<span class="ev-bi-child-grp-cnt">${grp.rows.length}</span>
 					</div>
 					<div class="ev-bi-child-grp-body">${grp.rows.join("")}</div>
 				</div>`
-			).join("");
+				)
+				.join("");
 
 			// \u2500\u2500 Stats \u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500
-			const n_rows    = rows.length;
-			const n_parent  = parent_rows_html.length;
-			const n_auto    = child_col_cfg.length;
+			const n_rows = rows.length;
+			const n_parent = parent_rows_html.length;
+			const n_auto = child_col_cfg.length;
 			const n_matched = matched.filter(Boolean).length;
 
-			const auto_sec_html = child_col_cfg.length ? `
+			const auto_sec_html = child_col_cfg.length
+				? `
 				<div class="ev-bi-auto-section">
 					<div class="ev-bi-auto-sec-hdr">\u2713 ${__("Auto-detected child columns")}</div>
 					${child_groups_html}
-				</div>` : "";
+				</div>`
+				: "";
 
 			// \u2500\u2500 Modal HTML \u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500
 			this.$bi_modal = $(`
 				<div class="ev-bi-backdrop">
 					<div class="ev-bi-modal">
 						<div class="ev-bi-modal-hdr">
-							<span class="ev-bi-title">${__("Import into")} <span class="ev-bi-title-dt">${esc(doctype)}</span></span>
+							<span class="ev-bi-title">${__("Import into")} <span class="ev-bi-title-dt">${esc(
+				doctype
+			)}</span></span>
 							<button class="ev-bi-modal-close" aria-label="${__("Close")}">
 								<svg viewBox="0 0 16 16" fill="currentColor" width="14" height="14"><path d="M4.646 4.646a.5.5 0 0 1 .708 0L8 7.293l2.646-2.647a.5.5 0 0 1 .708.708L8.707 8l2.647 2.646a.5.5 0 0 1-.708.708L8 8.707l-2.646 2.647a.5.5 0 0 1-.708-.708L7.293 8 4.646 5.354a.5.5 0 0 1 0-.708z"/></svg>
 							</button>
@@ -2536,34 +3073,52 @@ frappe.views.excel.ExcelToolbar = class ExcelToolbar {
 			// ── Event bindings ────────────────────────────────────────────────────────
 			this.$bi_modal
 				.on("click", ".ev-bi-modal-close, .ev-bi-cancel-btn", () => {
-					this.$bi_modal?.remove(); this.$bi_modal = null;
+					this.$bi_modal?.remove();
+					this.$bi_modal = null;
 				})
 				.on("click", ".ev-bi-back-btn", () => {
-					this.$bi_modal?.remove(); this.$bi_modal = null;
+					this.$bi_modal?.remove();
+					this.$bi_modal = null;
 					this._gd_import_mode = true;
 					this._gd_open();
 				})
 				.on("click", ".ev-bi-import-btn", () => {
 					const col_map = {};
 					this.$bi_modal.find(".ev-bi-map").each(function () {
-						const fn  = $(this).val();
+						const fn = $(this).val();
 						const idx = parseInt($(this).attr("data-src-idx"));
 						if (fn) col_map[idx] = fn;
 					});
-					const mapped_rows = this._bi_build_records(rows, col_map, child_col_cfg, headers);
+					const mapped_rows = this._bi_build_records(
+						rows,
+						col_map,
+						child_col_cfg,
+						headers
+					);
 					if (!mapped_rows.length) {
-						frappe.show_alert({ message: __("No records found."), indicator: "orange" }, 3);
+						frappe.show_alert(
+							{ message: __("No records found."), indicator: "orange" },
+							3
+						);
 						return;
 					}
 					this.$bi_modal?.remove();
 					this.$bi_modal = null;
-					this._bi_show_dep_graph(mapped_rows, rows, headers, fieldnames, col_map, child_col_cfg);
+					this._bi_show_dep_graph(
+						mapped_rows,
+						rows,
+						headers,
+						fieldnames,
+						col_map,
+						child_col_cfg
+					);
 				});
 
 			// Backdrop click closes
 			this.$bi_modal.on("click.bi", (e) => {
 				if ($(e.target).hasClass("ev-bi-backdrop")) {
-					this.$bi_modal?.remove(); this.$bi_modal = null;
+					this.$bi_modal?.remove();
+					this.$bi_modal = null;
 				}
 			});
 		});
@@ -2576,16 +3131,20 @@ frappe.views.excel.ExcelToolbar = class ExcelToolbar {
 	 * 4-layer: L1 exact fieldnames list \u2192 L2 exact fieldname set \u2192 L3 exact scrubbed label \u2192 L4 bare scrubbed label.
 	 */
 	_bi_match_fields(headers, fieldnames, usable) {
-		const scrub = s => (s || "").toLowerCase().replace(/\s+/g, "_").replace(/[^a-z0-9_]/g, "");
-		const fn_set  = new Set(usable.map(f => f.fieldname));
+		const scrub = (s) =>
+			(s || "")
+				.toLowerCase()
+				.replace(/\s+/g, "_")
+				.replace(/[^a-z0-9_]/g, "");
+		const fn_set = new Set(usable.map((f) => f.fieldname));
 		const lbl_map = {};
-		usable.forEach(f => {
+		usable.forEach((f) => {
 			const lbl = (f.label || f.fieldname || "").toLowerCase();
-			lbl_map[lbl]          = f.fieldname;
+			lbl_map[lbl] = f.fieldname;
 			lbl_map[scrub(f.label || f.fieldname)] = f.fieldname;
 		});
-		const fn_list = new Set((fieldnames || []).map(s => (s || "").toLowerCase()));
-		return headers.map(h => {
+		const fn_list = new Set((fieldnames || []).map((s) => (s || "").toLowerCase()));
+		return headers.map((h) => {
 			const h_lc = (h || "").trim().toLowerCase();
 			const h_sc = scrub(h);
 			// L1: in provided fieldnames list
@@ -2606,15 +3165,28 @@ frappe.views.excel.ExcelToolbar = class ExcelToolbar {
 	 */
 	_bi_build_records(rows, col_map, child_col_cfg, headers) {
 		const mapped_idxs = Object.keys(col_map).map(Number);
-		const child_idxs  = new Set((child_col_cfg || []).map(c => c.src_idx));
-		const is_cont = (row) => mapped_idxs.length > 0 &&
-			mapped_idxs.every(idx => !String(row[idx] ?? "").trim());
+		const child_idxs = new Set((child_col_cfg || []).map((c) => c.src_idx));
+		const is_cont = (row) =>
+			mapped_idxs.length > 0 && mapped_idxs.every((idx) => !String(row[idx] ?? "").trim());
 
 		// Extra columns: not in col_map and not child-table source — folded into record
 		// so the dep-graph backend can find them via meta Link-field scan (e.g. item_group).
 		const extra_idxs = headers
-			? headers.map((h, i) => ({ i, fn: (h || "").trim().toLowerCase().replace(/[\s\-]+/g, "_") }))
-				.filter(({ i, fn }) => fn && !mapped_idxs.includes(i) && !child_idxs.has(i) && !fn.includes("."))
+			? headers
+					.map((h, i) => ({
+						i,
+						fn: (h || "")
+							.trim()
+							.toLowerCase()
+							.replace(/[\s\-]+/g, "_"),
+					}))
+					.filter(
+						({ i, fn }) =>
+							fn &&
+							!mapped_idxs.includes(i) &&
+							!child_idxs.has(i) &&
+							!fn.includes(".")
+					)
 			: [];
 
 		const groups = [];
@@ -2635,9 +3207,9 @@ frappe.views.excel.ExcelToolbar = class ExcelToolbar {
 				if (v && !(fn in obj)) obj[fn] = v;
 			});
 			const by_table = {};
-			[parent, ...cont].forEach(row => {
+			[parent, ...cont].forEach((row) => {
 				const per_table = {};
-				child_col_cfg.forEach(cfg => {
+				child_col_cfg.forEach((cfg) => {
 					const v = String(row[cfg.src_idx] ?? "").trim();
 					if (!v) return;
 					if (!per_table[cfg.table_field]) per_table[cfg.table_field] = {};
@@ -2661,11 +3233,14 @@ frappe.views.excel.ExcelToolbar = class ExcelToolbar {
 	 */
 	_bi_do_import(_headers, rows, col_map, child_col_cfg, $modal) {
 		const doctype = this.board.doctype;
-		const meta    = frappe.get_meta(doctype);
+		const meta = frappe.get_meta(doctype);
 
 		const mapped_rows = this._bi_build_records(rows, col_map, child_col_cfg, _headers);
 		if (!mapped_rows.length) {
-			frappe.show_alert({ message: __("No records found in the file."), indicator: "orange" }, 4);
+			frappe.show_alert(
+				{ message: __("No records found in the file."), indicator: "orange" },
+				4
+			);
 			return;
 		}
 
@@ -2679,7 +3254,9 @@ frappe.views.excel.ExcelToolbar = class ExcelToolbar {
 				mapped_rows,
 				tree_info,
 				$modal,
-				on_done: () => { this.board.list_view?.refresh(); },
+				on_done: () => {
+					this.board.list_view?.refresh();
+				},
 			});
 			engine.run();
 			return;
@@ -2700,7 +3277,7 @@ frappe.views.excel.ExcelToolbar = class ExcelToolbar {
 		// These may contain data useful for dep DocType fields (e.g. "item_group" col B
 		// isn't a BOM field but IS a field on Item → tells us which Item Groups are needed).
 		const mapped_main_idxs = new Set(Object.keys(col_map).map(Number));
-		const child_src_idxs   = new Set((child_col_cfg || []).map(cc => cc.src_idx));
+		const child_src_idxs = new Set((child_col_cfg || []).map((cc) => cc.src_idx));
 		const unmapped_cols = {};
 		// col_pair_data[fn] = {key_header, col_header, pairs:[{key,val}]}
 		// Pairs key=first-mapped-col value, val=unmapped col value — used by View Mapping dialog
@@ -2708,23 +3285,26 @@ frappe.views.excel.ExcelToolbar = class ExcelToolbar {
 		const first_mapped_idx = Math.min(...[...mapped_main_idxs]);
 		headers.forEach((h, i) => {
 			if (mapped_main_idxs.has(i) || child_src_idxs.has(i)) return;
-			const fn = (h || "").trim().toLowerCase().replace(/[\s\-]+/g, "_");
+			const fn = (h || "")
+				.trim()
+				.toLowerCase()
+				.replace(/[\s\-]+/g, "_");
 			if (!fn) return;
-			const with_val = rows.map(r => (r[i] ?? "").toString().trim()).filter(Boolean);
+			const with_val = rows.map((r) => (r[i] ?? "").toString().trim()).filter(Boolean);
 			const unique_vals = [...new Set(with_val)];
 			if (!unique_vals.length) return;
 			unmapped_cols[fn] = { vals: unique_vals, rows_with_value: with_val.length };
 			// Build per-row pairs for View Mapping dialog (key = first mapped col value)
 			const pairs = rows
-				.map(r => ({
+				.map((r) => ({
 					key: (r[first_mapped_idx] ?? "").toString().trim(),
 					val: (r[i] ?? "").toString().trim(),
 				}))
-				.filter(p => p.key);
-			if (pairs.some(p => p.val)) {
+				.filter((p) => p.key);
+			if (pairs.some((p) => p.val)) {
 				col_pair_data[fn] = {
-					key_header : headers[first_mapped_idx] || "Key",
-					col_header : h || fn,
+					key_header: headers[first_mapped_idx] || "Key",
+					col_header: h || fn,
 					pairs,
 				};
 			}
@@ -2736,16 +3316,16 @@ frappe.views.excel.ExcelToolbar = class ExcelToolbar {
 		// Destroyed on Back / Cancel / successful import.
 		if (!this._bi_vs) {
 			this._bi_vs = {
-				mapped_rows  : JSON.parse(JSON.stringify(mapped_rows)),
-				rows         : JSON.parse(JSON.stringify(rows)),
-				headers      : headers ? [...headers] : [],
-				fieldnames   : fieldnames ? [...fieldnames] : [],
-				col_map      : {...col_map},
+				mapped_rows: JSON.parse(JSON.stringify(mapped_rows)),
+				rows: JSON.parse(JSON.stringify(rows)),
+				headers: headers ? [...headers] : [],
+				fieldnames: fieldnames ? [...fieldnames] : [],
+				col_map: { ...col_map },
 				child_col_cfg: child_col_cfg ? JSON.parse(JSON.stringify(child_col_cfg)) : null,
 				unmapped_cols: JSON.parse(JSON.stringify(unmapped_cols)),
 				col_pair_data: JSON.parse(JSON.stringify(col_pair_data)),
-				user_edits   : {},   // {fn: {item_name → value}} — accumulated fix panel edits
-				dt_cache     : {},   // {doctype → [names]}       — autocomplete cache
+				user_edits: {}, // {fn: {item_name → value}} — accumulated fix panel edits
+				dt_cache: {}, // {doctype → [names]}       — autocomplete cache
 			};
 		}
 
@@ -2772,28 +3352,50 @@ frappe.views.excel.ExcelToolbar = class ExcelToolbar {
 		}
 		$loading.remove();
 
-		this._bi_render_dep_graph(graph, mapped_rows, rows, headers, fieldnames, col_map, child_col_cfg, col_pair_data);
+		this._bi_render_dep_graph(
+			graph,
+			mapped_rows,
+			rows,
+			headers,
+			fieldnames,
+			col_map,
+			child_col_cfg,
+			col_pair_data
+		);
 	}
 
 	/**
 	 * Render the dependency graph modal.
 	 */
-	_bi_render_dep_graph(graph, mapped_rows, rows, headers, fieldnames, col_map, child_col_cfg, col_pair_data = {}) {
-		const doctype   = this.board.doctype;
+	_bi_render_dep_graph(
+		graph,
+		mapped_rows,
+		rows,
+		headers,
+		fieldnames,
+		col_map,
+		child_col_cfg,
+		col_pair_data = {}
+	) {
+		const doctype = this.board.doctype;
 		const { nodes, edges } = graph;
 
 		// ── 1. Layout ──────────────────────────────────────────────────────────────
 		// BFS backwards from main node to assign column depth
 		const adj_in = {};
-		nodes.forEach(n => { adj_in[n.id] = []; });
-		edges.forEach(e => { if (adj_in[e.to]) adj_in[e.to].push(e.from); });
+		nodes.forEach((n) => {
+			adj_in[n.id] = [];
+		});
+		edges.forEach((e) => {
+			if (adj_in[e.to]) adj_in[e.to].push(e.from);
+		});
 
-		const col_depth = {};   // node_id → col depth (0 = main/rightmost, increases leftward)
+		const col_depth = {}; // node_id → col depth (0 = main/rightmost, increases leftward)
 		const queue = [doctype];
 		col_depth[doctype] = 0;
 		while (queue.length) {
 			const cur = queue.shift();
-			for (const src of (adj_in[cur] || [])) {
+			for (const src of adj_in[cur] || []) {
 				if (col_depth[src] === undefined) {
 					col_depth[src] = col_depth[cur] + 1;
 					queue.push(src);
@@ -2802,30 +3404,34 @@ frappe.views.excel.ExcelToolbar = class ExcelToolbar {
 		}
 
 		const max_depth = Math.max(...Object.values(col_depth), 0);
-		nodes.forEach(n => {
+		nodes.forEach((n) => {
 			// display col: 0=leftmost dep, max_depth=main
 			n._col = max_depth - (col_depth[n.id] ?? 0);
 		});
 
 		// Group by display column
 		const by_col = {};
-		nodes.forEach(n => {
+		nodes.forEach((n) => {
 			if (!by_col[n._col]) by_col[n._col] = [];
 			by_col[n._col].push(n);
 		});
 
 		// ── 2. Pixel positions ─────────────────────────────────────────────────────
-		const NW = 210, NH = 82, COL_GAP = 88, ROW_GAP = 14, PAD = 32;
-		const num_cols  = max_depth + 1;
-		const max_rows  = Math.max(...Object.values(by_col).map(a => a.length));
-		const canvas_w  = PAD * 2 + num_cols * NW + (num_cols - 1) * COL_GAP;
-		const canvas_h  = PAD * 2 + max_rows * NH + Math.max(0, max_rows - 1) * ROW_GAP;
+		const NW = 210,
+			NH = 82,
+			COL_GAP = 88,
+			ROW_GAP = 14,
+			PAD = 32;
+		const num_cols = max_depth + 1;
+		const max_rows = Math.max(...Object.values(by_col).map((a) => a.length));
+		const canvas_w = PAD * 2 + num_cols * NW + (num_cols - 1) * COL_GAP;
+		const canvas_h = PAD * 2 + max_rows * NH + Math.max(0, max_rows - 1) * ROW_GAP;
 
 		Object.entries(by_col).forEach(([col_s, col_nodes]) => {
 			const col = parseInt(col_s);
-			const cx  = PAD + col * (NW + COL_GAP);
+			const cx = PAD + col * (NW + COL_GAP);
 			const total_h = col_nodes.length * NH + Math.max(0, col_nodes.length - 1) * ROW_GAP;
-			const sy  = PAD + (canvas_h - PAD * 2 - total_h) / 2;
+			const sy = PAD + (canvas_h - PAD * 2 - total_h) / 2;
 			col_nodes.forEach((n, i) => {
 				n._x = cx;
 				n._y = sy + i * (NH + ROW_GAP);
@@ -2837,32 +3443,41 @@ frappe.views.excel.ExcelToolbar = class ExcelToolbar {
 
 		// DocType → SVG path (Heroicons outline, viewBox 0 0 24 24)
 		const _DT_PATHS = {
-			"BOM"         : "M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z",
-			"Item"        : "M20 7l-8-4-8 4m16 0l-8 4m8-4v10l-8 4m0-10L4 7m8 4v10M4 7v10l8 4",
-			"Item Group"  : "M3 7v10a2 2 0 002 2h14a2 2 0 002-2V9a2 2 0 00-2-2h-6l-2-2H5a2 2 0 00-2 2z",
-			"UOM"         : "M3 6l3 1m0 0l-3 9a5.002 5.002 0 006.001 0M6 7l3 9M6 7l6-2m6 2l3-1m-3 1l-3 9a5.002 5.002 0 006.001 0M18 7l3 9m-3-9l-6-2m0-2v2m0 16V5m0 16H9m3 0h3",
-			"Company"     : "M19 21V5a2 2 0 00-2-2H7a2 2 0 00-2 2v16m14 0h2m-2 0H5m14 0H5m-2 0h2M9 7h1m-1 4h1m4-4h1m-1 4h1m-5 10v-5a1 1 0 011-1h2a1 1 0 011 1v5m-4 0h4",
-			"Operation"   : "M10.325 4.317c.426-1.756 2.924-1.756 3.35 0a1.724 1.724 0 002.573 1.066c1.543-.94 3.31.826 2.37 2.37a1.724 1.724 0 001.065 2.572c1.756.426 1.756 2.924 0 3.35a1.724 1.724 0 00-1.066 2.573c.94 1.543-.826 3.31-2.37 2.37a1.724 1.724 0 00-2.572 1.065c-.426 1.756-2.924 1.756-3.35 0a1.724 1.724 0 00-2.573-1.066c-1.543.94-3.31-.826-2.37-2.37a1.724 1.724 0 00-1.065-2.572c-1.756-.426-1.756-2.924 0-3.35a1.724 1.724 0 001.066-2.573c-.94-1.543.826-3.31 2.37-2.37.996.608 2.296.07 2.572-1.065zM15 12a3 3 0 11-6 0 3 3 0 016 0z",
-			"Workstation" : "M9.75 17L9 20l-1 1h8l-1-1-.75-3M3 13h18M5 17h14a2 2 0 002-2V5a2 2 0 00-2-2H5a2 2 0 00-2 2v10a2 2 0 002 2z",
-			"Routing"     : "M9 20l-5.447-2.724A1 1 0 013 16.382V5.618a1 1 0 011.447-.894L9 7m0 13l6-3m-6 3V7m6 10l4.553 2.276A1 1 0 0021 18.382V7.618a1 1 0 00-.553-.894L15 4m0 13V4m0 0L9 7",
-			"Currency"    : "M12 8c-1.657 0-3 .895-3 2s1.343 2 3 2 3 .895 3 2-1.343 2-3 2m0-8c1.11 0 2.08.402 2.599 1M12 8V7m0 1v8m0 0v1m0-1c-1.11 0-2.08-.402-2.599-1M21 12a9 9 0 11-18 0 9 9 0 0118 0z",
-			"Warehouse"   : "M8 14v3m4-3v3m4-3v3M3 21h18M3 10h18M3 7l9-4 9 4M4 10h16v11H4V10z",
-			"Customer"    : "M17 20h5v-2a3 3 0 00-5.356-1.857M17 20H7m10 0v-2c0-.656-.126-1.283-.356-1.857M7 20H2v-2a3 3 0 015.356-1.857M7 20v-2c0-.656.126-1.283.356-1.857m0 0a5.002 5.002 0 019.288 0",
-			"Supplier"    : "M21 13.255A23.931 23.931 0 0112 15c-3.183 0-6.22-.62-9-1.745M16 6V4a2 2 0 00-2-2h-4a2 2 0 00-2 2v2m4 6h.01M5 20h14a2 2 0 002-2V8a2 2 0 00-2-2H5a2 2 0 00-2 2v10a2 2 0 002 2z",
+			BOM: "M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z",
+			Item: "M20 7l-8-4-8 4m16 0l-8 4m8-4v10l-8 4m0-10L4 7m8 4v10M4 7v10l8 4",
+			"Item Group":
+				"M3 7v10a2 2 0 002 2h14a2 2 0 002-2V9a2 2 0 00-2-2h-6l-2-2H5a2 2 0 00-2 2z",
+			UOM: "M3 6l3 1m0 0l-3 9a5.002 5.002 0 006.001 0M6 7l3 9M6 7l6-2m6 2l3-1m-3 1l-3 9a5.002 5.002 0 006.001 0M18 7l3 9m-3-9l-6-2m0-2v2m0 16V5m0 16H9m3 0h3",
+			Company:
+				"M19 21V5a2 2 0 00-2-2H7a2 2 0 00-2 2v16m14 0h2m-2 0H5m14 0H5m-2 0h2M9 7h1m-1 4h1m4-4h1m-1 4h1m-5 10v-5a1 1 0 011-1h2a1 1 0 011 1v5m-4 0h4",
+			Operation:
+				"M10.325 4.317c.426-1.756 2.924-1.756 3.35 0a1.724 1.724 0 002.573 1.066c1.543-.94 3.31.826 2.37 2.37a1.724 1.724 0 001.065 2.572c1.756.426 1.756 2.924 0 3.35a1.724 1.724 0 00-1.066 2.573c.94 1.543-.826 3.31-2.37 2.37a1.724 1.724 0 00-2.572 1.065c-.426 1.756-2.924 1.756-3.35 0a1.724 1.724 0 00-2.573-1.066c-1.543.94-3.31-.826-2.37-2.37a1.724 1.724 0 00-1.065-2.572c-1.756-.426-1.756-2.924 0-3.35a1.724 1.724 0 001.066-2.573c-.94-1.543.826-3.31 2.37-2.37.996.608 2.296.07 2.572-1.065zM15 12a3 3 0 11-6 0 3 3 0 016 0z",
+			Workstation:
+				"M9.75 17L9 20l-1 1h8l-1-1-.75-3M3 13h18M5 17h14a2 2 0 002-2V5a2 2 0 00-2-2H5a2 2 0 00-2 2v10a2 2 0 002 2z",
+			Routing:
+				"M9 20l-5.447-2.724A1 1 0 013 16.382V5.618a1 1 0 011.447-.894L9 7m0 13l6-3m-6 3V7m6 10l4.553 2.276A1 1 0 0021 18.382V7.618a1 1 0 00-.553-.894L15 4m0 13V4m0 0L9 7",
+			Currency:
+				"M12 8c-1.657 0-3 .895-3 2s1.343 2 3 2 3 .895 3 2-1.343 2-3 2m0-8c1.11 0 2.08.402 2.599 1M12 8V7m0 1v8m0 0v1m0-1c-1.11 0-2.08-.402-2.599-1M21 12a9 9 0 11-18 0 9 9 0 0118 0z",
+			Warehouse: "M8 14v3m4-3v3m4-3v3M3 21h18M3 10h18M3 7l9-4 9 4M4 10h16v11H4V10z",
+			Customer:
+				"M17 20h5v-2a3 3 0 00-5.356-1.857M17 20H7m10 0v-2c0-.656-.126-1.283-.356-1.857M7 20H2v-2a3 3 0 015.356-1.857M7 20v-2c0-.656.126-1.283.356-1.857m0 0a5.002 5.002 0 019.288 0",
+			Supplier:
+				"M21 13.255A23.931 23.931 0 0112 15c-3.183 0-6.22-.62-9-1.745M16 6V4a2 2 0 00-2-2h-4a2 2 0 00-2 2v2m4 6h.01M5 20h14a2 2 0 002-2V8a2 2 0 00-2-2H5a2 2 0 00-2 2v10a2 2 0 002 2z",
 		};
-		const _DEFAULT_PATH = "M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z";
+		const _DEFAULT_PATH =
+			"M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z";
 
 		const _status_class = (n) => {
-			if (n.type === "main")    return "ev-dg-node--main";
-			if (n.total === 0)        return "ev-dg-node--structural";
-			if (n.to_create === 0)    return "ev-dg-node--ok";
-			if (n.existing > 0)       return "ev-dg-node--partial";
+			if (n.type === "main") return "ev-dg-node--main";
+			if (n.total === 0) return "ev-dg-node--structural";
+			if (n.to_create === 0) return "ev-dg-node--ok";
+			if (n.existing > 0) return "ev-dg-node--partial";
 			return "ev-dg-node--create";
 		};
 
 		const _icon_html = (n) => {
-			const sc  = _status_class(n);
-			const d   = _DT_PATHS[n.id] || _DEFAULT_PATH;
+			const sc = _status_class(n);
+			const d = _DT_PATHS[n.id] || _DEFAULT_PATH;
 			return `<div class="ev-dg-icon ${sc}">
 				<svg viewBox="0 0 24 24" width="15" height="15" fill="none"
 				     stroke="currentColor" stroke-width="1.75"
@@ -2876,32 +3491,48 @@ frappe.views.excel.ExcelToolbar = class ExcelToolbar {
 			if (n.type === "main")
 				return `<div class="ev-dg-stat">${n.total} ${__("records to import")}</div>`;
 			if (n.total === 0)
-				return `<div class="ev-dg-stat ev-dg-stat--structural">${__("Prerequisite")}</div>`;
+				return `<div class="ev-dg-stat ev-dg-stat--structural">${__(
+					"Prerequisite"
+				)}</div>`;
 			const parts = [];
-			if (n.existing)  parts.push(`<span class="ev-dg-ok">\u2713 ${n.existing}</span>`);
+			if (n.existing) parts.push(`<span class="ev-dg-ok">\u2713 ${n.existing}</span>`);
 			if (n.to_create) parts.push(`<span class="ev-dg-cr">+ ${n.to_create}</span>`);
 			// Incomplete nodes (unmapped col, coverage < 100%): show fraction covered
 			if (n.incomplete && n.coverage_have != null) {
-				parts.push(`<span class="ev-dg-cov">${n.coverage_have}/${n.coverage_total} ${__("covered")}</span>`);
+				parts.push(
+					`<span class="ev-dg-cov">${n.coverage_have}/${n.coverage_total} ${__(
+						"covered"
+					)}</span>`
+				);
 			}
-			let stat_html = `<div class="ev-dg-stat">${parts.join(" &nbsp;")} ${__("records")}</div>`;
+			let stat_html = `<div class="ev-dg-stat">${parts.join(" &nbsp;")} ${__(
+				"records"
+			)}</div>`;
 			// Show which CSV column was assumed as the source (e.g. "via \"item_group\" col")
 			if (n.source_col) {
-				stat_html += `<div class="ev-dg-via">${__("via")} <code>${esc(n.source_col)}</code> ${__("col")}</div>`;
+				stat_html += `<div class="ev-dg-via">${__("via")} <code>${esc(
+					n.source_col
+				)}</code> ${__("col")}</div>`;
 			}
 			return stat_html;
 		};
 
-		const nodes_html = nodes.map(n => {
-			const extra_cls    = n.incomplete ? " ev-dg-node--incomplete" : "";
-			const data_src_col = n.source_col ? ` data-source-col="${esc(n.source_col)}"` : "";
-			const footer_html  = n.incomplete ? `
+		const nodes_html = nodes
+			.map((n) => {
+				const extra_cls = n.incomplete ? " ev-dg-node--incomplete" : "";
+				const data_src_col = n.source_col ? ` data-source-col="${esc(n.source_col)}"` : "";
+				const footer_html = n.incomplete
+					? `
 				<div class="ev-dg-node-footer">
-					${col_pair_data[n.source_col]
-						? `<button class="ev-dg-map-btn">${__("View Mapping")}</button>` : ""}
+					${
+						col_pair_data[n.source_col]
+							? `<button class="ev-dg-map-btn">${__("View Mapping")}</button>`
+							: ""
+					}
 					<button class="ev-dg-fix-btn">${__("Fix")} →</button>
-				</div>` : "";
-			return `
+				</div>`
+					: "";
+				return `
 			<div class="ev-dg-node ${_status_class(n)}${extra_cls}"
 			     style="left:${n._x}px;top:${n._y}px;width:${NW}px;"
 			     data-id="${esc(n.id)}" title="${esc(n.id)}"${data_src_col}>
@@ -2915,26 +3546,29 @@ frappe.views.excel.ExcelToolbar = class ExcelToolbar {
 				</div>
 				${footer_html}
 			</div>`;
-		}).join("");
+			})
+			.join("");
 
 		// ── 4. SVG edges ──────────────────────────────────────────────────────────
 		const node_map = {};
-		nodes.forEach(n => { node_map[n.id] = n; });
+		nodes.forEach((n) => {
+			node_map[n.id] = n;
+		});
 
 		// Memoised DFS: is this dep chain blocked by missing/incomplete data?
 		// GREEN = dep data is complete all the way up the chain (even if records need creating)
 		// RED   = dep data is missing or incomplete for some references (cascade from upstream)
 		// Uses a _visiting set to safely handle any graph cycles (no stack overflow).
 		const _blocked_cache = {};
-		const _visiting      = new Set();
+		const _visiting = new Set();
 		const _is_blocked = (nid) => {
 			if (nid in _blocked_cache) return _blocked_cache[nid];
-			if (_visiting.has(nid))    return (_blocked_cache[nid] = false); // cycle → treat as unblocked
+			if (_visiting.has(nid)) return (_blocked_cache[nid] = false); // cycle → treat as unblocked
 			const n = node_map[nid];
 			if (!n || n.total === 0) return (_blocked_cache[nid] = false);
-			if (n.incomplete)        return (_blocked_cache[nid] = true);
+			if (n.incomplete) return (_blocked_cache[nid] = true);
 			_visiting.add(nid);
-			const blocked = edges.filter(e => e.to === nid).some(e => _is_blocked(e.from));
+			const blocked = edges.filter((e) => e.to === nid).some((e) => _is_blocked(e.from));
 			_visiting.delete(nid);
 			return (_blocked_cache[nid] = blocked);
 		};
@@ -2942,32 +3576,48 @@ frappe.views.excel.ExcelToolbar = class ExcelToolbar {
 		// Per-edge: {color, dash, marker_id}
 		const _edge_style = (e) => {
 			const src = node_map[e.from];
-			if (!src || src.total === 0) return { color: "#94a3b8", dash: "5,3", mid: "ev-dg-arr-gray" };
-			if (_is_blocked(e.from))     return { color: "#ef4444", dash: "none", mid: "ev-dg-arr-red" };
-			return                               { color: "#22c55e", dash: "none", mid: "ev-dg-arr-grn" };
+			if (!src || src.total === 0)
+				return { color: "#94a3b8", dash: "5,3", mid: "ev-dg-arr-gray" };
+			if (_is_blocked(e.from))
+				return { color: "#ef4444", dash: "none", mid: "ev-dg-arr-red" };
+			return { color: "#22c55e", dash: "none", mid: "ev-dg-arr-grn" };
 		};
 
-		const paths_html = edges.map(e => {
-			const src = node_map[e.from];
-			const tgt = node_map[e.to];
-			if (!src || !tgt) return "";
-			const x1 = src._x + NW, y1 = src._y + NH / 2;
-			const x2 = tgt._x - 2,  y2 = tgt._y + NH / 2;
-			const cx  = (x1 + x2) / 2;
-			const { color, dash, mid } = _edge_style(e);
-			return `<path fill="none" stroke="${color}" stroke-width="1.5"
+		const paths_html = edges
+			.map((e) => {
+				const src = node_map[e.from];
+				const tgt = node_map[e.to];
+				if (!src || !tgt) return "";
+				const x1 = src._x + NW,
+					y1 = src._y + NH / 2;
+				const x2 = tgt._x - 2,
+					y2 = tgt._y + NH / 2;
+				const cx = (x1 + x2) / 2;
+				const { color, dash, mid } = _edge_style(e);
+				return `<path fill="none" stroke="${color}" stroke-width="1.5"
 			              stroke-dasharray="${dash}" marker-end="url(#${mid})"
 			              d="M${x1},${y1} C${cx},${y1} ${cx},${y2} ${x2},${y2}"/>`;
-		}).join("");
+			})
+			.join("");
 
 		// ── 5. Legend ──────────────────────────────────────────────────────────────
 		const legend_html = `
 			<div class="ev-dg-legend">
-				<span class="ev-dg-legend-item"><span class="ev-dg-dot ev-dg-node--ok"></span>${__("All exist in DB")}</span>
-				<span class="ev-dg-legend-item"><span class="ev-dg-dot ev-dg-node--partial"></span>${__("Some to create")}</span>
-				<span class="ev-dg-legend-item"><span class="ev-dg-dot ev-dg-node--create"></span>${__("Will be created")}</span>
-				<span class="ev-dg-legend-item"><span class="ev-dg-legend-line ev-dg-legend-line--green"></span>${__("Data complete")}</span>
-				<span class="ev-dg-legend-item"><span class="ev-dg-legend-line ev-dg-legend-line--red"></span>${__("Data missing")}</span>
+				<span class="ev-dg-legend-item"><span class="ev-dg-dot ev-dg-node--ok"></span>${__(
+					"All exist in DB"
+				)}</span>
+				<span class="ev-dg-legend-item"><span class="ev-dg-dot ev-dg-node--partial"></span>${__(
+					"Some to create"
+				)}</span>
+				<span class="ev-dg-legend-item"><span class="ev-dg-dot ev-dg-node--create"></span>${__(
+					"Will be created"
+				)}</span>
+				<span class="ev-dg-legend-item"><span class="ev-dg-legend-line ev-dg-legend-line--green"></span>${__(
+					"Data complete"
+				)}</span>
+				<span class="ev-dg-legend-item"><span class="ev-dg-legend-line ev-dg-legend-line--red"></span>${__(
+					"Data missing"
+				)}</span>
 			</div>
 		`;
 
@@ -2976,7 +3626,9 @@ frappe.views.excel.ExcelToolbar = class ExcelToolbar {
 			<div class="ev-bi-backdrop">
 				<div class="ev-dg-modal">
 					<div class="ev-bi-modal-hdr">
-						<span class="ev-bi-title">${__("Import into")} <span class="ev-bi-title-dt">${esc(doctype)}</span> <span class="ev-dg-step-badge">${__("Step 2 — Dependency Review")}</span></span>
+						<span class="ev-bi-title">${__("Import into")} <span class="ev-bi-title-dt">${esc(
+			doctype
+		)}</span> <span class="ev-dg-step-badge">${__("Step 2 — Dependency Review")}</span></span>
 						<button class="ev-bi-modal-close ev-dg-close-btn" aria-label="${__("Close")}">
 							<svg viewBox="0 0 16 16" fill="currentColor" width="14" height="14"><path d="M4.646 4.646a.5.5 0 0 1 .708 0L8 7.293l2.646-2.647a.5.5 0 0 1 .708.708L8.707 8l2.647 2.646a.5.5 0 0 1-.708.708L8 8.707l-2.646 2.647a.5.5 0 0 1-.708-.708L7.293 8 4.646 5.354a.5.5 0 0 1 0-.708z"/></svg>
 						</button>
@@ -3008,7 +3660,9 @@ frappe.views.excel.ExcelToolbar = class ExcelToolbar {
 								${__("Back")}
 							</button>
 							<button class="btn btn-sm btn-default ev-dg-cancel-btn">${__("Cancel")}</button>
-			<button class="btn btn-sm btn-primary ev-dg-import-btn">${__("Import")} ${mapped_rows.length} ${__("records")}</button>
+			<button class="btn btn-sm btn-primary ev-dg-import-btn">${__("Import")} ${mapped_rows.length} ${__(
+			"records"
+		)}</button>
 						</div>
 					</div>
 				</div>
@@ -3017,49 +3671,62 @@ frappe.views.excel.ExcelToolbar = class ExcelToolbar {
 
 		this.$bi_dg_modal
 			.on("click", ".ev-bi-modal-close, .ev-dg-cancel-btn", () => {
-				this.$bi_dg_modal?.remove(); this.$bi_dg_modal = null;
-				this._bi_vs = null;   // destroy virtual state
+				this.$bi_dg_modal?.remove();
+				this.$bi_dg_modal = null;
+				this._bi_vs = null; // destroy virtual state
 			})
 			.on("click", ".ev-dg-back-btn", () => {
-				this.$bi_dg_modal?.remove(); this.$bi_dg_modal = null;
-				this._bi_vs = null;   // destroy virtual state — user re-maps from scratch
+				this.$bi_dg_modal?.remove();
+				this.$bi_dg_modal = null;
+				this._bi_vs = null; // destroy virtual state — user re-maps from scratch
 				this._open_bulk_import_mapper(headers, rows, fieldnames);
 			})
 			.on("click", ".ev-dg-import-btn", async () => {
-				const _vs            = this._bi_vs;
-				const _rows          = _vs?.rows          || rows;
-				const _col_map       = _vs?.col_map       || col_map;
+				const _vs = this._bi_vs;
+				const _rows = _vs?.rows || rows;
+				const _col_map = _vs?.col_map || col_map;
 				const _child_col_cfg = _vs?.child_col_cfg ?? child_col_cfg;
-				const _mapped_rows   = this._bi_build_records(_rows, _col_map, _child_col_cfg, _vs?.headers);
+				const _mapped_rows = this._bi_build_records(
+					_rows,
+					_col_map,
+					_child_col_cfg,
+					_vs?.headers
+				);
 				if (!_mapped_rows.length) return;
 
 				// Lock UI
 				const $modal = this.$bi_dg_modal;
-				$modal.find(".ev-dg-import-btn, .ev-dg-back-btn, .ev-dg-cancel-btn, .ev-bi-modal-close")
-				      .prop("disabled", true).css("opacity", .45);
+				$modal
+					.find(
+						".ev-dg-import-btn, .ev-dg-back-btn, .ev-dg-cancel-btn, .ev-bi-modal-close"
+					)
+					.prop("disabled", true)
+					.css("opacity", 0.45);
 				$modal.find(".ev-dg-import-btn").text(__("Creating deps…"));
 
 				const job_id = `ev_imp_${Date.now()}`;
 
 				// Per-node progress updater — each node tracks its own done/total
-				const _node_prog = {};  // {node_id: {done, total}}
-				nodes.forEach(n => { _node_prog[n.id] = { done: 0, total: n.to_create || 0 }; });
+				const _node_prog = {}; // {node_id: {done, total}}
+				nodes.forEach((n) => {
+					_node_prog[n.id] = { done: 0, total: n.to_create || 0 };
+				});
 				_node_prog[doctype] = { done: 0, total: _mapped_rows.length };
 
 				const _update_node = (node_id, done, total) => {
 					_node_prog[node_id] = { done, total };
-					const $n  = $modal.find(`.ev-dg-node[data-id="${node_id}"]`);
-					const pct = total ? Math.round(done / total * 100) : (done > 0 ? 100 : 0);
+					const $n = $modal.find(`.ev-dg-node[data-id="${node_id}"]`);
+					const pct = total ? Math.round((done / total) * 100) : done > 0 ? 100 : 0;
 					$n.find(".ev-dg-node-prog-fill").css("width", pct + "%");
 					$n.find(".ev-dg-stat").text(
-						node_id === doctype
-							? `${done} / ${total}`
-							: `✓ ${done} / ${total}`
+						node_id === doctype ? `${done} / ${total}` : `✓ ${done} / ${total}`
 					);
 					if (pct >= 100 && !$n.hasClass("ev-dg-node--import-done")) {
 						$n.addClass("ev-dg-node--import-done");
 						if (!$n.find(".ev-dg-check").length)
-							$n.find(".ev-dg-node-row").append('<span class="ev-dg-check">✓</span>');
+							$n.find(".ev-dg-node-row").append(
+								'<span class="ev-dg-check">✓</span>'
+							);
 					}
 				};
 
@@ -3069,46 +3736,86 @@ frappe.views.excel.ExcelToolbar = class ExcelToolbar {
 					if (!errors.length) {
 						_update_node(doctype, main_done, main_done);
 						// Show success banner; keep Import button disabled
-						$modal.find(".ev-dg-import-btn").prop("disabled", true).text(__("Import complete"));
+						$modal
+							.find(".ev-dg-import-btn")
+							.prop("disabled", true)
+							.text(__("Import complete"));
 						if (!$modal.find(".ev-dg-success-banner").length) {
-							$modal.find(".ev-dg-footer").prepend(
-								`<div class="ev-dg-success-banner">✓ ${main_done} ${__("records imported successfully")}</div>`
-							);
+							$modal
+								.find(".ev-dg-footer")
+								.prepend(
+									`<div class="ev-dg-success-banner">✓ ${main_done} ${__(
+										"records imported successfully"
+									)}</div>`
+								);
 						}
 						setTimeout(() => {
-							$modal.remove(); this.$bi_dg_modal = null;
-							frappe.show_alert({ message: `${main_done} ${__("records created successfully")}`, indicator: "green" }, 4);
+							$modal.remove();
+							this.$bi_dg_modal = null;
+							frappe.show_alert(
+								{
+									message: `${main_done} ${__("records created successfully")}`,
+									indicator: "green",
+								},
+								4
+							);
 							this.board.list_view?.refresh();
 						}, 2500);
 					} else {
-						$modal.find(`.ev-dg-node[data-id="${doctype}"]`).addClass("ev-dg-node--import-error");
-						$modal.find(".ev-dg-import-btn").prop("disabled", false).css("opacity", 1).text(__("Import") + " " + _mapped_rows.length + " " + __("records"));
-						$modal.find(".ev-dg-cancel-btn, .ev-bi-modal-close").prop("disabled", false).css("opacity", 1);
-						const errs = errors.map(e => `${esc(e.doctype || e.name || "")}: ${esc(e.error || "")}`).join("\n");
-						frappe.msgprint({ title: __("Import errors"), message: `<pre style="font-size:11px">${errs}</pre>`, indicator: "red" });
+						$modal
+							.find(`.ev-dg-node[data-id="${doctype}"]`)
+							.addClass("ev-dg-node--import-error");
+						$modal
+							.find(".ev-dg-import-btn")
+							.prop("disabled", false)
+							.css("opacity", 1)
+							.text(__("Import") + " " + _mapped_rows.length + " " + __("records"));
+						$modal
+							.find(".ev-dg-cancel-btn, .ev-bi-modal-close")
+							.prop("disabled", false)
+							.css("opacity", 1);
+						const errs = errors
+							.map((e) => `${esc(e.doctype || e.name || "")}: ${esc(e.error || "")}`)
+							.join("\n");
+						frappe.msgprint({
+							title: __("Import errors"),
+							message: `<pre style="font-size:11px">${errs}</pre>`,
+							indicator: "red",
+						});
 					}
 				};
 
 				// ── Step 1: Pre-create all dep records ──────────────────────────────
-				const dep_nodes = nodes.filter(n => n.type !== "main" && (n.to_create || 0) > 0);
+				const dep_nodes = nodes.filter((n) => n.type !== "main" && (n.to_create || 0) > 0);
 				if (dep_nodes.length) {
 					// Track per-dep-node progress from ev_dep_progress events
 					const dep_done = {};
-					dep_nodes.forEach(n => { dep_done[n.id] = 0; });
+					dep_nodes.forEach((n) => {
+						dep_done[n.id] = 0;
+					});
 
 					// Counter-based completion: wait until all expected events received or timeout
-					const dep_total_expected = dep_nodes.reduce((s, n) => s + (n.to_create || 0), 0);
+					const dep_total_expected = dep_nodes.reduce(
+						(s, n) => s + (n.to_create || 0),
+						0
+					);
 					let dep_received = 0;
 					let _dep_resolve = null;
-					const dep_done_promise = new Promise(r => { _dep_resolve = r; });
+					const dep_done_promise = new Promise((r) => {
+						_dep_resolve = r;
+					});
 
 					frappe.realtime.on("ev_dep_progress", (data) => {
 						if (data.job_id !== job_id) return;
 						if (data.status === "ok") {
 							dep_received++;
 							dep_done[data.doctype] = (dep_done[data.doctype] || 0) + 1;
-							const nd = nodes.find(n => n.id === data.doctype);
-							_update_node(data.doctype, dep_done[data.doctype], nd?.to_create || data.total || 1);
+							const nd = nodes.find((n) => n.id === data.doctype);
+							_update_node(
+								data.doctype,
+								dep_done[data.doctype],
+								nd?.to_create || data.total || 1
+							);
 							if (dep_received >= dep_total_expected) _dep_resolve?.();
 						}
 					});
@@ -3116,15 +3823,15 @@ frappe.views.excel.ExcelToolbar = class ExcelToolbar {
 					// Build per-record attribute hints from CSV data (stock_uom per item, etc.)
 					const _dep_attrs = {};
 					const _child_cfg = _vs?.child_col_cfg;
-					const _vs_rows   = _vs?.rows || [];
+					const _vs_rows = _vs?.rows || [];
 					if (_child_cfg) {
 						for (const [, col_map] of Object.entries(_child_cfg)) {
-							const ic_col  = col_map["item_code"];
+							const ic_col = col_map["item_code"];
 							const uom_col = col_map["uom"];
 							if (ic_col === undefined || uom_col === undefined) continue;
 							_dep_attrs["Item"] = _dep_attrs["Item"] || {};
-							_vs_rows.forEach(r => {
-								const ic  = (r[ic_col]  || "").trim();
+							_vs_rows.forEach((r) => {
+								const ic = (r[ic_col] || "").trim();
 								const uom = (r[uom_col] || "").trim();
 								if (ic && uom && !_dep_attrs["Item"][ic]) {
 									_dep_attrs["Item"][ic] = { stock_uom: uom };
@@ -3136,34 +3843,47 @@ frappe.views.excel.ExcelToolbar = class ExcelToolbar {
 					const _ig_map = _vs?.user_edits?.["item_group"] || {};
 					Object.entries(_ig_map).forEach(([ic, ig]) => {
 						_dep_attrs["Item"] = _dep_attrs["Item"] || {};
-						_dep_attrs["Item"][ic] = { ...(_dep_attrs["Item"][ic] || {}), item_group: ig };
+						_dep_attrs["Item"][ic] = {
+							...(_dep_attrs["Item"][ic] || {}),
+							item_group: ig,
+						};
 					});
 
 					// Build per-Routing operations from CSV rows
 					// The dep graph shows Operation→Routing→BOM; Routing must be created WITH operations
 					const _routing_col = _vs?.col_map?.["routing"];
-					const _item_col    = _vs?.col_map?.["item"];
+					const _item_col = _vs?.col_map?.["item"];
 					if (_child_cfg && _routing_col !== undefined && _item_col !== undefined) {
 						// Find the child table key that has operation/workstation/time_in_mins
 						for (const [, op_map] of Object.entries(_child_cfg)) {
-							const op_col  = op_map["operation"];
-							const ws_col  = op_map["workstation"];
-							const tm_col  = op_map["time_in_mins"];
+							const op_col = op_map["operation"];
+							const ws_col = op_map["workstation"];
+							const tm_col = op_map["time_in_mins"];
 							if (op_col === undefined) continue;
 							let cur_routing = null;
-							_vs_rows.forEach(r => {
+							_vs_rows.forEach((r) => {
 								const item = (r[_item_col] || "").trim();
 								if (item) cur_routing = (r[_routing_col] || "").trim() || null;
 								if (!cur_routing) return;
-								const op = (r[op_col]  || "").trim();
+								const op = (r[op_col] || "").trim();
 								const ws = ws_col !== undefined ? (r[ws_col] || "").trim() : "";
 								const tm = tm_col !== undefined ? parseFloat(r[tm_col]) || 0 : 0;
 								if (!op) return;
 								_dep_attrs["Routing"] = _dep_attrs["Routing"] || {};
-								_dep_attrs["Routing"][cur_routing] = _dep_attrs["Routing"][cur_routing] || { operations: [] };
+								_dep_attrs["Routing"][cur_routing] = _dep_attrs["Routing"][
+									cur_routing
+								] || { operations: [] };
 								const already = _dep_attrs["Routing"][cur_routing].operations;
-								if (!already.some(x => x.operation === op && x.workstation === ws)) {
-									already.push({ operation: op, workstation: ws, time_in_mins: tm });
+								if (
+									!already.some(
+										(x) => x.operation === op && x.workstation === ws
+									)
+								) {
+									already.push({
+										operation: op,
+										workstation: ws,
+										time_in_mins: tm,
+									});
 								}
 							});
 							break; // only process first matching child table
@@ -3171,22 +3891,28 @@ frappe.views.excel.ExcelToolbar = class ExcelToolbar {
 					}
 
 					try {
-						const dep_result = await frappe.xcall("excel_view.tree_import.pre_create_deps", {
-							doctype,
-							nodes_json      : JSON.stringify(nodes),
-							edges_json      : JSON.stringify(graph.edges || []),
-							user_edits_json : JSON.stringify(_vs?.user_edits || {}),
-							dep_attrs_json  : JSON.stringify(_dep_attrs),
-							job_id,
-						});
+						const dep_result = await frappe.xcall(
+							"excel_view.tree_import.pre_create_deps",
+							{
+								doctype,
+								nodes_json: JSON.stringify(nodes),
+								edges_json: JSON.stringify(graph.edges || []),
+								user_edits_json: JSON.stringify(_vs?.user_edits || {}),
+								dep_attrs_json: JSON.stringify(_dep_attrs),
+								job_id,
+							}
+						);
 						// Wait for all expected events (or 8s safety timeout) before removing handler
-						await Promise.race([dep_done_promise, new Promise(r => setTimeout(r, 8000))]);
+						await Promise.race([
+							dep_done_promise,
+							new Promise((r) => setTimeout(r, 8000)),
+						]);
 						frappe.realtime.off("ev_dep_progress");
 						if (dep_result.errors?.length) {
 							_finish_all(0, dep_result.errors);
 							return;
 						}
-					} catch(err) {
+					} catch (err) {
 						frappe.realtime.off("ev_dep_progress");
 						_finish_all(0, [{ doctype: "deps", error: String(err) }]);
 						return;
@@ -3200,7 +3926,9 @@ frappe.views.excel.ExcelToolbar = class ExcelToolbar {
 
 				if (tree_info.pattern) {
 					let _tree_resolve = null;
-					const tree_done_promise = new Promise(r => { _tree_resolve = r; });
+					const tree_done_promise = new Promise((r) => {
+						_tree_resolve = r;
+					});
 					frappe.realtime.on("ev_tree_progress", (data) => {
 						if (data.job_id !== job_id) return;
 						if (data.status === "ok") {
@@ -3213,19 +3941,22 @@ frappe.views.excel.ExcelToolbar = class ExcelToolbar {
 					try {
 						const result = await frappe.xcall("excel_view.tree_import.import_tree", {
 							doctype,
-							records_json     : JSON.stringify(_mapped_rows),
-							pattern          : String(tree_info.pattern),
+							records_json: JSON.stringify(_mapped_rows),
+							pattern: String(tree_info.pattern),
 							pattern_info_json: JSON.stringify(tree_info),
 							job_id,
 						});
-						await Promise.race([tree_done_promise, new Promise(r => setTimeout(r, 15000))]);
+						await Promise.race([
+							tree_done_promise,
+							new Promise((r) => setTimeout(r, 15000)),
+						]);
 						frappe.realtime.off("ev_tree_progress");
 						if (result.status === "rolled_back") {
 							_finish_all(0, result.errors || []);
 						} else {
 							_finish_all(result.created || main_done, result.errors || []);
 						}
-					} catch(err) {
+					} catch (err) {
 						frappe.realtime.off("ev_tree_progress");
 						_finish_all(main_done, [{ doctype, error: String(err) }]);
 					}
@@ -3233,10 +3964,16 @@ frappe.views.excel.ExcelToolbar = class ExcelToolbar {
 					const errors = [];
 					for (let i = 0; i < _mapped_rows.length; i++) {
 						try {
-							await frappe.xcall("frappe.client.insert", { doc: { doctype, ..._mapped_rows[i] } });
+							await frappe.xcall("frappe.client.insert", {
+								doc: { doctype, ..._mapped_rows[i] },
+							});
 							main_done++;
-						} catch(err) {
-							errors.push({ doctype, name: _mapped_rows[i].name || `Row ${i+1}`, error: String(err) });
+						} catch (err) {
+							errors.push({
+								doctype,
+								name: _mapped_rows[i].name || `Row ${i + 1}`,
+								error: String(err),
+							});
 						}
 						_update_node(doctype, i + 1, _mapped_rows.length);
 					}
@@ -3247,18 +3984,25 @@ frappe.views.excel.ExcelToolbar = class ExcelToolbar {
 				e.stopPropagation();
 				// Prevent duplicate — toggle: close if already open
 				const $existing = this.$bi_dg_modal.find(".ev-dg-map-overlay");
-				if ($existing.length) { $existing.remove(); return; }
+				if ($existing.length) {
+					$existing.remove();
+					return;
+				}
 				const src_col = $(e.currentTarget).closest(".ev-dg-node").attr("data-source-col");
-				const pd      = src_col && col_pair_data[src_col];
+				const pd = src_col && col_pair_data[src_col];
 				if (!pd) return;
 				const { key_header, col_header, pairs } = pd;
-				const mapped    = pairs.filter(p => p.val);
-				const no_val    = pairs.filter(p => !p.val).length;
-				const rows_html = mapped.map(p =>
-					`<tr><td>${esc(p.key)}</td><td>${esc(p.val)}</td></tr>`
-				).join("");
+				const mapped = pairs.filter((p) => p.val);
+				const no_val = pairs.filter((p) => !p.val).length;
+				const rows_html = mapped
+					.map((p) => `<tr><td>${esc(p.key)}</td><td>${esc(p.val)}</td></tr>`)
+					.join("");
 				const note_html = no_val
-					? `<div class="ev-dg-map-note">&#9888; ${no_val} ${__("rows have no")} <b>${esc(col_header)}</b> ${__("value — those records will need item groups assigned separately.")}</div>`
+					? `<div class="ev-dg-map-note">&#9888; ${no_val} ${__(
+							"rows have no"
+					  )} <b>${esc(col_header)}</b> ${__(
+							"value — those records will need item groups assigned separately."
+					  )}</div>`
 					: "";
 				const $overlay = $(`
 					<div class="ev-dg-map-overlay">
@@ -3284,55 +4028,69 @@ frappe.views.excel.ExcelToolbar = class ExcelToolbar {
 			.on("click", ".ev-dg-fix-btn", (e) => {
 				e.stopPropagation();
 				this.$bi_dg_modal.find(".ev-dg-fix-overlay").remove();
-				const $node   = $(e.currentTarget).closest(".ev-dg-node");
+				const $node = $(e.currentTarget).closest(".ev-dg-node");
 				const src_col = $node.attr("data-source-col");
-				const vs      = this._bi_vs;
+				const vs = this._bi_vs;
 				if (!src_col || !vs) return;
 				const pd = vs.col_pair_data[src_col];
 				if (!pd) return;
-				const dep_node  = nodes.find(n => n.source_col === src_col);
+				const dep_node = nodes.find((n) => n.source_col === src_col);
 				const target_dt = dep_node?.id || null;
 				// Build csv_map from pairs that have a value
 				const csv_map = {};
-				pd.pairs.forEach(p => { if (p.key && p.val) csv_map[p.key] = p.val; });
-				const cur_map = {...csv_map, ...(vs.user_edits[src_col] || {})};
+				pd.pairs.forEach((p) => {
+					if (p.key && p.val) csv_map[p.key] = p.val;
+				});
+				const cur_map = { ...csv_map, ...(vs.user_edits[src_col] || {}) };
 				// ALL items that need this dep: come from the PARENT node's values
 				// e.g. for "Item Group" incomplete node, parent is "Item" which has all 33 item codes
-				const parent_edge = (graph.edges || []).find(eg => eg.from === dep_node?.id);
-				const parent_node = parent_edge ? nodes.find(n => n.id === parent_edge.to) : null;
+				const parent_edge = (graph.edges || []).find((eg) => eg.from === dep_node?.id);
+				const parent_node = parent_edge
+					? nodes.find((n) => n.id === parent_edge.to)
+					: null;
 				const parent_vals = parent_node?.values || [];
 				// Union: parent node values + pairs keys (covers edge cases where parent node has no values)
 				const known_items = new Set([
 					...parent_vals,
-					...pd.pairs.map(p => p.key).filter(Boolean),
+					...pd.pairs.map((p) => p.key).filter(Boolean),
 				]);
 				const _render_fix = (autocomplete_vals) => {
-					const items  = [...known_items].sort();
-					const total  = items.length;
-					const filled = items.filter(i => cur_map[i]).length;
-					const pct    = total ? Math.round(filled / total * 100) : 0;
-					const dl_id  = `ev-dg-dl-${src_col.replace(/\W/g,"")}${Date.now()}`;
-					const dl_html = autocomplete_vals.map(v => `<option value="${esc(v)}">`).join("");
-					const rows_html = items.map((item, i) => {
-						const val        = esc(cur_map[item] || "");
-						const mapped_cls = cur_map[item] ? " ev-dg-fi-mapped" : "";
-						const dot        = cur_map[item]
-							? `<span class="ev-dg-fi-dot ev-dg-fi-dot--on"></span>`
-							: `<span class="ev-dg-fi-dot"></span>`;
-						return `<tr class="ev-dg-fi-row${mapped_cls}" data-row="${i}" data-item="${esc(item)}">
+					const items = [...known_items].sort();
+					const total = items.length;
+					const filled = items.filter((i) => cur_map[i]).length;
+					const pct = total ? Math.round((filled / total) * 100) : 0;
+					const dl_id = `ev-dg-dl-${src_col.replace(/\W/g, "")}${Date.now()}`;
+					const dl_html = autocomplete_vals
+						.map((v) => `<option value="${esc(v)}">`)
+						.join("");
+					const rows_html = items
+						.map((item, i) => {
+							const val = esc(cur_map[item] || "");
+							const mapped_cls = cur_map[item] ? " ev-dg-fi-mapped" : "";
+							const dot = cur_map[item]
+								? `<span class="ev-dg-fi-dot ev-dg-fi-dot--on"></span>`
+								: `<span class="ev-dg-fi-dot"></span>`;
+							return `<tr class="ev-dg-fi-row${mapped_cls}" data-row="${i}" data-item="${esc(
+								item
+							)}">
 							<td class="ev-dg-fi-key">${dot}${esc(item)}</td>
 							<td class="ev-dg-fi-val">
-								<input class="ev-dg-fi-input" value="${val}" placeholder="${__("Select or type…")}" list="${dl_id}" autocomplete="off"/>
+								<input class="ev-dg-fi-input" value="${val}" placeholder="${__(
+								"Select or type…"
+							)}" list="${dl_id}" autocomplete="off"/>
 								<div class="ev-dg-fi-handle" title="${__("Drag to fill down")}"></div>
 							</td>
 						</tr>`;
-					}).join("");
+						})
+						.join("");
 					const $ov = $(`
 						<div class="ev-dg-fix-overlay">
 							<div class="ev-dg-fix-panel">
 								<div class="ev-dg-fix-hdr">
 									<div class="ev-dg-fix-hdr-left">
-										<div class="ev-dg-fix-title">${__("Fix data gap")} <span class="ev-dg-fix-col">${esc(pd.col_header || src_col)}</span></div>
+										<div class="ev-dg-fix-title">${__("Fix data gap")} <span class="ev-dg-fix-col">${esc(
+						pd.col_header || src_col
+					)}</span></div>
 										<div class="ev-dg-fix-sub">${filled}/${total} ${__("mapped")}</div>
 									</div>
 									<button class="ev-dg-fix-close" aria-label="${__("Close")}">×</button>
@@ -3362,67 +4120,107 @@ frappe.views.excel.ExcelToolbar = class ExcelToolbar {
 						</div>
 					`).appendTo(this.$bi_dg_modal.find(".ev-dg-modal"));
 					// ── Drag-to-fill ─────────────────────────────────────────────
-					let _drag = false, _drag_val = "", _drag_from = -1;
+					let _drag = false,
+						_drag_val = "",
+						_drag_from = -1;
 					const $tbody = $ov.find("tbody");
 					$tbody
-						.on("mousedown", ".ev-dg-fi-handle", ev => {
+						.on("mousedown", ".ev-dg-fi-handle", (ev) => {
 							ev.preventDefault();
 							_drag = true;
 							_drag_from = +$(ev.currentTarget).closest("tr").attr("data-row");
-							_drag_val  = $(ev.currentTarget).closest("tr").find(".ev-dg-fi-input").val();
+							_drag_val = $(ev.currentTarget)
+								.closest("tr")
+								.find(".ev-dg-fi-input")
+								.val();
 							$ov.find(".ev-dg-fi-table").addClass("ev-dg-fi-dragging");
 						})
-						.on("mouseover", "tr", ev => {
+						.on("mouseover", "tr", (ev) => {
 							if (!_drag) return;
 							const to = +$(ev.currentTarget).attr("data-row");
-							$tbody.find("tr").each(function() {
+							$tbody.find("tr").each(function () {
 								const ri = +$(this).attr("data-row");
 								if (ri > _drag_from && ri <= to)
-									$(this).find(".ev-dg-fi-input").val(_drag_val).closest("tr").addClass("ev-dg-fi-dragged");
-								else if (ri > to)
-									$(this).removeClass("ev-dg-fi-dragged");
+									$(this)
+										.find(".ev-dg-fi-input")
+										.val(_drag_val)
+										.closest("tr")
+										.addClass("ev-dg-fi-dragged");
+								else if (ri > to) $(this).removeClass("ev-dg-fi-dragged");
 							});
 						});
 					$(document).on("mouseup.ev_fix", () => {
 						_drag = false;
 						$ov.find(".ev-dg-fi-table").removeClass("ev-dg-fi-dragging");
-						$tbody.find(".ev-dg-fi-dragged").each(function() {
+						$tbody.find(".ev-dg-fi-dragged").each(function () {
 							$(this).removeClass("ev-dg-fi-dragged").addClass("ev-dg-fi-mapped");
 						});
 					});
 					// ── Close ────────────────────────────────────────────────────
-					const _close_fix = () => { $ov.remove(); $(document).off("mouseup.ev_fix"); };
-					$ov.on("click", ".ev-dg-fix-close, .ev-dg-fix-cancel", _close_fix)
-					   .on("click", ev => { if ($(ev.target).is(".ev-dg-fix-overlay")) _close_fix(); });
+					const _close_fix = () => {
+						$ov.remove();
+						$(document).off("mouseup.ev_fix");
+					};
+					$ov.on("click", ".ev-dg-fix-close, .ev-dg-fix-cancel", _close_fix).on(
+						"click",
+						(ev) => {
+							if ($(ev.target).is(".ev-dg-fix-overlay")) _close_fix();
+						}
+					);
 					// ── Apply ────────────────────────────────────────────────────
 					$ov.on("click", ".ev-dg-fix-apply", async () => {
 						const edits = {};
-						$ov.find("tr[data-item]").each(function() {
+						$ov.find("tr[data-item]").each(function () {
 							const item = $(this).attr("data-item");
-							const val  = $(this).find(".ev-dg-fi-input").val().trim();
+							const val = $(this).find(".ev-dg-fi-input").val().trim();
 							if (val) edits[item] = val;
 						});
 						vs.user_edits[src_col] = edits;
 						// Rebuild unmapped_cols entry from edits
 						const all_vals = [...new Set(Object.values(edits).filter(Boolean))];
-						vs.unmapped_cols[src_col] = { vals: all_vals, rows_with_value: Object.keys(edits).length };
+						vs.unmapped_cols[src_col] = {
+							vals: all_vals,
+							rows_with_value: Object.keys(edits).length,
+						};
 						// Also update col_pair_data so View Mapping reflects edits
 						if (vs.col_pair_data[src_col]) {
-							vs.col_pair_data[src_col].pairs = Object.entries(edits).map(([k,v]) => ({key:k, val:v}));
+							vs.col_pair_data[src_col].pairs = Object.entries(edits).map(
+								([k, v]) => ({ key: k, val: v })
+							);
 						}
 						_close_fix();
-						this.$bi_dg_modal?.remove(); this.$bi_dg_modal = null;
-						const $ld = $(`<div class="ev-bi-backdrop"><div class="ev-dg-loading"><div class="ev-dg-spinner"></div><div class="ev-dg-loading-txt">${__("Re-analysing…")}</div></div></div>`).appendTo($("body"));
+						this.$bi_dg_modal?.remove();
+						this.$bi_dg_modal = null;
+						const $ld = $(
+							`<div class="ev-bi-backdrop"><div class="ev-dg-loading"><div class="ev-dg-spinner"></div><div class="ev-dg-loading-txt">${__(
+								"Re-analysing…"
+							)}</div></div></div>`
+						).appendTo($("body"));
 						try {
-							const g2 = await frappe.xcall("excel_view.tree_import.analyze_import_deps", {
-								doctype: this.board.doctype,
-								records_json: JSON.stringify(vs.mapped_rows),
-							});
+							const g2 = await frappe.xcall(
+								"excel_view.tree_import.analyze_import_deps",
+								{
+									doctype: this.board.doctype,
+									records_json: JSON.stringify(vs.mapped_rows),
+								}
+							);
 							$ld.remove();
-							this._bi_render_dep_graph(g2, vs.mapped_rows, vs.rows, vs.headers, vs.fieldnames, vs.col_map, vs.child_col_cfg, vs.col_pair_data);
-						} catch(_) {
+							this._bi_render_dep_graph(
+								g2,
+								vs.mapped_rows,
+								vs.rows,
+								vs.headers,
+								vs.fieldnames,
+								vs.col_map,
+								vs.child_col_cfg,
+								vs.col_pair_data
+							);
+						} catch (_) {
 							$ld.remove();
-							frappe.show_alert({message: __("Re-analysis failed."), indicator: "red"}, 4);
+							frappe.show_alert(
+								{ message: __("Re-analysis failed."), indicator: "red" },
+								4
+							);
 						}
 					});
 				};
@@ -3430,18 +4228,25 @@ frappe.views.excel.ExcelToolbar = class ExcelToolbar {
 				if (target_dt && vs.dt_cache[target_dt]) {
 					_render_fix(vs.dt_cache[target_dt]);
 				} else if (target_dt) {
-					frappe.db.get_list(target_dt, {fields:["name"], limit:500, order_by:"name asc"})
-						.then(recs => {
-							vs.dt_cache[target_dt] = recs.map(r => r.name);
+					frappe.db
+						.get_list(target_dt, {
+							fields: ["name"],
+							limit: 500,
+							order_by: "name asc",
+						})
+						.then((recs) => {
+							vs.dt_cache[target_dt] = recs.map((r) => r.name);
 							_render_fix(vs.dt_cache[target_dt]);
-						}).catch(() => _render_fix([]));
+						})
+						.catch(() => _render_fix([]));
 				} else {
 					_render_fix([]);
 				}
 			})
 			.on("click.dg", (e) => {
 				if ($(e.target).hasClass("ev-bi-backdrop")) {
-					this.$bi_dg_modal?.remove(); this.$bi_dg_modal = null;
+					this.$bi_dg_modal?.remove();
+					this.$bi_dg_modal = null;
 				}
 			});
 	}
@@ -3463,27 +4268,30 @@ frappe.views.excel.ExcelToolbar = class ExcelToolbar {
 		}
 
 		// Pattern 2: scan Table fields for a Link back to this doctype in child meta
-		for (const df of (meta.fields || [])) {
+		for (const df of meta.fields || []) {
 			if (df.fieldtype !== "Table" || !df.options) continue;
 			const child_meta = frappe.get_meta(df.options);
 			if (!child_meta) continue;
-			for (const cdf of (child_meta.fields || [])) {
+			for (const cdf of child_meta.fields || []) {
 				if (cdf.fieldtype === "Link" && cdf.options === doctype) {
 					// Also detect the identity_field: first mandatory non-system Link/Data field
 					// before the first Table field (mirrors tree_import.py _detect_identity_field)
 					let identity_field = null;
-					for (const idf of (meta.fields || [])) {
+					for (const idf of meta.fields || []) {
 						if (idf.fieldtype === "Table") break;
-						if (idf.reqd && !["name","naming_series"].includes(idf.fieldname) &&
-								["Link","Data","Dynamic Link"].includes(idf.fieldtype)) {
+						if (
+							idf.reqd &&
+							!["name", "naming_series"].includes(idf.fieldname) &&
+							["Link", "Data", "Dynamic Link"].includes(idf.fieldtype)
+						) {
 							identity_field = idf.fieldname;
 							break;
 						}
 					}
 					return {
-						pattern      : 2,
-						table_field  : df.fieldname,
-						link_field   : cdf.fieldname,
+						pattern: 2,
+						table_field: df.fieldname,
+						link_field: cdf.fieldname,
 						child_doctype: df.options,
 						identity_field,
 					};
@@ -3498,8 +4306,8 @@ frappe.views.excel.ExcelToolbar = class ExcelToolbar {
 	_gd_open() {
 		this._gd_target = "new";
 		const is_import = !!this._gd_import_mode;
-		const title     = is_import ? __("Import Records") : __("Get Data");
-		const step2_lbl = is_import ? __("Map Columns")   : __("Configure");
+		const title = is_import ? __("Import Records") : __("Get Data");
+		const step2_lbl = is_import ? __("Map Columns") : __("Configure");
 		const title_icon = is_import
 			? `<svg class="ev-gd-title-icon" viewBox="0 0 20 20" fill="currentColor"><path d="M10 2a1 1 0 0 1 .707.293l4 4a1 1 0 0 1-1.414 1.414L11 5.414V13a1 1 0 1 1-2 0V5.414L6.707 7.707a1 1 0 0 1-1.414-1.414l4-4A1 1 0 0 1 10 2zM4 15a1 1 0 1 0 0 2h12a1 1 0 1 0 0-2H4z"/></svg>`
 			: `<svg class="ev-gd-title-icon" viewBox="0 0 20 20" fill="currentColor"><path d="M3 4a1 1 0 0 1 1-1h12a1 1 0 0 1 1 1v2a1 1 0 0 1-1 1H4a1 1 0 0 1-1-1V4zm0 6a1 1 0 0 1 1-1h12a1 1 0 0 1 1 1v2a1 1 0 0 1-1 1H4a1 1 0 0 1-1-1v-2zm0 6a1 1 0 0 1 1-1h12a1 1 0 0 1 1 1v1a1 1 0 0 1-1 1H4a1 1 0 0 1-1-1v-1z"/></svg>`;
@@ -3530,17 +4338,27 @@ frappe.views.excel.ExcelToolbar = class ExcelToolbar {
 						</button>
 					</div>
 					<div class="ev-gd-modal-body"></div>
-					${is_import ? "" : `
+					${
+						is_import
+							? ""
+							: `
 					<div class="ev-gd-modal-footer">
 						<span class="ev-gd-target-lbl">${__("Load into:")}</span>
-						<label class="ev-gd-radio"><input type="radio" name="ev_gd_target" value="new" checked> ${__("New Sheet")}</label>
-						<label class="ev-gd-radio"><input type="radio" name="ev_gd_target" value="current"> ${__("Current Sheet")}</label>
-					</div>`}
+						<label class="ev-gd-radio"><input type="radio" name="ev_gd_target" value="new" checked> ${__(
+							"New Sheet"
+						)}</label>
+						<label class="ev-gd-radio"><input type="radio" name="ev_gd_target" value="current"> ${__(
+							"Current Sheet"
+						)}</label>
+					</div>`
+					}
 				</div>
 			</div>
 		`).appendTo(document.body);
 		this.$gd_modal.find(".ev-gd-close-btn").on("click", () => this._gd_close());
-		this.$gd_modal.on("click.gd", (e) => { if ($(e.target).hasClass("ev-gd-backdrop")) this._gd_close(); });
+		this.$gd_modal.on("click.gd", (e) => {
+			if ($(e.target).hasClass("ev-gd-backdrop")) this._gd_close();
+		});
 		this.$gd_modal.on("change.gd", "input[name=ev_gd_target]", (e) => {
 			this._gd_target = $(e.currentTarget).val();
 		});
@@ -3558,7 +4376,7 @@ frappe.views.excel.ExcelToolbar = class ExcelToolbar {
 		this.$gd_modal?.find(".ev-gd-step").each(function () {
 			const s = parseInt($(this).data("step"));
 			$(this).removeClass("ev-gd-step--active ev-gd-step--done");
-			if (s < n)       $(this).addClass("ev-gd-step--done");
+			if (s < n) $(this).addClass("ev-gd-step--done");
 			else if (s === n) $(this).addClass("ev-gd-step--active");
 		});
 		this.$gd_modal?.find(".ev-gd-step-line").toggleClass("ev-gd-step-line--done", n > 1);
@@ -3567,20 +4385,50 @@ frappe.views.excel.ExcelToolbar = class ExcelToolbar {
 	_gd_step1($body) {
 		this._gd_set_step(1);
 		const ALL_SOURCES = [
-			{ id: "reports", color: "#1565c0", label: __("From Reports"), sub: __("Frappe standard & custom reports"),
-			  icon: `<svg width="24" height="24" viewBox="0 0 16 16" fill="currentColor"><path d="M1 11a1 1 0 0 1 1-1h2a1 1 0 0 1 1 1v3a1 1 0 0 1-1 1H2a1 1 0 0 1-1-1v-3zm5-4a1 1 0 0 1 1-1h2a1 1 0 0 1 1 1v7a1 1 0 0 1-1 1H7a1 1 0 0 1-1-1V7zm5-5a1 1 0 0 1 1-1h2a1 1 0 0 1 1 1v12a1 1 0 0 1-1 1h-2a1 1 0 0 1-1-1V2z"/></svg>` },
-			{ id: "gsheets", color: "#2e7d32", label: __("Google Sheets"), sub: __("Public spreadsheet by URL"),
-			  icon: `<svg width="24" height="24" viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.3"><rect x="2" y="1" width="12" height="14" rx="1"/><line x1="2" y1="5" x2="14" y2="5"/><line x1="2" y1="9" x2="14" y2="9"/><line x1="6" y1="1" x2="6" y2="15"/></svg>` },
-			{ id: "csv",     color: "#e65100", label: __("CSV"),           sub: __("File upload or URL"),
-			  icon: `<svg width="24" height="24" viewBox="0 0 16 16" fill="currentColor"><path d="M5.5 7a.5.5 0 0 0 0 1h5a.5.5 0 0 0 0-1h-5zm0 2a.5.5 0 0 0 0 1h5a.5.5 0 0 0 0-1h-5zm0 2a.5.5 0 0 0 0 1h3a.5.5 0 0 0 0-1h-3z"/><path d="M3 0h7.586a1 1 0 0 1 .707.293L13.707 2.707A1 1 0 0 1 14 3.414V14a2 2 0 0 1-2 2H4a2 2 0 0 1-2-2V2a2 2 0 0 1 2-2zm0 2v12a1 1 0 0 0 1 1h8a1 1 0 0 0 1-1V4h-2.5A1.5 1.5 0 0 1 9 2.5V0H4a1 1 0 0 0-1 1z"/></svg>` },
-			{ id: "json",    color: "#6a1b9a", label: __("JSON"),          sub: __("File, URL, or paste"),
-			  icon: `<svg width="24" height="24" viewBox="0 0 16 16" fill="currentColor"><path d="M2 2a2 2 0 0 1 2-2h8a2 2 0 0 1 2 2v12a2 2 0 0 1-2 2H4a2 2 0 0 1-2-2V2zm2-1a1 1 0 0 0-1 1v12a1 1 0 0 0 1 1h8a1 1 0 0 0 1-1V2a1 1 0 0 0-1-1H4z"/><path d="M4.5 5.5a.5.5 0 0 0 0 1h7a.5.5 0 0 0 0-1h-7zm0 2a.5.5 0 0 0 0 1h7a.5.5 0 0 0 0-1h-7zm0 2a.5.5 0 0 0 0 1h4a.5.5 0 0 0 0-1h-4z"/></svg>` },
-			{ id: "pdf",     color: "#b71c1c", label: __("PDF"),           sub: __("Extract tables from PDF"),
-			  icon: `<svg width="24" height="24" viewBox="0 0 16 16" fill="currentColor"><path d="M14 14V4.5L9.5 0H4a2 2 0 0 0-2 2v12a2 2 0 0 0 2 2h8a2 2 0 0 0 2-2zM9.5 3A1.5 1.5 0 0 0 11 4.5h2V14a1 1 0 0 1-1 1H4a1 1 0 0 1-1-1V2a1 1 0 0 1 1-1h5.5v2z"/></svg>` },
-			{ id: "webapi",  color: "#00695c", label: __("Web API"),       sub: __("Any REST endpoint"),
-			  icon: `<svg width="24" height="24" viewBox="0 0 16 16" fill="currentColor"><path d="M0 8a8 8 0 1 1 16 0A8 8 0 0 1 0 8zm7.5-6.923c-.67.204-1.335.82-1.887 1.855A7.97 7.97 0 0 0 5.145 4H7.5V1.077zM4.09 4a9.267 9.267 0 0 1 .64-1.539 6.7 6.7 0 0 1 .597-.933A7.025 7.025 0 0 0 2.255 4H4.09zm-.582 3.5c.03-.877.138-1.718.312-2.5H1.674a6.958 6.958 0 0 0-.656 2.5h2.49zM4.847 5a12.5 12.5 0 0 0-.338 2.5H7.5V5H4.847zM8.5 5v2.5h2.99a12.495 12.495 0 0 0-.337-2.5H8.5zM4.51 8.5a12.5 12.5 0 0 0 .337 2.5H7.5V8.5H4.51zm3.99 0V11h2.653c.187-.765.306-1.608.338-2.5H8.5z"/></svg>` },
+			{
+				id: "reports",
+				color: "#1565c0",
+				label: __("From Reports"),
+				sub: __("Frappe standard & custom reports"),
+				icon: `<svg width="24" height="24" viewBox="0 0 16 16" fill="currentColor"><path d="M1 11a1 1 0 0 1 1-1h2a1 1 0 0 1 1 1v3a1 1 0 0 1-1 1H2a1 1 0 0 1-1-1v-3zm5-4a1 1 0 0 1 1-1h2a1 1 0 0 1 1 1v7a1 1 0 0 1-1 1H7a1 1 0 0 1-1-1V7zm5-5a1 1 0 0 1 1-1h2a1 1 0 0 1 1 1v12a1 1 0 0 1-1 1h-2a1 1 0 0 1-1-1V2z"/></svg>`,
+			},
+			{
+				id: "gsheets",
+				color: "#2e7d32",
+				label: __("Google Sheets"),
+				sub: __("Public spreadsheet by URL"),
+				icon: `<svg width="24" height="24" viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.3"><rect x="2" y="1" width="12" height="14" rx="1"/><line x1="2" y1="5" x2="14" y2="5"/><line x1="2" y1="9" x2="14" y2="9"/><line x1="6" y1="1" x2="6" y2="15"/></svg>`,
+			},
+			{
+				id: "csv",
+				color: "#e65100",
+				label: __("CSV"),
+				sub: __("File upload or URL"),
+				icon: `<svg width="24" height="24" viewBox="0 0 16 16" fill="currentColor"><path d="M5.5 7a.5.5 0 0 0 0 1h5a.5.5 0 0 0 0-1h-5zm0 2a.5.5 0 0 0 0 1h5a.5.5 0 0 0 0-1h-5zm0 2a.5.5 0 0 0 0 1h3a.5.5 0 0 0 0-1h-3z"/><path d="M3 0h7.586a1 1 0 0 1 .707.293L13.707 2.707A1 1 0 0 1 14 3.414V14a2 2 0 0 1-2 2H4a2 2 0 0 1-2-2V2a2 2 0 0 1 2-2zm0 2v12a1 1 0 0 0 1 1h8a1 1 0 0 0 1-1V4h-2.5A1.5 1.5 0 0 1 9 2.5V0H4a1 1 0 0 0-1 1z"/></svg>`,
+			},
+			{
+				id: "json",
+				color: "#6a1b9a",
+				label: __("JSON"),
+				sub: __("File, URL, or paste"),
+				icon: `<svg width="24" height="24" viewBox="0 0 16 16" fill="currentColor"><path d="M2 2a2 2 0 0 1 2-2h8a2 2 0 0 1 2 2v12a2 2 0 0 1-2 2H4a2 2 0 0 1-2-2V2zm2-1a1 1 0 0 0-1 1v12a1 1 0 0 0 1 1h8a1 1 0 0 0 1-1V2a1 1 0 0 0-1-1H4z"/><path d="M4.5 5.5a.5.5 0 0 0 0 1h7a.5.5 0 0 0 0-1h-7zm0 2a.5.5 0 0 0 0 1h7a.5.5 0 0 0 0-1h-7zm0 2a.5.5 0 0 0 0 1h4a.5.5 0 0 0 0-1h-4z"/></svg>`,
+			},
+			{
+				id: "pdf",
+				color: "#b71c1c",
+				label: __("PDF"),
+				sub: __("Extract tables from PDF"),
+				icon: `<svg width="24" height="24" viewBox="0 0 16 16" fill="currentColor"><path d="M14 14V4.5L9.5 0H4a2 2 0 0 0-2 2v12a2 2 0 0 0 2 2h8a2 2 0 0 0 2-2zM9.5 3A1.5 1.5 0 0 0 11 4.5h2V14a1 1 0 0 1-1 1H4a1 1 0 0 1-1-1V2a1 1 0 0 1 1-1h5.5v2z"/></svg>`,
+			},
+			{
+				id: "webapi",
+				color: "#00695c",
+				label: __("Web API"),
+				sub: __("Any REST endpoint"),
+				icon: `<svg width="24" height="24" viewBox="0 0 16 16" fill="currentColor"><path d="M0 8a8 8 0 1 1 16 0A8 8 0 0 1 0 8zm7.5-6.923c-.67.204-1.335.82-1.887 1.855A7.97 7.97 0 0 0 5.145 4H7.5V1.077zM4.09 4a9.267 9.267 0 0 1 .64-1.539 6.7 6.7 0 0 1 .597-.933A7.025 7.025 0 0 0 2.255 4H4.09zm-.582 3.5c.03-.877.138-1.718.312-2.5H1.674a6.958 6.958 0 0 0-.656 2.5h2.49zM4.847 5a12.5 12.5 0 0 0-.338 2.5H7.5V5H4.847zM8.5 5v2.5h2.99a12.495 12.495 0 0 0-.337-2.5H8.5zM4.51 8.5a12.5 12.5 0 0 0 .337 2.5H7.5V8.5H4.51zm3.99 0V11h2.653c.187-.765.306-1.608.338-2.5H8.5z"/></svg>`,
+			},
 		];
-		const IMPORT_SOURCES = ALL_SOURCES.filter(s => s.id !== "reports");
+		const IMPORT_SOURCES = ALL_SOURCES.filter((s) => s.id !== "reports");
 		const chevron = `<svg class="ev-gd-isrc-arrow" viewBox="0 0 16 16" fill="currentColor" width="14" height="14"><path fill-rule="evenodd" d="M4.646 1.646a.5.5 0 0 1 .708 0l6 6a.5.5 0 0 1 0 .708l-6 6a.5.5 0 0 1-.708-.708L10.293 8 4.646 2.354a.5.5 0 0 1 0-.708z"/></svg>`;
 
 		if (this._gd_import_mode) {
@@ -3591,7 +4439,8 @@ frappe.views.excel.ExcelToolbar = class ExcelToolbar {
 						<span class="ev-gd-import-doctype">${this.board.doctype}</span>
 					</p>
 					<div class="ev-gd-isrc-list">
-						${IMPORT_SOURCES.map(s => `
+						${IMPORT_SOURCES.map(
+							(s) => `
 							<div class="ev-gd-isrc" data-src="${s.id}" role="button" tabindex="0">
 								<div class="ev-gd-isrc-icon" style="--isrc-color:${s.color}">${s.icon}</div>
 								<div class="ev-gd-isrc-body">
@@ -3600,7 +4449,8 @@ frappe.views.excel.ExcelToolbar = class ExcelToolbar {
 								</div>
 								${chevron}
 							</div>
-						`).join("")}
+						`
+						).join("")}
 					</div>
 				</div>
 			`);
@@ -3612,13 +4462,15 @@ frappe.views.excel.ExcelToolbar = class ExcelToolbar {
 			$body.html(`
 				<div class="ev-gd-step1">
 					<div class="ev-gd-sources-grid">
-						${ALL_SOURCES.map(s => `
+						${ALL_SOURCES.map(
+							(s) => `
 							<div class="ev-gd-card" data-src="${s.id}" role="button" tabindex="0">
 								<div class="ev-gd-card-icon-wrap" style="--card-color:${s.color}">${s.icon}</div>
 								<div class="ev-gd-card-label">${s.label}</div>
 								<div class="ev-gd-card-sub">${s.sub}</div>
 							</div>
-						`).join("")}
+						`
+						).join("")}
 					</div>
 				</div>
 			`);
@@ -3635,12 +4487,15 @@ frappe.views.excel.ExcelToolbar = class ExcelToolbar {
 		({
 			reports: () => this._gd_reports($body),
 			gsheets: () => this._gd_gsheets($body),
-			csv:     () => this._gd_csv($body),
-			json:    () => this._gd_json($body),
-			pdf:     () => this._gd_pdf($body),
-			webapi:  () => this._gd_webapi($body),
-		})[src]?.();
-		$body.on("click.gd", ".ev-gd-back, .ev-gd-back-btn", () => { $body.off(".gd"); this._gd_step1($body); });
+			csv: () => this._gd_csv($body),
+			json: () => this._gd_json($body),
+			pdf: () => this._gd_pdf($body),
+			webapi: () => this._gd_webapi($body),
+		}[src]?.());
+		$body.on("click.gd", ".ev-gd-back, .ev-gd-back-btn", () => {
+			$body.off(".gd");
+			this._gd_step1($body);
+		});
 	}
 
 	_gd_wrap(title, inner, footer = "") {
@@ -3662,8 +4517,19 @@ frappe.views.excel.ExcelToolbar = class ExcelToolbar {
 		return `<div class="ev-gd-preview">
 			<div class="ev-gd-preview-lbl">${__("Preview")} \u2014 ${rows.length} ${__("rows")}</div>
 			<div class="ev-gd-preview-scroll"><table class="ev-gd-ptbl">
-				<thead><tr>${headers.map(h => `<th>${frappe.utils.escape_html(String(h))}</th>`).join("")}</tr></thead>
-				<tbody>${sample.map(r => `<tr>${r.map(v => `<td>${frappe.utils.escape_html(String(v ?? ""))}</td>`).join("")}</tr>`).join("")}</tbody>
+				<thead><tr>${headers
+					.map((h) => `<th>${frappe.utils.escape_html(String(h))}</th>`)
+					.join("")}</tr></thead>
+				<tbody>${sample
+					.map(
+						(r) =>
+							`<tr>${r
+								.map(
+									(v) => `<td>${frappe.utils.escape_html(String(v ?? ""))}</td>`
+								)
+								.join("")}</tr>`
+					)
+					.join("")}</tbody>
 			</table></div>
 		</div>`;
 	}
@@ -3672,14 +4538,19 @@ frappe.views.excel.ExcelToolbar = class ExcelToolbar {
 
 	_gd_reports($body) {
 		const doctype = this.board.doctype;
-		const esc     = frappe.utils.escape_html;
-		$body.html(this._gd_wrap(__("From Reports"), `
+		const esc = frappe.utils.escape_html;
+		$body.html(
+			this._gd_wrap(
+				__("From Reports"),
+				`
 			<div class="ev-gd-reports-split">
 				<div class="ev-gd-rpt-left">
 					<div class="ev-gd-info" style="margin-bottom:8px">
 						\ud83d\udcc8 ${__("Reports for")} <strong>${esc(doctype)}</strong>
 					</div>
-					<input type="text" class="form-control ev-gd-report-search" placeholder="${__("Search reports\u2026")}" style="margin-bottom:8px" autocomplete="off">
+					<input type="text" class="form-control ev-gd-report-search" placeholder="${__(
+						"Search reports\u2026"
+					)}" style="margin-bottom:8px" autocomplete="off">
 					<div class="ev-gd-report-list ev-gd-loading">${__("Loading\u2026")}</div>
 				</div>
 				<div class="ev-gd-rpt-right">
@@ -3698,15 +4569,21 @@ frappe.views.excel.ExcelToolbar = class ExcelToolbar {
 					<div class="ev-gd-preview-area"></div>
 				</div>
 			</div>
-		`));
+		`
+			)
+		);
 
-		let _all = [], _sel = null, _res = null, _filter_defs = [];
+		let _all = [],
+			_sel = null,
+			_res = null,
+			_filter_defs = [];
 		const _get_filters = () => this._gd_collect_filters($body);
 
 		const _load_filters = (report_name) => {
 			const $rows = $body.find(".ev-gd-rpt-filter-rows");
-			const $lbl  = $body.find(".ev-gd-filter-loading");
-			$rows.html(""); $lbl.text(__("Loading filters\u2026"));
+			const $lbl = $body.find(".ev-gd-filter-loading");
+			$rows.html("");
+			$lbl.text(__("Loading filters\u2026"));
 			frappe.call({
 				method: "frappe.desk.query_report.get_script",
 				args: { report_name },
@@ -3715,47 +4592,75 @@ frappe.views.excel.ExcelToolbar = class ExcelToolbar {
 					let filters = [];
 					try {
 						if (!frappe.query_reports) frappe.query_reports = {};
-						const script = r.message?.script || (typeof r.message === "string" ? r.message : "");
+						const script =
+							r.message?.script || (typeof r.message === "string" ? r.message : "");
 						if (script) (0, eval)(script);
-						filters = (frappe.query_reports?.[report_name]?.filters || []).filter(f => f && f.fieldname);
-					} catch (e) { /* silent */ }
+						filters = (frappe.query_reports?.[report_name]?.filters || []).filter(
+							(f) => f && f.fieldname
+						);
+					} catch (e) {
+						/* silent */
+					}
 					_filter_defs = filters;
-					$rows.html(filters.length
-						? filters.map(f => this._gd_filter_row(f)).join("")
-						: `<div class="ev-gd-empty" style="padding:10px 0">${__("This report has no filters.")}</div>`);
+					$rows.html(
+						filters.length
+							? filters.map((f) => this._gd_filter_row(f)).join("")
+							: `<div class="ev-gd-empty" style="padding:10px 0">${__(
+									"This report has no filters."
+							  )}</div>`
+					);
 				},
 			});
 		};
 
 		frappe.call({
 			method: "frappe.client.get_list",
-			args: { doctype: "Report", fields: ["name","report_type","ref_doctype"], filters: [["ref_doctype","=",doctype]], limit: 500, order_by: "modified desc" },
+			args: {
+				doctype: "Report",
+				fields: ["name", "report_type", "ref_doctype"],
+				filters: [["ref_doctype", "=", doctype]],
+				limit: 500,
+				order_by: "modified desc",
+			},
 			callback: (r) => {
 				_all = r.message || [];
 				const render = (list) => {
 					const $l = $body.find(".ev-gd-report-list").removeClass("ev-gd-loading");
-					$l.html(list.length
-						? list.map(x => `<div class="ev-gd-report-item" data-name="${esc(x.name)}">
+					$l.html(
+						list.length
+							? list
+									.map(
+										(x) => `<div class="ev-gd-report-item" data-name="${esc(
+											x.name
+										)}">
 								<div class="ev-gd-report-name">${esc(x.name)}</div>
 								<div class="ev-gd-report-meta">${esc(x.report_type || "")}</div>
-							</div>`).join("")
-						: `<div class="ev-gd-empty">${__("No reports found for")} <strong>${esc(doctype)}</strong></div>`);
+							</div>`
+									)
+									.join("")
+							: `<div class="ev-gd-empty">${__(
+									"No reports found for"
+							  )} <strong>${esc(doctype)}</strong></div>`
+					);
 				};
 				render(_all);
-				$body.on("input.gd", ".ev-gd-report-search", (e) => {
-					const q = $(e.currentTarget).val().toLowerCase();
-					render(q ? _all.filter(x => x.name.toLowerCase().includes(q)) : _all);
-				}).on("click.gd", ".ev-gd-report-item", (e) => {
-					$body.find(".ev-gd-report-item").removeClass("ev-gd-selected");
-					$(e.currentTarget).addClass("ev-gd-selected");
-					_sel = $(e.currentTarget).data("name");
-					$body.find(".ev-gd-report-sel-name").text(_sel);
-					$body.find(".ev-gd-rpt-right-placeholder").hide();
-					$body.find(".ev-gd-filters-wrap, .ev-gd-actions").removeClass("hide");
-					$body.find(".ev-gd-preview-btn, .ev-gd-load-btn").prop("disabled", false);
-					_res = null; $body.find(".ev-gd-preview-area").empty();
-					_load_filters(_sel);
-				});
+				$body
+					.on("input.gd", ".ev-gd-report-search", (e) => {
+						const q = $(e.currentTarget).val().toLowerCase();
+						render(q ? _all.filter((x) => x.name.toLowerCase().includes(q)) : _all);
+					})
+					.on("click.gd", ".ev-gd-report-item", (e) => {
+						$body.find(".ev-gd-report-item").removeClass("ev-gd-selected");
+						$(e.currentTarget).addClass("ev-gd-selected");
+						_sel = $(e.currentTarget).data("name");
+						$body.find(".ev-gd-report-sel-name").text(_sel);
+						$body.find(".ev-gd-rpt-right-placeholder").hide();
+						$body.find(".ev-gd-filters-wrap, .ev-gd-actions").removeClass("hide");
+						$body.find(".ev-gd-preview-btn, .ev-gd-load-btn").prop("disabled", false);
+						_res = null;
+						$body.find(".ev-gd-preview-area").empty();
+						_load_filters(_sel);
+					});
 			},
 		});
 
@@ -3764,25 +4669,43 @@ frappe.views.excel.ExcelToolbar = class ExcelToolbar {
 			frappe.call({
 				method: "frappe.desk.query_report.run",
 				args: { report_name: _sel, filters: _get_filters(), ignore_prepared_report: 1 },
-				freeze: true, freeze_message: __("Running report\u2026"),
-				callback: (r) => { _res = r.message; cb?.(_res); },
+				freeze: true,
+				freeze_message: __("Running report\u2026"),
+				callback: (r) => {
+					_res = r.message;
+					cb?.(_res);
+				},
 			});
 		};
-		$body.on("click.gd", ".ev-gd-preview-btn", () => _run((res) => {
-			const cols = (res.columns || []).map(c => typeof c === "string" ? c : (c.label || c.fieldname));
-			const rows = (res.result || []).filter(r => !r.is_subtotal && !r.is_total)
-				.map(r => cols.map((_, i) => Array.isArray(r) ? r[i] : (r[cols[i]] ?? "")));
-			$body.find(".ev-gd-preview-area").html(this._gd_preview_tbl(cols, rows));
-		}));
+		$body.on("click.gd", ".ev-gd-preview-btn", () =>
+			_run((res) => {
+				const cols = (res.columns || []).map((c) =>
+					typeof c === "string" ? c : c.label || c.fieldname
+				);
+				const rows = (res.result || [])
+					.filter((r) => !r.is_subtotal && !r.is_total)
+					.map((r) => cols.map((_, i) => (Array.isArray(r) ? r[i] : r[cols[i]] ?? "")));
+				$body.find(".ev-gd-preview-area").html(this._gd_preview_tbl(cols, rows));
+			})
+		);
 		$body.on("click.gd", ".ev-gd-load-btn", () => {
 			const go = (res) => {
-				const raw  = res.columns || [];
-				const cols = raw.map(c => typeof c === "string" ? { label: c, fieldname: c } : c);
-				const headers = cols.map(c => c.label || c.fieldname);
-				const keys    = cols.map(c => c.fieldname || c.label);
-				const rows    = (res.result || []).filter(r => !r.is_subtotal && !r.is_total)
-					.map(r => keys.map((k, i) => Array.isArray(r) ? r[i] : (r[k] ?? "")));
-				this._gd_load(headers, rows, _sel, { name: _sel, filter_defs: _filter_defs, current_filters: _get_filters() }, keys);
+				const raw = res.columns || [];
+				const cols = raw.map((c) =>
+					typeof c === "string" ? { label: c, fieldname: c } : c
+				);
+				const headers = cols.map((c) => c.label || c.fieldname);
+				const keys = cols.map((c) => c.fieldname || c.label);
+				const rows = (res.result || [])
+					.filter((r) => !r.is_subtotal && !r.is_total)
+					.map((r) => keys.map((k, i) => (Array.isArray(r) ? r[i] : r[k] ?? "")));
+				this._gd_load(
+					headers,
+					rows,
+					_sel,
+					{ name: _sel, filter_defs: _filter_defs, current_filters: _get_filters() },
+					keys
+				);
 				this._gd_close();
 			};
 			_res ? go(_res) : _run(go);
@@ -3792,40 +4715,65 @@ frappe.views.excel.ExcelToolbar = class ExcelToolbar {
 	// ── Google Sheets ─────────────────────────────────────────────────────────
 
 	_gd_gsheets($body) {
-		$body.html(this._gd_wrap(__("Google Sheets"), `
+		$body.html(
+			this._gd_wrap(
+				__("Google Sheets"),
+				`
 			<div class="ev-gd-field-row">
 				<label class="ev-gd-lbl">${__("Spreadsheet URL")}</label>
 				<input type="text" class="form-control ev-gd-gs-url" placeholder="https://docs.google.com/spreadsheets/d/…" autocomplete="off">
 			</div>
 			<div class="ev-gd-field-row">
-				<label class="ev-gd-lbl">${__("Sheet / Tab Name")} <span class="ev-gd-lbl-opt">${__("optional")}</span></label>
+				<label class="ev-gd-lbl">${__("Sheet / Tab Name")} <span class="ev-gd-lbl-opt">${__(
+					"optional"
+				)}</span></label>
 				<input type="text" class="form-control ev-gd-gs-tab" placeholder="Sheet1">
 			</div>
 			<div class="ev-gd-info">
 				<svg viewBox="0 0 16 16" fill="currentColor" width="14" height="14"><path d="M8 16A8 8 0 1 0 8 0a8 8 0 0 0 0 16zm.93-9.412-1 4.705c-.07.34.029.533.304.533.194 0 .487-.07.686-.246l-.088.416c-.287.346-.92.598-1.465.598-.703 0-1.002-.422-.808-1.319l.738-3.468c.064-.293.006-.399-.287-.47l-.451-.081.082-.381 2.29-.287zM8 5.5a1 1 0 1 1 0-2 1 1 0 0 1 0 2z"/></svg>
 				<span>${__('Set sharing to "Anyone with link can view" before pasting the URL.')}</span>
 			</div>
-		`, `
+		`,
+				`
 			<button class="ev-gd-btn ev-gd-btn--secondary ev-gd-preview-btn">${__("Preview")}</button>
 			<button class="ev-gd-btn ev-gd-btn--primary ev-gd-load-btn">${__("Load")}</button>
-		`));
-		let _h = [], _r = [];
+		`
+			)
+		);
+		let _h = [],
+			_r = [];
 		const _fetch = (cb) => {
 			const url = $body.find(".ev-gd-gs-url").val().trim();
 			const tab = $body.find(".ev-gd-gs-tab").val().trim();
-			if (!url) { frappe.msgprint(__("Please enter a URL.")); return; }
+			if (!url) {
+				frappe.msgprint(__("Please enter a URL."));
+				return;
+			}
 			frappe.call({
 				method: "excel_view.api.fetch_google_sheet",
 				args: { url, tab_name: tab },
-				freeze: true, freeze_message: __("Fetching sheet…"),
+				freeze: true,
+				freeze_message: __("Fetching sheet…"),
 				callback: (r) => {
-					if (r.message?.error) { frappe.msgprint(r.message.error); return; }
-					_h = r.message.headers || []; _r = r.message.rows || []; cb?.();
+					if (r.message?.error) {
+						frappe.msgprint(r.message.error);
+						return;
+					}
+					_h = r.message.headers || [];
+					_r = r.message.rows || [];
+					cb?.();
 				},
 			});
 		};
-		$body.on("click.gd", ".ev-gd-preview-btn", () => _fetch(() => $body.find(".ev-gd-preview-area").html(this._gd_preview_tbl(_h, _r))));
-		$body.on("click.gd", ".ev-gd-load-btn", () => _fetch(() => { this._gd_load(_h, _r, $body.find(".ev-gd-gs-tab").val().trim() || "Google Sheet"); this._gd_close(); }));
+		$body.on("click.gd", ".ev-gd-preview-btn", () =>
+			_fetch(() => $body.find(".ev-gd-preview-area").html(this._gd_preview_tbl(_h, _r)))
+		);
+		$body.on("click.gd", ".ev-gd-load-btn", () =>
+			_fetch(() => {
+				this._gd_load(_h, _r, $body.find(".ev-gd-gs-tab").val().trim() || "Google Sheet");
+				this._gd_close();
+			})
+		);
 	}
 
 	// ── CSV ───────────────────────────────────────────────────────────────────
@@ -3835,11 +4783,16 @@ frappe.views.excel.ExcelToolbar = class ExcelToolbar {
 			<div class="ev-gd-drop-icon">
 				<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.4" stroke-linecap="round" stroke-linejoin="round" width="36" height="36"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><polyline points="14 2 14 8 20 8"/><line x1="16" y1="13" x2="8" y2="13"/><line x1="16" y1="17" x2="8" y2="17"/><polyline points="10 9 9 9 8 9"/></svg>
 			</div>
-			<div class="ev-gd-dz-label">${__("Drop file here or")} <span class="ev-gd-browse">${__("browse")}</span></div>
+			<div class="ev-gd-dz-label">${__("Drop file here or")} <span class="ev-gd-browse">${__(
+			"browse"
+		)}</span></div>
 			<div class="ev-gd-dz-sub">.csv · .tsv · .txt</div>
 			<input type="file" accept=".csv,.tsv,.txt" class="ev-gd-file-in" style="display:none">`;
 
-		$body.html(this._gd_wrap(__("CSV"), `
+		$body.html(
+			this._gd_wrap(
+				__("CSV"),
+				`
 			<div class="ev-gd-two-col">
 				<div class="ev-gd-col-drop">
 					<div class="ev-gd-dropzone ev-gd-drop-csv">${_dz_inner()}</div>
@@ -3866,11 +4819,15 @@ frappe.views.excel.ExcelToolbar = class ExcelToolbar {
 					</label>
 				</div>
 			</div>
-		`, `
+		`,
+				`
 			<button class="ev-gd-btn ev-gd-btn--secondary ev-gd-preview-btn">${__("Preview")}</button>
 			<button class="ev-gd-btn ev-gd-btn--primary ev-gd-load-btn">${__("Load")}</button>
-		`));
-		let _h = [], _r = [];
+		`
+			)
+		);
+		let _h = [],
+			_r = [];
 		const _parse = (text) => {
 			const d = $body.find(".ev-gd-delim").val();
 			const has_hdr = $body.find(".ev-gd-has-hdr").prop("checked");
@@ -3880,8 +4837,7 @@ frappe.views.excel.ExcelToolbar = class ExcelToolbar {
 		};
 		const _set_file = (fname, read_fn) => {
 			const esc = frappe.utils.escape_html;
-			$body.find(".ev-gd-drop-csv")
-				.addClass("ev-gd-dropzone--loaded")
+			$body.find(".ev-gd-drop-csv").addClass("ev-gd-dropzone--loaded")
 				.html(`<span class="ev-gd-file-chip">
 					<span class="ev-gd-file-chip-icon"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round" width="18" height="18"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><polyline points="14 2 14 8 20 8"/></svg></span>
 					<span class="ev-gd-file-chip-name">${esc(fname)}</span>
@@ -3892,55 +4848,91 @@ frappe.views.excel.ExcelToolbar = class ExcelToolbar {
 			read_fn();
 		};
 		$body.on("click.gd", ".ev-gd-file-chip-clear", () => {
-			$body.find(".ev-gd-drop-csv")
-				.removeClass("ev-gd-dropzone--loaded")
-				.html(_dz_inner());
+			$body.find(".ev-gd-drop-csv").removeClass("ev-gd-dropzone--loaded").html(_dz_inner());
 			$body.find(".ev-gd-preview-area").empty();
-			_h = []; _r = [];
+			_h = [];
+			_r = [];
 		});
 		$body.on("click.gd", ".ev-gd-browse", () => $body.find(".ev-gd-file-in").click());
 		$body.on("change.gd", ".ev-gd-file-in", (e) => {
-			const f = e.target.files[0]; if (!f) return;
+			const f = e.target.files[0];
+			if (!f) return;
 			_set_file(f.name, () => {
-				const rd = new FileReader(); rd.onload = (ev) => { _parse(ev.target.result); $body.find(".ev-gd-preview-area").html(this._gd_preview_tbl(_h, _r)); };
+				const rd = new FileReader();
+				rd.onload = (ev) => {
+					_parse(ev.target.result);
+					$body.find(".ev-gd-preview-area").html(this._gd_preview_tbl(_h, _r));
+				};
 				rd.readAsText(f);
 			});
 		});
-		$body.on("dragover.gd", ".ev-gd-drop-csv", (e) => { e.preventDefault(); $(e.currentTarget).addClass("ev-gd-over"); });
-		$body.on("dragleave.gd drop.gd", ".ev-gd-drop-csv", (e) => { e.preventDefault(); $(e.currentTarget).removeClass("ev-gd-over"); });
+		$body.on("dragover.gd", ".ev-gd-drop-csv", (e) => {
+			e.preventDefault();
+			$(e.currentTarget).addClass("ev-gd-over");
+		});
+		$body.on("dragleave.gd drop.gd", ".ev-gd-drop-csv", (e) => {
+			e.preventDefault();
+			$(e.currentTarget).removeClass("ev-gd-over");
+		});
 		$body.on("drop.gd", ".ev-gd-drop-csv", (e) => {
-			const f = e.originalEvent.dataTransfer.files[0]; if (!f) return;
+			const f = e.originalEvent.dataTransfer.files[0];
+			if (!f) return;
 			_set_file(f.name, () => {
-				const rd = new FileReader(); rd.onload = (ev) => { _parse(ev.target.result); $body.find(".ev-gd-preview-area").html(this._gd_preview_tbl(_h, _r)); };
+				const rd = new FileReader();
+				rd.onload = (ev) => {
+					_parse(ev.target.result);
+					$body.find(".ev-gd-preview-area").html(this._gd_preview_tbl(_h, _r));
+				};
 				rd.readAsText(f);
 			});
 		});
 		$body.on("click.gd", ".ev-gd-preview-btn", () => {
 			const url = $body.find(".ev-gd-url-in").val().trim();
 			if (url) {
-				frappe.call({ method: "excel_view.api.fetch_url_text", args: { url }, freeze: true, freeze_message: __("Fetching…"),
-					callback: (r) => { if (r.message?.text) { _parse(r.message.text); $body.find(".ev-gd-preview-area").html(this._gd_preview_tbl(_h, _r)); } } });
+				frappe.call({
+					method: "excel_view.api.fetch_url_text",
+					args: { url },
+					freeze: true,
+					freeze_message: __("Fetching…"),
+					callback: (r) => {
+						if (r.message?.text) {
+							_parse(r.message.text);
+							$body.find(".ev-gd-preview-area").html(this._gd_preview_tbl(_h, _r));
+						}
+					},
+				});
 			} else if (_r.length) {
 				$body.find(".ev-gd-preview-area").html(this._gd_preview_tbl(_h, _r));
-			} else { frappe.msgprint(__("Upload a file or enter a URL first.")); }
+			} else {
+				frappe.msgprint(__("Upload a file or enter a URL first."));
+			}
 		});
 		$body.on("click.gd", ".ev-gd-load-btn", () => {
-			if (!_h.length) { frappe.msgprint(__("No data — click Preview first.")); return; }
-			this._gd_load(_h, _r, "CSV Import"); this._gd_close();
+			if (!_h.length) {
+				frappe.msgprint(__("No data — click Preview first."));
+				return;
+			}
+			this._gd_load(_h, _r, "CSV Import");
+			this._gd_close();
 		});
 	}
 
 	// ── JSON ──────────────────────────────────────────────────────────────────
 
 	_gd_json($body) {
-		$body.html(this._gd_wrap(__("JSON"), `
+		$body.html(
+			this._gd_wrap(
+				__("JSON"),
+				`
 			<div class="ev-gd-two-col">
 				<div class="ev-gd-col-drop">
 					<div class="ev-gd-dropzone ev-gd-drop-json">
 						<div class="ev-gd-drop-icon">
 							<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.4" stroke-linecap="round" stroke-linejoin="round" width="36" height="36"><polyline points="16 18 22 12 16 6"/><polyline points="8 6 2 12 8 18"/></svg>
 						</div>
-						<div class="ev-gd-dz-label">${__("Drop file here or")} <span class="ev-gd-browse">${__("browse")}</span></div>
+						<div class="ev-gd-dz-label">${__("Drop file here or")} <span class="ev-gd-browse">${__(
+					"browse"
+				)}</span></div>
 						<div class="ev-gd-dz-sub">.json</div>
 						<input type="file" accept=".json" class="ev-gd-file-in" style="display:none">
 					</div>
@@ -3952,56 +4944,94 @@ frappe.views.excel.ExcelToolbar = class ExcelToolbar {
 					</div>
 					<div class="ev-gd-two-col-sep"></div>
 					<div class="ev-gd-field-row">
-						<label class="ev-gd-lbl">${__("JSON Path")} <span class="ev-gd-lbl-opt">${__("blank for root array")}</span></label>
+						<label class="ev-gd-lbl">${__("JSON Path")} <span class="ev-gd-lbl-opt">${__(
+					"blank for root array"
+				)}</span></label>
 						<input type="text" class="form-control ev-gd-json-path" placeholder="data.items">
 					</div>
 				</div>
 			</div>
-		`, `
+		`,
+				`
 			<button class="ev-gd-btn ev-gd-btn--secondary ev-gd-preview-btn">${__("Preview")}</button>
 			<button class="ev-gd-btn ev-gd-btn--primary ev-gd-load-btn">${__("Load")}</button>
-		`));
-		let _h = [], _r = [];
+		`
+			)
+		);
+		let _h = [],
+			_r = [];
 		const _parse = (text) => {
 			try {
 				let obj = JSON.parse(text);
 				const path = $body.find(".ev-gd-json-path").val().trim();
 				if (path) obj = this._gd_path(obj, path);
 				if (!Array.isArray(obj)) obj = obj != null ? [obj] : [];
-				if (!obj.length) { frappe.msgprint(__("No array found at that path.")); return; }
+				if (!obj.length) {
+					frappe.msgprint(__("No array found at that path."));
+					return;
+				}
 				_h = Object.keys(obj[0]);
-				_r = obj.map(row => _h.map(k => row[k] ?? ""));
-			} catch (e) { frappe.msgprint(__("Invalid JSON: ") + e.message); }
+				_r = obj.map((row) => _h.map((k) => row[k] ?? ""));
+			} catch (e) {
+				frappe.msgprint(__("Invalid JSON: ") + e.message);
+			}
 		};
 		$body.on("click.gd", ".ev-gd-browse", () => $body.find(".ev-gd-file-in").click());
 		$body.on("change.gd", ".ev-gd-file-in", (e) => {
-			const f = e.target.files[0]; if (!f) return;
-			const rd = new FileReader(); rd.onload = (ev) => { _parse(ev.target.result); $body.find(".ev-gd-preview-area").html(this._gd_preview_tbl(_h, _r)); };
+			const f = e.target.files[0];
+			if (!f) return;
+			const rd = new FileReader();
+			rd.onload = (ev) => {
+				_parse(ev.target.result);
+				$body.find(".ev-gd-preview-area").html(this._gd_preview_tbl(_h, _r));
+			};
 			rd.readAsText(f);
 		});
 		$body.on("click.gd", ".ev-gd-preview-btn", () => {
 			const url = $body.find(".ev-gd-url-in").val().trim();
 			if (url) {
-				frappe.call({ method: "excel_view.api.fetch_url_text", args: { url }, freeze: true, freeze_message: __("Fetching…"),
-					callback: (r) => { if (r.message?.text) { _parse(r.message.text); $body.find(".ev-gd-preview-area").html(this._gd_preview_tbl(_h, _r)); } } });
-			} else if (_r.length) { $body.find(".ev-gd-preview-area").html(this._gd_preview_tbl(_h, _r));
-			} else { frappe.msgprint(__("Upload a file or enter a URL.")); }
+				frappe.call({
+					method: "excel_view.api.fetch_url_text",
+					args: { url },
+					freeze: true,
+					freeze_message: __("Fetching…"),
+					callback: (r) => {
+						if (r.message?.text) {
+							_parse(r.message.text);
+							$body.find(".ev-gd-preview-area").html(this._gd_preview_tbl(_h, _r));
+						}
+					},
+				});
+			} else if (_r.length) {
+				$body.find(".ev-gd-preview-area").html(this._gd_preview_tbl(_h, _r));
+			} else {
+				frappe.msgprint(__("Upload a file or enter a URL."));
+			}
 		});
 		$body.on("click.gd", ".ev-gd-load-btn", () => {
-			if (!_h.length) { frappe.msgprint(__("No data — click Preview first.")); return; }
-			this._gd_load(_h, _r, "JSON Import"); this._gd_close();
+			if (!_h.length) {
+				frappe.msgprint(__("No data — click Preview first."));
+				return;
+			}
+			this._gd_load(_h, _r, "JSON Import");
+			this._gd_close();
 		});
 	}
 
 	// ── PDF ───────────────────────────────────────────────────────────────────
 
 	_gd_pdf($body) {
-		$body.html(this._gd_wrap(__("PDF"), `
+		$body.html(
+			this._gd_wrap(
+				__("PDF"),
+				`
 			<div class="ev-gd-dropzone ev-gd-drop-pdf">
 				<div class="ev-gd-drop-icon">
 					<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.4" stroke-linecap="round" stroke-linejoin="round" width="36" height="36"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><polyline points="14 2 14 8 20 8"/><path d="M9.5 12.5h1a1 1 0 0 1 0 2h-1v-2zm0 0V15m2.5-2.5h1.25a1.25 1.25 0 1 1 0 2.5H12V12.5zm3.5 0v2.5"/></svg>
 				</div>
-				<div class="ev-gd-dz-label">${__("Drop PDF here or")} <span class="ev-gd-browse">${__("browse")}</span></div>
+				<div class="ev-gd-dz-label">${__("Drop PDF here or")} <span class="ev-gd-browse">${__(
+					"browse"
+				)}</span></div>
 				<div class="ev-gd-dz-sub">.pdf</div>
 				<input type="file" accept=".pdf" class="ev-gd-file-in" style="display:none">
 			</div>
@@ -4013,13 +5043,17 @@ frappe.views.excel.ExcelToolbar = class ExcelToolbar {
 				<label class="ev-gd-lbl">${__("Table")}</label>
 				<select class="ev-gd-sel ev-gd-tbl-sel ev-gd-tbl-sel-input"></select>
 			</div>
-		`, `
+		`,
+				`
 			<button class="ev-gd-btn ev-gd-btn--primary ev-gd-load-btn" disabled>${__("Load")}</button>
-		`));
+		`
+			)
+		);
 		let _tables = [];
 		$body.on("click.gd", ".ev-gd-browse", () => $body.find(".ev-gd-file-in").click());
 		$body.on("change.gd", ".ev-gd-file-in", (e) => {
-			const f = e.target.files[0]; if (!f) return;
+			const f = e.target.files[0];
+			if (!f) return;
 			$body.find(".ev-gd-drop-pdf").addClass("ev-gd-dropzone--loaded").html(`
 				<span class="ev-gd-file-chip">
 					<span class="ev-gd-file-chip-icon"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round" width="18" height="18"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><polyline points="14 2 14 8 20 8"/></svg></span>
@@ -4027,24 +5061,47 @@ frappe.views.excel.ExcelToolbar = class ExcelToolbar {
 				</span>
 			`);
 			// re-bind the file input after DOM replacement
-			const inp2 = document.createElement("input"); inp2.type = "file"; inp2.accept = ".pdf"; inp2.className = "ev-gd-file-in"; inp2.style.display = "none"; $body.find(".ev-gd-drop-pdf")[0].appendChild(inp2);
+			const inp2 = document.createElement("input");
+			inp2.type = "file";
+			inp2.accept = ".pdf";
+			inp2.className = "ev-gd-file-in";
+			inp2.style.display = "none";
+			$body.find(".ev-gd-drop-pdf")[0].appendChild(inp2);
 			const rd = new FileReader();
 			rd.onload = (ev) => {
 				frappe.call({
 					method: "excel_view.api.extract_pdf_tables",
 					args: { pdf_b64: ev.target.result.split(",")[1] },
-					freeze: true, freeze_message: __("Extracting tables…"),
+					freeze: true,
+					freeze_message: __("Extracting tables…"),
 					callback: (r) => {
-						if (r.message?.error) { frappe.msgprint(r.message.error); return; }
+						if (r.message?.error) {
+							frappe.msgprint(r.message.error);
+							return;
+						}
 						_tables = r.message?.tables || [];
-						if (!_tables.length) { frappe.msgprint(__("No tables found in this PDF.")); return; }
+						if (!_tables.length) {
+							frappe.msgprint(__("No tables found in this PDF."));
+							return;
+						}
 						const $sel = $body.find(".ev-gd-tbl-sel").empty();
-						_tables.forEach((t, i) => $sel.append(`<option value="${i}">${__("Table")} ${i + 1} (${t.rows.length} ${__("rows")})</option>`));
+						_tables.forEach((t, i) =>
+							$sel.append(
+								`<option value="${i}">${__("Table")} ${i + 1} (${
+									t.rows.length
+								} ${__("rows")})</option>`
+							)
+						);
 						$body.find(".ev-gd-tbl-sel-row").removeClass("hide");
 						$body.find(".ev-gd-load-btn").prop("disabled", false);
-						const show = (i) => $body.find(".ev-gd-preview-area").html(this._gd_preview_tbl(_tables[i].headers, _tables[i].rows));
+						const show = (i) =>
+							$body
+								.find(".ev-gd-preview-area")
+								.html(this._gd_preview_tbl(_tables[i].headers, _tables[i].rows));
 						show(0);
-						$body.on("change.gd", ".ev-gd-tbl-sel", (e2) => show(+$(e2.currentTarget).val()));
+						$body.on("change.gd", ".ev-gd-tbl-sel", (e2) =>
+							show(+$(e2.currentTarget).val())
+						);
 					},
 				});
 			};
@@ -4053,14 +5110,18 @@ frappe.views.excel.ExcelToolbar = class ExcelToolbar {
 		$body.on("click.gd", ".ev-gd-load-btn", () => {
 			const t = _tables[+$body.find(".ev-gd-tbl-sel").val() || 0];
 			if (!t) return;
-			this._gd_load(t.headers, t.rows, "PDF Table"); this._gd_close();
+			this._gd_load(t.headers, t.rows, "PDF Table");
+			this._gd_close();
 		});
 	}
 
 	// ── Web API ───────────────────────────────────────────────────────────────
 
 	_gd_webapi($body) {
-		$body.html(this._gd_wrap(__("Web API"), `
+		$body.html(
+			this._gd_wrap(
+				__("Web API"),
+				`
 			<div class="ev-gd-field-row">
 				<label class="ev-gd-lbl">${__("Endpoint")}</label>
 				<div class="ev-gd-api-url-row">
@@ -4081,14 +5142,20 @@ frappe.views.excel.ExcelToolbar = class ExcelToolbar {
 				<div class="ev-gd-hdrs-list"></div>
 			</div>
 			<div class="ev-gd-field-row">
-				<label class="ev-gd-lbl">${__("JSON Path")} <span class="ev-gd-lbl-opt">${__("e.g. data.results — blank for root array")}</span></label>
+				<label class="ev-gd-lbl">${__("JSON Path")} <span class="ev-gd-lbl-opt">${__(
+					"e.g. data.results — blank for root array"
+				)}</span></label>
 				<input type="text" class="form-control ev-gd-json-path" placeholder="data">
 			</div>
-		`, `
+		`,
+				`
 			<button class="ev-gd-btn ev-gd-btn--secondary ev-gd-preview-btn">${__("Test & Preview")}</button>
 			<button class="ev-gd-btn ev-gd-btn--primary ev-gd-load-btn">${__("Load")}</button>
-		`));
-		let _h = [], _r = [];
+		`
+			)
+		);
+		let _h = [],
+			_r = [];
 		$body.on("click.gd", ".ev-gd-add-hdr", () => {
 			$body.find(".ev-gd-hdrs-list").append(`
 				<div class="ev-gd-hdr-row">
@@ -4099,10 +5166,15 @@ frappe.views.excel.ExcelToolbar = class ExcelToolbar {
 					</button>
 				</div>`);
 		});
-		$body.on("click.gd", ".ev-gd-del-hdr", (e) => $(e.currentTarget).closest(".ev-gd-hdr-row").remove());
+		$body.on("click.gd", ".ev-gd-del-hdr", (e) =>
+			$(e.currentTarget).closest(".ev-gd-hdr-row").remove()
+		);
 		const _fetch = (cb) => {
 			const url = $body.find(".ev-gd-url-in").val().trim();
-			if (!url) { frappe.msgprint(__("Please enter a URL.")); return; }
+			if (!url) {
+				frappe.msgprint(__("Please enter a URL."));
+				return;
+			}
 			const hdrs = {};
 			$body.find(".ev-gd-hdr-row").each((_, row) => {
 				const k = $(row).find(".ev-gd-hk").val().trim();
@@ -4110,16 +5182,34 @@ frappe.views.excel.ExcelToolbar = class ExcelToolbar {
 			});
 			frappe.call({
 				method: "excel_view.api.fetch_web_api",
-				args: { url, method: $body.find(".ev-gd-method").val(), headers: JSON.stringify(hdrs), json_path: $body.find(".ev-gd-json-path").val().trim() },
-				freeze: true, freeze_message: __("Fetching…"),
+				args: {
+					url,
+					method: $body.find(".ev-gd-method").val(),
+					headers: JSON.stringify(hdrs),
+					json_path: $body.find(".ev-gd-json-path").val().trim(),
+				},
+				freeze: true,
+				freeze_message: __("Fetching…"),
 				callback: (r) => {
-					if (r.message?.error) { frappe.msgprint(r.message.error); return; }
-					_h = r.message.headers || []; _r = r.message.rows || []; cb?.();
+					if (r.message?.error) {
+						frappe.msgprint(r.message.error);
+						return;
+					}
+					_h = r.message.headers || [];
+					_r = r.message.rows || [];
+					cb?.();
 				},
 			});
 		};
-		$body.on("click.gd", ".ev-gd-preview-btn", () => _fetch(() => $body.find(".ev-gd-preview-area").html(this._gd_preview_tbl(_h, _r))));
-		$body.on("click.gd", ".ev-gd-load-btn", () => _fetch(() => { this._gd_load(_h, _r, "Web API"); this._gd_close(); }));
+		$body.on("click.gd", ".ev-gd-preview-btn", () =>
+			_fetch(() => $body.find(".ev-gd-preview-area").html(this._gd_preview_tbl(_h, _r)))
+		);
+		$body.on("click.gd", ".ev-gd-load-btn", () =>
+			_fetch(() => {
+				this._gd_load(_h, _r, "Web API");
+				this._gd_close();
+			})
+		);
 	}
 
 	// ── Shared load + utilities ───────────────────────────────────────────────
@@ -4135,23 +5225,37 @@ frappe.views.excel.ExcelToolbar = class ExcelToolbar {
 		// Use actual fieldnames as data keys when available (fixes Smart Lookup matching)
 		const keys = fieldnames || headers.map((_, i) => String(i));
 		const col_configs = headers.map((h, i) => ({
-			data: keys[i], title: String(h), type: "text",
+			data: keys[i],
+			title: String(h),
+			type: "text",
 			width: Math.max(80, Math.min(200, String(h).length * 9 + 20)),
 		}));
-		const blank = Object.fromEntries(keys.map(k => [k, ""]));
-		const data_rows = rows.map(r => Object.fromEntries(keys.map((k, i) => [k, String(r[i] ?? "")])));
+		const blank = Object.fromEntries(keys.map((k) => [k, ""]));
+		const data_rows = rows.map((r) =>
+			Object.fromEntries(keys.map((k, i) => [k, String(r[i] ?? "")]))
+		);
 		while (data_rows.length < 50) data_rows.push({ ...blank });
 
 		if (this._gd_target === "current") {
 			const sm = this.board.sheet_manager;
 			const s = sm?._sheets?.get(sm?._active_id);
 			if (s?.is_blank) {
-				s.columns_config = col_configs; s.data = data_rows; s.report_meta = report_meta;
-				sm._apply_sheet(s); return;
+				s.columns_config = col_configs;
+				s.data = data_rows;
+				s.report_meta = report_meta;
+				sm._apply_sheet(s);
+				return;
 			}
-			frappe.msgprint(__("Current sheet is a DocType sheet — loading into a new sheet instead."));
+			frappe.msgprint(
+				__("Current sheet is a DocType sheet — loading into a new sheet instead.")
+			);
 		}
-		this.board.sheet_manager.add_blank_sheet_with_data(label || __("Import"), col_configs, data_rows, report_meta);
+		this.board.sheet_manager.add_blank_sheet_with_data(
+			label || __("Import"),
+			col_configs,
+			data_rows,
+			report_meta
+		);
 	}
 
 	// ── Report filter helper class methods (shared with in-sheet filter bar) ──
@@ -4159,9 +5263,15 @@ frappe.views.excel.ExcelToolbar = class ExcelToolbar {
 	/** Resolve the default value for a report filter definition. */
 	_gd_default_val(f) {
 		let d = f.default;
-		if (typeof d === "function") { try { d = d(); } catch (_) { d = ""; } }
+		if (typeof d === "function") {
+			try {
+				d = d();
+			} catch (_) {
+				d = "";
+			}
+		}
 		if (typeof d === "string") {
-			if (d === "Today")      return frappe.datetime.get_today();
+			if (d === "Today") return frappe.datetime.get_today();
 			if (d === "Year Start") return frappe.datetime.year_start();
 		}
 		return d ?? "";
@@ -4169,9 +5279,9 @@ frappe.views.excel.ExcelToolbar = class ExcelToolbar {
 
 	/** Render one filter row HTML from a filter definition object. */
 	_gd_filter_row(f) {
-		const fn  = frappe.utils.escape_html(f.fieldname || "");
+		const fn = frappe.utils.escape_html(f.fieldname || "");
 		const lbl = frappe.utils.escape_html(__(f.label || f.fieldname || ""));
-		const ft  = (f.fieldtype || "Data").toLowerCase();
+		const ft = (f.fieldtype || "Data").toLowerCase();
 		const def = frappe.utils.escape_html(String(this._gd_default_val(f)));
 		const req = f.reqd ? `<span class="ev-gd-req" title="${__("Required")}">*</span>` : "";
 
@@ -4179,18 +5289,31 @@ frappe.views.excel.ExcelToolbar = class ExcelToolbar {
 		if (ft === "date") {
 			input = `<input type="date" class="form-control ev-gd-rfv" data-fn="${fn}" value="${def}">`;
 		} else if (ft === "daterange") {
-			const parts = Array.isArray(f.default) ? f.default : [frappe.datetime.year_start(), frappe.datetime.get_today()];
+			const parts = Array.isArray(f.default)
+				? f.default
+				: [frappe.datetime.year_start(), frappe.datetime.get_today()];
 			input = `<input type="date" class="form-control ev-gd-rfv ev-gd-rfv-from" data-fn="${fn}" value="${parts[0]}" style="width:calc(50% - 10px)">
 				<span style="margin:0 4px;color:var(--text-muted)">–</span>
 				<input type="date" class="form-control ev-gd-rfv ev-gd-rfv-to" data-fn="${fn}__to" value="${parts[1]}" style="width:calc(50% - 10px)">`;
 		} else if (ft === "select") {
 			const raw_opts = f.options ?? "";
-			const opts = Array.isArray(raw_opts) ? raw_opts : String(raw_opts).split("\n").filter(Boolean);
+			const opts = Array.isArray(raw_opts)
+				? raw_opts
+				: String(raw_opts).split("\n").filter(Boolean);
 			input = `<select class="form-control ev-gd-rfv" data-fn="${fn}">
-				${opts.map(o => `<option${o === def ? " selected" : ""}>${frappe.utils.escape_html(o)}</option>`).join("")}
+				${opts
+					.map(
+						(o) =>
+							`<option${o === def ? " selected" : ""}>${frappe.utils.escape_html(
+								o
+							)}</option>`
+					)
+					.join("")}
 			</select>`;
 		} else if (ft === "check") {
-			input = `<input type="checkbox" class="ev-gd-rfv ev-gd-rfv-check" data-fn="${fn}"${def === "1" || def === "true" ? " checked" : ""} style="margin-top:6px">`;
+			input = `<input type="checkbox" class="ev-gd-rfv ev-gd-rfv-check" data-fn="${fn}"${
+				def === "1" || def === "true" ? " checked" : ""
+			} style="margin-top:6px">`;
 		} else if (ft === "int" || ft === "float" || ft === "currency") {
 			input = `<input type="number" class="form-control ev-gd-rfv" data-fn="${fn}" value="${def}">`;
 		} else {
@@ -4207,12 +5330,14 @@ frappe.views.excel.ExcelToolbar = class ExcelToolbar {
 	_gd_collect_filters($container) {
 		const f = {};
 		$container.find(".ev-gd-rpt-frow--dynamic").each((_, row) => {
-			$(row).find(".ev-gd-rfv").each((_, inp) => {
-				const fn = $(inp).data("fn");
-				if (!fn) return;
-				if ($(inp).is("[type=checkbox]")) f[fn] = $(inp).prop("checked") ? 1 : 0;
-				else f[fn] = $(inp).val();
-			});
+			$(row)
+				.find(".ev-gd-rfv")
+				.each((_, inp) => {
+					const fn = $(inp).data("fn");
+					if (!fn) return;
+					if ($(inp).is("[type=checkbox]")) f[fn] = $(inp).prop("checked") ? 1 : 0;
+					else f[fn] = $(inp).val();
+				});
 		});
 		return f;
 	}
@@ -4244,31 +5369,49 @@ frappe.views.excel.ExcelToolbar = class ExcelToolbar {
 		const $cw = $bar.find(".ev-rfb-controls-wrap");
 		rm._controls = {};
 
-		filter_defs.forEach(f => {
+		filter_defs.forEach((f) => {
 			const ft = (f.fieldtype || "Data").toLowerCase();
-			const label_html = `<span class="ev-rfb-ctrl-lbl">${frappe.utils.escape_html(__(f.label || f.fieldname))}${f.reqd ? '<span class="ev-rfb-req">*</span>' : ""}</span>`;
+			const label_html = `<span class="ev-rfb-ctrl-lbl">${frappe.utils.escape_html(
+				__(f.label || f.fieldname)
+			)}${f.reqd ? '<span class="ev-rfb-req">*</span>' : ""}</span>`;
 
 			if (ft === "daterange") {
 				// DateRange → two Date controls side by side
-				const $item = $(`<div class="ev-rfb-ctrl-item ev-rfb-ctrl-item--range">${label_html}<div class="ev-rfb-range-inputs"></div></div>`).appendTo($cw);
+				const $item = $(
+					`<div class="ev-rfb-ctrl-item ev-rfb-ctrl-item--range">${label_html}<div class="ev-rfb-range-inputs"></div></div>`
+				).appendTo($cw);
 				const $ri = $item.find(".ev-rfb-range-inputs");
 				const $fw = $(`<div class="ev-rfb-date-half"></div>`).appendTo($ri);
-				$(`<span class="ev-rfb-range-sep">–</span><div class="ev-rfb-date-half"></div>`).appendTo($ri);
+				$(
+					`<span class="ev-rfb-range-sep">–</span><div class="ev-rfb-date-half"></div>`
+				).appendTo($ri);
 
-				const from_ctrl = frappe.ui.form.make_control({ df: { fieldtype: "Date", fieldname: f.fieldname, label: "" }, parent: $fw[0], render_input: true });
-				const to_ctrl   = frappe.ui.form.make_control({ df: { fieldtype: "Date", fieldname: f.fieldname + "__to", label: "" }, parent: $ri.find(".ev-rfb-date-half").last()[0], render_input: true });
-				from_ctrl.refresh(); to_ctrl.refresh();
+				const from_ctrl = frappe.ui.form.make_control({
+					df: { fieldtype: "Date", fieldname: f.fieldname, label: "" },
+					parent: $fw[0],
+					render_input: true,
+				});
+				const to_ctrl = frappe.ui.form.make_control({
+					df: { fieldtype: "Date", fieldname: f.fieldname + "__to", label: "" },
+					parent: $ri.find(".ev-rfb-date-half").last()[0],
+					render_input: true,
+				});
+				from_ctrl.refresh();
+				to_ctrl.refresh();
 
-				const parts = Array.isArray(f.default) ? f.default : [frappe.datetime.year_start(), frappe.datetime.get_today()];
+				const parts = Array.isArray(f.default)
+					? f.default
+					: [frappe.datetime.year_start(), frappe.datetime.get_today()];
 				setTimeout(() => {
 					from_ctrl.set_value(rm.current_filters?.[f.fieldname] || parts[0]);
 					to_ctrl.set_value(rm.current_filters?.[f.fieldname + "__to"] || parts[1]);
 				}, 50);
 				rm._controls[f.fieldname] = from_ctrl;
 				rm._controls[f.fieldname + "__to"] = to_ctrl;
-
 			} else {
-				const $item = $(`<div class="ev-rfb-ctrl-item">${label_html}<div class="ev-rfb-ctrl-input"></div></div>`).appendTo($cw);
+				const $item = $(
+					`<div class="ev-rfb-ctrl-item">${label_html}<div class="ev-rfb-ctrl-input"></div></div>`
+				).appendTo($cw);
 
 				// Normalize Select options: can be array OR newline-separated string
 				let df_options = f.options || "";
@@ -4291,8 +5434,8 @@ frappe.views.excel.ExcelToolbar = class ExcelToolbar {
 				// so Link autocomplete respects any constraints defined in the report JS file
 				if (ft === "link") {
 					if (f.get_query) ctrl.get_query = f.get_query;
-					if (f.query)     ctrl.df.query   = f.query;
-					if (f.filters)   ctrl.df.filters  = f.filters;
+					if (f.query) ctrl.df.query = f.query;
+					if (f.filters) ctrl.df.filters = f.filters;
 				}
 
 				const saved_val = rm.current_filters?.[f.fieldname];
@@ -4319,11 +5462,11 @@ frappe.views.excel.ExcelToolbar = class ExcelToolbar {
 		// Refresh — collect from Frappe controls
 		$bar.on("click", ".ev-rfb-refresh-btn", () => {
 			const filters = {};
-			filter_defs.forEach(f => {
+			filter_defs.forEach((f) => {
 				const ft = (f.fieldtype || "Data").toLowerCase();
 				if (ft === "daterange") {
 					const from_v = rm._controls[f.fieldname]?.get_value?.();
-					const to_v   = rm._controls[f.fieldname + "__to"]?.get_value?.();
+					const to_v = rm._controls[f.fieldname + "__to"]?.get_value?.();
 					if (from_v || to_v) filters[f.fieldname] = [from_v || "", to_v || ""];
 				} else {
 					const v = rm._controls[f.fieldname]?.get_value?.();
@@ -4335,53 +5478,92 @@ frappe.views.excel.ExcelToolbar = class ExcelToolbar {
 			frappe.call({
 				method: "frappe.desk.query_report.run",
 				args: { report_name: rm.name, filters, ignore_prepared_report: 1 },
-				freeze: true, freeze_message: __("Refreshing report…"),
+				freeze: true,
+				freeze_message: __("Refreshing report…"),
 				callback: (r) => {
 					if (!r.message) return;
 					const res = r.message;
 					const raw = res.columns || [];
-					const cols = raw.map(c => typeof c === "string" ? { label: c, fieldname: c } : c);
-					const hdrs = cols.map(c => c.label || c.fieldname);
-					const keys = cols.map(c => c.fieldname || c.label);
+					const cols = raw.map((c) =>
+						typeof c === "string" ? { label: c, fieldname: c } : c
+					);
+					const hdrs = cols.map((c) => c.label || c.fieldname);
+					const keys = cols.map((c) => c.fieldname || c.label);
 					const result_rows = (res.result || [])
-						.filter(row => !row.is_subtotal && !row.is_total)
-						.map(row => keys.map((k, i) => Array.isArray(row) ? row[i] : (row[k] ?? "")));
+						.filter((row) => !row.is_subtotal && !row.is_total)
+						.map((row) =>
+							keys.map((k, i) => (Array.isArray(row) ? row[i] : row[k] ?? ""))
+						);
 					// Use fieldnames as data keys (matches col_configs created at load time)
-					const sheet_keys = sheet.columns_config?.length ? sheet.columns_config.map(c => c.data) : keys;
-					const blank = Object.fromEntries(sheet_keys.map(k => [k, ""]));
-					const data_rows = result_rows.map(row => Object.fromEntries(sheet_keys.map((k, i) => [k, String(row[i] ?? "")])));
+					const sheet_keys = sheet.columns_config?.length
+						? sheet.columns_config.map((c) => c.data)
+						: keys;
+					const blank = Object.fromEntries(sheet_keys.map((k) => [k, ""]));
+					const data_rows = result_rows.map((row) =>
+						Object.fromEntries(sheet_keys.map((k, i) => [k, String(row[i] ?? "")]))
+					);
 					while (data_rows.length < 50) data_rows.push({ ...blank });
 					sheet.data = data_rows;
 					sheet._data_is_stale = false;
 					this.board.hot.loadData(data_rows);
 					// Re-run any Smart Lookups that enrich this sheet's rows.
-					if (this.board._applied_lookups?.some(c => c.src_sheet_id === sheet.id)) {
+					if (this.board._applied_lookups?.some((c) => c.src_sheet_id === sheet.id)) {
 						setTimeout(() => this.board._reapply_smart_lookups(), 0);
 					}
-					frappe.show_alert({ message: __("{0} rows loaded", [result_rows.length]), indicator: "green" }, 2);
+					frappe.show_alert(
+						{
+							message: __("{0} rows loaded", [result_rows.length]),
+							indicator: "green",
+						},
+						2
+					);
 				},
 			});
 		});
 	}
 
 	_gd_detect_delim(text) {
-		const s = text.slice(0, 2000), c = { ",": 0, ";": 0, "\t": 0, "|": 0 };
+		const s = text.slice(0, 2000),
+			c = { ",": 0, ";": 0, "\t": 0, "|": 0 };
 		for (const ch of s) if (ch in c) c[ch]++;
 		return Object.entries(c).sort((a, b) => b[1] - a[1])[0][0];
 	}
 
 	_gd_parse_csv(text, delim = ",") {
-		const rows = []; let row = [], cur = "", inq = false;
+		const rows = [];
+		let row = [],
+			cur = "",
+			inq = false;
 		for (let i = 0; i < text.length; i++) {
 			const c = text[i];
-			if (inq) { if (c === '"' && text[i + 1] === '"') { cur += '"'; i++; } else if (c === '"') { inq = false; } else { cur += c; } }
-			else if (c === '"') { inq = true; }
-			else if (c === delim) { row.push(cur); cur = ""; }
-			else if (c === "\n") { row.push(cur); rows.push(row); row = []; cur = ""; }
-			else if (c !== "\r") { cur += c; }
+			if (inq) {
+				if (c === '"' && text[i + 1] === '"') {
+					cur += '"';
+					i++;
+				} else if (c === '"') {
+					inq = false;
+				} else {
+					cur += c;
+				}
+			} else if (c === '"') {
+				inq = true;
+			} else if (c === delim) {
+				row.push(cur);
+				cur = "";
+			} else if (c === "\n") {
+				row.push(cur);
+				rows.push(row);
+				row = [];
+				cur = "";
+			} else if (c !== "\r") {
+				cur += c;
+			}
 		}
-		if (cur || row.length) { row.push(cur); rows.push(row); }
-		return rows.filter(r => r.some(v => v.trim()));
+		if (cur || row.length) {
+			row.push(cur);
+			rows.push(row);
+		}
+		return rows.filter((r) => r.some((v) => v.trim()));
 	}
 
 	_gd_path(obj, path) {
@@ -4394,19 +5576,23 @@ frappe.views.excel.ExcelToolbar = class ExcelToolbar {
 		this._color_target = type;
 		this._refresh_recent_swatches();
 		this.$palette.find(".ev-pal-custom-panel").addClass("hide");
-		const btn_rect  = trigger_el.getBoundingClientRect();
+		const btn_rect = trigger_el.getBoundingClientRect();
 		const wrap_rect = this.wrapper.getBoundingClientRect();
-		this.$palette.css({
-			top:  btn_rect.bottom - wrap_rect.top + 2,
-			left: Math.max(0, btn_rect.left - wrap_rect.left),
-		}).removeClass("hide");
+		this.$palette
+			.css({
+				top: btn_rect.bottom - wrap_rect.top + 2,
+				left: Math.max(0, btn_rect.left - wrap_rect.left),
+			})
+			.removeClass("hide");
 	}
 
 	_pick_color(color) {
 		const range = this._get_range();
 		if (range) {
 			const key = this._color_target === "color" ? "color" : "bg";
-			this._apply_to_range(range, (fmt) => { fmt[key] = color; });
+			this._apply_to_range(range, (fmt) => {
+				fmt[key] = color;
+			});
 			this.board.hot.render();
 			if (key === "color") {
 				this._last_text_color = color;
@@ -4427,7 +5613,11 @@ frappe.views.excel.ExcelToolbar = class ExcelToolbar {
 				const k = `${r}:${c}`;
 				if (!this.board.format_store[k]) this.board.format_store[k] = {};
 				fn(this.board.format_store[k], r, c);
-				if (!Object.values(this.board.format_store[k]).some(v => v !== null && v !== undefined && v !== "" && v !== false)) {
+				if (
+					!Object.values(this.board.format_store[k]).some(
+						(v) => v !== null && v !== undefined && v !== "" && v !== false
+					)
+				) {
 					delete this.board.format_store[k];
 				}
 			}
@@ -4445,30 +5635,38 @@ frappe.views.excel.ExcelToolbar = class ExcelToolbar {
 	}
 
 	_vary_color(hex, factor) {
-		const r = parseInt(hex.slice(1,3), 16);
-		const g = parseInt(hex.slice(3,5), 16);
-		const b = parseInt(hex.slice(5,7), 16);
+		const r = parseInt(hex.slice(1, 3), 16);
+		const g = parseInt(hex.slice(3, 5), 16);
+		const b = parseInt(hex.slice(5, 7), 16);
 		let nr, ng, nb;
 		if (factor > 0) {
-			nr = Math.round(r + (255-r)*factor);
-			ng = Math.round(g + (255-g)*factor);
-			nb = Math.round(b + (255-b)*factor);
+			nr = Math.round(r + (255 - r) * factor);
+			ng = Math.round(g + (255 - g) * factor);
+			nb = Math.round(b + (255 - b) * factor);
 		} else {
 			const s = -factor;
-			nr = Math.round(r*(1-s));
-			ng = Math.round(g*(1-s));
-			nb = Math.round(b*(1-s));
+			nr = Math.round(r * (1 - s));
+			ng = Math.round(g * (1 - s));
+			nb = Math.round(b * (1 - s));
 		}
-		return "#" + [nr,ng,nb].map(v => Math.min(255,Math.max(0,v)).toString(16).padStart(2,"0")).join("");
+		return (
+			"#" +
+			[nr, ng, nb]
+				.map((v) => Math.min(255, Math.max(0, v)).toString(16).padStart(2, "0"))
+				.join("")
+		);
 	}
 
 	_load_recent() {
-		try { return JSON.parse(localStorage.getItem("ev_recent_colors") || "[]"); }
-		catch { return []; }
+		try {
+			return JSON.parse(localStorage.getItem("ev_recent_colors") || "[]");
+		} catch {
+			return [];
+		}
 	}
 
 	_save_recent(color) {
-		let recent = this._load_recent().filter(c => c !== color);
+		let recent = this._load_recent().filter((c) => c !== color);
 		recent.unshift(color);
 		localStorage.setItem("ev_recent_colors", JSON.stringify(recent.slice(0, 10)));
 	}
@@ -4476,10 +5674,20 @@ frappe.views.excel.ExcelToolbar = class ExcelToolbar {
 	_refresh_recent_swatches() {
 		const recent = this._load_recent();
 		const $wrap = this.$palette.find(".ev-pal-recent-wrap");
-		if (!recent.length) { $wrap.addClass("hide"); return; }
+		if (!recent.length) {
+			$wrap.addClass("hide");
+			return;
+		}
 		$wrap.removeClass("hide");
-		$wrap.find(".ev-pal-recent-grid").html(
-			recent.map(c => `<span class="ev-swatch" data-color="${c}" style="background:${c}" title="${c}"></span>`).join("")
-		);
+		$wrap
+			.find(".ev-pal-recent-grid")
+			.html(
+				recent
+					.map(
+						(c) =>
+							`<span class="ev-swatch" data-color="${c}" style="background:${c}" title="${c}"></span>`
+					)
+					.join("")
+			);
 	}
 };

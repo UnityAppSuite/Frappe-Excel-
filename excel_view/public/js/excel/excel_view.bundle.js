@@ -83,22 +83,23 @@ import "./cell_types/index.js";
 
 import "./components/context_menu.js";
 import "./components/data_manager.js";
+import "./components/undo_manager.js"; // Undo / Redo that survives data reloads
 import "./components/child_table_manager.js"; // V3.5 — Inline child table expand
 import "./components/column_manager.js";
 import "./components/formula_bar.js";
 import "./components/toolbar.js";
 import "./components/field_picker.js";
-import "./components/workbook_manager.js";  // V2.1 — Saved Workbooks
-import "./components/status_bar.js";        // V2.2 — Status Bar
+import "./components/workbook_manager.js"; // V2.1 — Saved Workbooks
+import "./components/status_bar.js"; // V2.2 — Status Bar
 // V2.4 — IntelliFlow Join Canvas + Collaboration (Phase 3) - Now using vanilla JS
-import "./components/query_flow_panel.js";  // V3 — QueryFlowPanel (IntelliFlow V3)
-import "./components/sheet_manager.js";    // V2.5 — Multi-Sheet Workbooks
-import "./components/cf_manager.js";      // V2.6 — Conditional Formatting
-import "./components/chart_manager.js";   // V2.6 — Insert Charts
-import "./components/pivot_builder.js";   // V2.6 — PivotTable Builder
+import "./components/query_flow_panel.js"; // V3 — QueryFlowPanel (IntelliFlow V3)
+import "./components/sheet_manager.js"; // V2.5 — Multi-Sheet Workbooks
+import "./components/cf_manager.js"; // V2.6 — Conditional Formatting
+import "./components/chart_manager.js"; // V2.6 — Insert Charts
+import "./components/pivot_builder.js"; // V2.6 — PivotTable Builder
 import "./components/dashboard_manager.js"; // V3.4 — Dashboard Sheets
-import "./components/tree_import.js";       // V3.3 — Tree-View Bulk Import
-import "./components/permission_panel.js";  // V3.4 — DocType Permission Panel
+import "./components/tree_import.js"; // V3.3 — Tree-View Bulk Import
+import "./components/permission_panel.js"; // V3.4 — DocType Permission Panel
 import "./components/excel_board.js";
 
 // ── 5. Signal that deps are ready ─────────────────────────────────────────────
