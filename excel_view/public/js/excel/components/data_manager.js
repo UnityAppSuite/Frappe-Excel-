@@ -153,12 +153,23 @@ frappe.views.excel.DataManager = class DataManager {
 						? __("{0} record(s) could not be saved", [errors.length])
 						: __("Saving {0}", [first.name])
 				);
-			} else {
-				this._dirty = false;
-				this._clear_dirty_indicator();
-				frappe.views.excel.toast(__("Saved"), "success", 2000);
 			}
+			// Refused rows were reverted by the reload, so they are no longer waiting.
+			// Only edits typed while this request was running are still unsaved.
+			if (!errors.length || !Object.keys(this._save_queue).length) {
+				this._dirty = Object.keys(this._save_queue).length > 0;
+				if (!this._dirty) this._clear_dirty_indicator();
+			}
+			if (!errors.length) frappe.views.excel.toast(__("Saved"), "success", 2000);
 		} catch (err) {
+			// The whole request failed (session expired, network down, no permission). Nothing
+			// was stored, so put the edits back: Ctrl+S retries them and the leave warning
+			// stays on. Edits typed since the request went out win over the older ones.
+			Object.entries(queue).forEach(([name, fields]) => {
+				this._save_queue[name] = { ...fields, ...(this._save_queue[name] || {}) };
+			});
+			this._dirty = true;
+			this._show_dirty_indicator();
 			frappe.views.excel.show_error(err, __("Saving changes to {0}", [doctype]));
 		}
 	}

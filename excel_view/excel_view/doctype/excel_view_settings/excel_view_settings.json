@@ -9,8 +9,8 @@
  ],
  "fields": [
   {
-   "default": "1",
-   "description": "When ticked (the default), edits in the Excel View grid are NOT saved automatically. They wait until the user presses Ctrl+S (or leaves the page). When unticked, edits are saved about one second after each change.",
+   "default": "0",
+   "description": "When ticked, edits in the Excel View grid are NOT saved automatically. They wait until the user presses Ctrl+S (or leaves the page). When unticked (the default), edits are saved about one second after each change.",
    "fieldname": "manual_save",
    "fieldtype": "Check",
    "label": "Manual Save (Ctrl+S)"

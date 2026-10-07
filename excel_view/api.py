@@ -790,9 +790,9 @@ def _check_writable_fields(meta, fields: dict) -> None:
 			frappe.throw(_("{0} is not a field of {1}.").format(frappe.bold(fieldname), meta.name))
 		if df.fieldtype in _NON_VALUE_FIELDTYPES or df.fieldtype in _TABLE_FIELDTYPES:
 			frappe.throw(_("{0} cannot be changed here.").format(frappe.bold(df.label or fieldname)))
-		# A read-only field that is filled from another record is refreshed by Frappe
-		# itself, so it is not a user edit. Everything else read-only is refused.
-		if df.read_only and not df.fetch_from:
+		# Read-only fields are never writable here, including fields filled by "fetch from":
+		# Frappe refreshes those itself on save, and the grid shows them locked.
+		if df.read_only or df.fieldtype == "Read Only":
 			frappe.throw(
 				_("{0} is read-only and cannot be changed here.").format(frappe.bold(df.label or fieldname))
 			)
@@ -4036,20 +4036,18 @@ def extend_bootinfo(bootinfo):
 
 
 def _manual_save_enabled() -> int:
-	"""Manual Save (Ctrl+S) is ON unless an administrator has switched it off in
-	Excel View Settings. When the setting has never been saved (a fresh install) the
-	doctype default applies, which is on."""
+	"""Manual Save (Ctrl+S) is OFF unless an administrator switches it on in
+	Excel View Settings. Edits are auto-saved, as before, when the setting has never
+	been saved (a fresh install or an upgrade)."""
 	try:
 		stored = frappe.db.sql(
 			"select value from tabSingles where doctype=%s and field=%s",
 			("Excel View Settings", "manual_save"),
 		)
-		if not stored:
-			return 1
-		return int(stored[0][0] or 0)
+		return int(stored[0][0] or 0) if stored else 0
 	except Exception:
 		# The settings doctype does not exist yet (before the first migrate).
-		return 1
+		return 0
 
 
 @frappe.whitelist()

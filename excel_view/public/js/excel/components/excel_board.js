@@ -3842,17 +3842,19 @@ frappe.views.ExcelBoard = class ExcelBoard {
 	// ── Keyboard shortcuts ────────────────────────────────────────────────────
 
 	_bind_shortcuts() {
-		// Manual-save mode: ask before the tab is closed or refreshed with edits waiting.
+		// Ask before the tab is closed or refreshed while edits are still unsaved. In
+		// auto-save mode that is only the moment before a save and after a failed save.
 		$(window)
 			.off("beforeunload.ev-manual-save")
 			.on("beforeunload.ev-manual-save", (e) => {
-				if (this.manual_save && !this._destroyed && this.data_manager?.is_dirty()) {
+				if (!this._destroyed && this.data_manager?.is_dirty()) {
 					e.preventDefault();
 					e.originalEvent.returnValue = "";
 				}
 			});
 
-		// Manual-save mode: leaving the page inside the app saves what is waiting. The view's
+		// Leaving the page inside the app saves whatever is still waiting (manual-save edits,
+		// or edits kept after a failed save). The view's
 		// on_hide() does not always run on a route change, so listen to the router itself.
 		// frappe.router's emitter cannot unbind a single handler, so ONE shared handler is
 		// registered for the page and it walks the boards that are still alive.
@@ -3866,7 +3868,7 @@ frappe.views.ExcelBoard = class ExcelBoard {
 						frappe.views.excel._live_boards.delete(b);
 						return;
 					}
-					if (b.manual_save && b.data_manager?.is_dirty()) b.data_manager._flush_saves();
+					if (b.data_manager?.is_dirty()) b.data_manager._flush_saves();
 				});
 			});
 		}
@@ -6488,10 +6490,9 @@ frappe.views.ExcelBoard = class ExcelBoard {
 	 */
 	destroy() {
 		this._destroyed = true;
-		// Manual-save mode: edits still waiting are saved when the user leaves the page.
+		// Edits still waiting are saved when the user leaves the page.
 		try {
-			if (this.manual_save && this.data_manager?.is_dirty())
-				this.data_manager._flush_saves();
+			if (this.data_manager?.is_dirty()) this.data_manager._flush_saves();
 		} catch (e) {
 			console.error("[ExcelView] save on leave failed", e);
 		}
