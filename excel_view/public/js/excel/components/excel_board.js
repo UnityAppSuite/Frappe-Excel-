@@ -34,6 +34,9 @@ frappe.views.ExcelBoard = class ExcelBoard {
 		this.columns = [];
 		// Sparse map of per-cell formatting: { "row:col": { bold, italic, ... } }
 		this.format_store = {};
+		// Site-wide "Manual Save" switch (Excel View Settings). When on, edits wait until
+		// Ctrl+S (or leaving the page) instead of being saved about 1 second after Enter.
+		this.manual_save = !!frappe.boot.excel_view_manual_save;
 		// Snapshot of list_view.fields at board creation time so _deselect() can
 		// restore it after a workbook (which overwrites list_view.fields) is closed.
 		this._default_list_view_fields = [...(this.list_view.fields || [])];
@@ -119,12 +122,12 @@ frappe.views.ExcelBoard = class ExcelBoard {
 		this.workbook_manager = new frappe.views.excel.WorkbookManager({ board: this });
 
 		// V2.6 — Chart / CF / Pivot managers (toolbar delegates to these)
-		this.cf_manager           = new frappe.views.excel.CFManager({ board: this });
-		this.chart_manager        = new frappe.views.excel.ChartManager({ board: this });
-		this.pivot_builder        = new frappe.views.excel.PivotBuilder({ board: this });
-		this.dashboard_manager    = new frappe.views.excel.DashboardManager({ board: this });
+		this.cf_manager = new frappe.views.excel.CFManager({ board: this });
+		this.chart_manager = new frappe.views.excel.ChartManager({ board: this });
+		this.pivot_builder = new frappe.views.excel.PivotBuilder({ board: this });
+		this.dashboard_manager = new frappe.views.excel.DashboardManager({ board: this });
 		// V3.5 — Inline child table expansion
-		this.child_table_manager  = new frappe.views.excel.ChildTableManager({ board: this });
+		this.child_table_manager = new frappe.views.excel.ChildTableManager({ board: this });
 
 		// 2. Load persisted freeze state (needed before _init_hot)
 		this._frozen_cols = this.column_manager.load_freeze();
@@ -137,7 +140,7 @@ frappe.views.ExcelBoard = class ExcelBoard {
 		if (this._ct_fieldnames.length) {
 			this.column_manager.fields = [
 				...this.column_manager.fields,
-				...this._ct_fieldnames.map(f => [f, this.doctype]),
+				...this._ct_fieldnames.map((f) => [f, this.doctype]),
 			];
 		}
 
@@ -186,7 +189,7 @@ frappe.views.ExcelBoard = class ExcelBoard {
 		// Restore hidden columns AFTER HOT init so _sync_visible_columns can call updateSettings
 		const _saved_hidden_cols = frappe.get_user_settings(this.doctype)?.excel_hidden_cols;
 		if (Array.isArray(_saved_hidden_cols) && _saved_hidden_cols.length) {
-			_saved_hidden_cols.forEach(key => this._hidden_col_keys.add(key));
+			_saved_hidden_cols.forEach((key) => this._hidden_col_keys.add(key));
 			this._sync_visible_columns();
 		}
 		// Restore Smart Lookup configs (column defs only — data re-joined after first refresh)
@@ -196,7 +199,7 @@ frappe.views.ExcelBoard = class ExcelBoard {
 		}
 		// V3.1 — Restore manual row heights AFTER HOT init (plugin must exist)
 		const _saved_rh = frappe.get_user_settings(this.doctype)?.excel_row_heights;
-		if (Array.isArray(_saved_rh) && _saved_rh.some(h => h != null)) {
+		if (Array.isArray(_saved_rh) && _saved_rh.some((h) => h != null)) {
 			setTimeout(() => {
 				const rh_plugin = this.hot?.getPlugin("manualRowResize");
 				if (rh_plugin) {
@@ -253,7 +256,8 @@ frappe.views.ExcelBoard = class ExcelBoard {
 		const saved_gridlines = frappe.get_user_settings(this.doctype)?.excel_hide_gridlines;
 		if (saved_gridlines) this.$hot_container?.addClass("ev-hide-gridlines");
 
-		const saved_freeze_rows = frappe.get_user_settings(this.doctype)?.excel_view_freeze_rows || 0;
+		const saved_freeze_rows =
+			frappe.get_user_settings(this.doctype)?.excel_view_freeze_rows || 0;
 		this._frozen_rows = saved_freeze_rows;
 		if (saved_freeze_rows > 0) {
 			setTimeout(() => this.hot?.updateSettings({ fixedRowsTop: saved_freeze_rows }), 0);
@@ -268,7 +272,9 @@ frappe.views.ExcelBoard = class ExcelBoard {
 		// Restore formula column templates from user_settings (no workbook needed).
 		// Deduplicate by key — a past bug could produce two entries with the same
 		// __fml_N__ key; keep only the last occurrence (most recently saved).
-		const saved_formula_col_templates = frappe.get_user_settings(this.doctype)?.excel_formula_col_templates;
+		const saved_formula_col_templates = frappe.get_user_settings(
+			this.doctype
+		)?.excel_formula_col_templates;
 		if (Array.isArray(saved_formula_col_templates) && saved_formula_col_templates.length) {
 			const seen_keys = new Map();
 			for (const fc of saved_formula_col_templates) {
@@ -278,7 +284,9 @@ frappe.views.ExcelBoard = class ExcelBoard {
 		}
 
 		// Restore blank column configs from user_settings
-		const saved_blank_col_configs = frappe.get_user_settings(this.doctype)?.excel_blank_col_configs;
+		const saved_blank_col_configs = frappe.get_user_settings(
+			this.doctype
+		)?.excel_blank_col_configs;
 		if (Array.isArray(saved_blank_col_configs) && saved_blank_col_configs.length) {
 			this._pending_blank_col_configs = saved_blank_col_configs;
 		}
@@ -340,14 +348,18 @@ frappe.views.ExcelBoard = class ExcelBoard {
 
 		// position:relative is required so the child-table panel (position:absolute)
 		// is positioned relative to this container, not the viewport.
-		this.$hot_container = $('<div class="ev-hot-container" style="position:relative">').appendTo(this.$grid_main);
+		this.$hot_container = $(
+			'<div class="ev-hot-container" style="position:relative">'
+		).appendTo(this.$grid_main);
 
 		// Dashboard canvas — shown when a Dashboard sheet is active, hidden otherwise
 		this.$dashboard_canvas = $('<div class="ev-dashboard-canvas">').appendTo(this.$grid_main);
 		this.$dashboard_canvas.hide();
 
 		// Status bar — fixed footer below the grid
-		this.$status_bar_container = $('<div class="ev-status-bar-container">').appendTo(this.$grid_main);
+		this.$status_bar_container = $('<div class="ev-status-bar-container">').appendTo(
+			this.$grid_main
+		);
 
 		// Right sidebar slot — used by Smart Lookup, Agent Mode, etc.
 		// Width transitions 0 → 300px; grid_main shrinks automatically (flex).
@@ -405,7 +417,7 @@ frappe.views.ExcelBoard = class ExcelBoard {
 				// V3.5 — CT spacer row: height = panel height so rows below are pushed down
 				const spacer_h = this.child_table_manager?.spacer_height_for_row(row);
 				if (spacer_h != null) return spacer_h;
-				return this.columns?.some(c => c._is_meta_col || c._is_social_col) ? 42 : 23;
+				return this.columns?.some((c) => c._is_meta_col || c._is_social_col) ? 42 : 23;
 			},
 			columnSorting: true,
 			allowInsertRow: this.list_view.can_create,
@@ -420,7 +432,7 @@ frappe.views.ExcelBoard = class ExcelBoard {
 			outsideClickDeselects: false,
 
 			// Column sort via dropdown — full autoFilter disabled; Frappe's sidebar
-		// handles filtering so we expose only sort_asc / sort_desc in the header menu.
+			// handles filtering so we expose only sort_asc / sort_desc in the header menu.
 			filters: false,
 			dropdownMenu: ["sort_asc", "sort_desc"],
 
@@ -429,7 +441,6 @@ frappe.views.ExcelBoard = class ExcelBoard {
 
 			// V2.6 — Merge cells plugin enabled
 			mergeCells: true,
-
 
 			// Frozen columns — restored from user_settings
 			fixedColumnsLeft: this._frozen_cols,
@@ -463,7 +474,9 @@ frappe.views.ExcelBoard = class ExcelBoard {
 					if (d._is_anomaly) {
 						meta.className = ((meta.className || "") + " ev-anomaly-row").trim();
 					} else if (d._cluster !== undefined && d._cluster !== null) {
-						meta.className = ((meta.className || "") + ` ev-cluster-${d._cluster % 6}`).trim();
+						meta.className = (
+							(meta.className || "") + ` ev-cluster-${d._cluster % 6}`
+						).trim();
 					}
 					// Inline insert: make all editable columns writable for the pending new row
 					if (d._is_new && row === this._new_row_idx) {
@@ -497,7 +510,11 @@ frappe.views.ExcelBoard = class ExcelBoard {
 			},
 			afterRowResize: (row, size) => this._on_row_resize(row, size),
 			afterRender: () => this._on_render(),
-			afterRenderer: (TD, row, col, prop, value) => this._apply_cell_format(TD, row, col, value),
+			afterRenderer: (TD, row, col, prop, value) => {
+				this._apply_cell_format(TD, row, col, value);
+				// Runs last, so no early return inside _apply_cell_format can overwrite it.
+				this._mark_failed_cell(TD, row, col);
+			},
 			afterGetColHeader: (col, TH) => this._apply_col_header_format(TH, col),
 			afterOnCellMouseDown: (e, coords) => {
 				this._on_tree_row_click(e, coords);
@@ -555,24 +572,30 @@ frappe.views.ExcelBoard = class ExcelBoard {
 				const row_data = this.list_view.data?.[row];
 				if (row_data?._tree_is_header && row_data._tree_size > 1) {
 					const expanded = this._expanded_keys?.has(row_data._tree_group_key);
-					TH.innerHTML = `<div class="ev-tree-th" title="Click to ${expanded ? 'collapse' : 'expand'}">${expanded ? '▼' : '▶'} <span class="ev-tree-badge">${row_data._tree_size}</span></div>`;
+					TH.innerHTML = `<div class="ev-tree-th" title="Click to ${
+						expanded ? "collapse" : "expand"
+					}">${expanded ? "▼" : "▶"} <span class="ev-tree-badge">${
+						row_data._tree_size
+					}</span></div>`;
 				} else if (row_data?._tree_is_child) {
 					TH.innerHTML = `<div class="ev-tree-child-th">└</div>`;
 				}
 			},
 			// V3.1 — intercept F4; V3.3 — intercept Ctrl+E (Flash Fill); V3.3 — Ctrl+D (Fill Down)
+			// e.key is lower-cased so Ctrl+E / Ctrl+D also work with Caps Lock on.
 			beforeKeyDown: (e) => {
+				const key = (e.key || "").toLowerCase();
 				if (e.key === "F4" && !e.ctrlKey && !e.altKey && !e.shiftKey) {
 					e.stopImmediatePropagation();
 					e.preventDefault();
 					setTimeout(() => this._repeat_last_action(), 0);
 				}
-				if (e.key === "e" && e.ctrlKey && !e.altKey && !e.shiftKey) {
+				if (key === "e" && e.ctrlKey && !e.altKey && !e.shiftKey) {
 					e.stopImmediatePropagation();
 					e.preventDefault();
 					setTimeout(() => this._flash_fill(), 0);
 				}
-				if (e.key === "d" && e.ctrlKey && !e.altKey && !e.shiftKey) {
+				if (key === "d" && e.ctrlKey && !e.altKey && !e.shiftKey) {
 					e.stopImmediatePropagation();
 					e.preventDefault();
 					setTimeout(() => this._fill_down(), 0);
@@ -580,8 +603,12 @@ frappe.views.ExcelBoard = class ExcelBoard {
 			},
 			// i18n
 			language: frappe.boot.lang === "ar" || frappe.boot.lang === "he" ? "ar-AR" : undefined,
-
 		});
+
+		// Undo / Redo that survives the reload that follows every auto-save.
+		// (Handsontable's own undo list is erased by each loadData().)
+		this.undo_manager = new frappe.views.excel.UndoManager({ board: this });
+		this.undo_manager.attach(this.hot);
 
 		// HOT height:"100%" reads clientHeight at init time — in a flex layout that
 		// value may be 0 before the browser has painted. Force a correct pixel height
@@ -598,9 +625,8 @@ frappe.views.ExcelBoard = class ExcelBoard {
 			// Instead we listen to the master scrollable container (.wtHolder) or
 			// fall back to the window scroll event.
 			const holder = this.$hot_container[0].querySelector(".wtHolder");
-			const scroll_target = (holder && holder.scrollHeight > holder.clientHeight)
-				? holder
-				: window;
+			const scroll_target =
+				holder && holder.scrollHeight > holder.clientHeight ? holder : window;
 
 			const on_scroll = () => this._on_scroll_vertical();
 			scroll_target.addEventListener("scroll", on_scroll, { passive: true });
@@ -649,8 +675,7 @@ frappe.views.ExcelBoard = class ExcelBoard {
 		}
 		const letter = this._col_idx_to_letter(col);
 		const name = frappe.utils.escape_html(col_cfg?.title || letter);
-		const ct_badge = col_cfg?._is_ct_col
-			? `<span class="ev-col-ct-badge">CT</span>` : "";
+		const ct_badge = col_cfg?._is_ct_col ? `<span class="ev-col-ct-badge">CT</span>` : "";
 		return `<div class="ev-col-header">${ct_badge}<span class="ev-col-letter">${letter}</span><span class="ev-col-name">${name}</span></div>`;
 	}
 
@@ -666,6 +691,20 @@ frappe.views.ExcelBoard = class ExcelBoard {
 			n = Math.floor((n - 1) / 26);
 		}
 		return result;
+	}
+
+	// A cell the server refused (set by DataManager after a failed save): red + message.
+	// Called from afterRenderer AFTER _apply_cell_format, which has several early returns
+	// (for example Long Text cells set their own tooltip) that must not hide the mark.
+	_mark_failed_cell(TD, row, col) {
+		if (!this._failed_cells?.size) return;
+		const rec = this.list_view?.data?.[row];
+		const field = this.columns[col]?.data;
+		const msg = rec && field && this._failed_cells.get(`${rec.name}|${field}`);
+		if (msg) {
+			TD.style.backgroundColor = "#ffb3b3";
+			TD.title = msg;
+		}
 	}
 
 	// ── Cell formatting (afterRenderer hook) ──────────────────────────────────
@@ -687,12 +726,19 @@ frappe.views.ExcelBoard = class ExcelBoard {
 				TD.style.padding = "0";
 				return;
 			}
-			if (d && !d._is_new && !d._is_ct_spacer && this.child_table_manager?.has_child_tables()) {
+			if (
+				d &&
+				!d._is_new &&
+				!d._is_ct_spacer &&
+				this.child_table_manager?.has_child_tables()
+			) {
 				const is_open = this.child_table_manager?._state?.parent_row_idx === row;
 				TD.innerHTML = `
 					<button class="ev-ct-toggle-btn${is_open ? " ev-ct-toggle-btn--open" : ""}"
 						data-row="${row}"
-						title="${frappe.utils.escape_html(is_open ? __("Collapse child table") : __("Expand child table"))}"
+						title="${frappe.utils.escape_html(
+							is_open ? __("Collapse child table") : __("Expand child table")
+						)}"
 						aria-expanded="${is_open}"
 						aria-label="${frappe.utils.escape_html(__("Toggle child tables"))}"
 					>
@@ -730,7 +776,11 @@ frappe.views.ExcelBoard = class ExcelBoard {
 			const d = this.list_view?.data?.[row];
 			if (d && !d._is_new && !d._is_ct_spacer && value) {
 				const escaped = frappe.utils.escape_html(String(value));
-				TD.innerHTML = `<a class="ev-id-link" data-name="${escaped}" href="#Form/${frappe.utils.escape_html(this.doctype)}/${escaped}" title="${frappe.utils.escape_html(__("Open {0}", [value]))}">${escaped}</a>`;
+				TD.innerHTML = `<a class="ev-id-link" data-name="${escaped}" href="#Form/${frappe.utils.escape_html(
+					this.doctype
+				)}/${escaped}" title="${frappe.utils.escape_html(
+					__("Open {0}", [value])
+				)}">${escaped}</a>`;
 				TD.style.padding = "0 8px";
 			}
 			return;
@@ -759,9 +809,9 @@ frappe.views.ExcelBoard = class ExcelBoard {
 		if (this.columns[col]?._is_docstatus) {
 			const v = parseInt(value, 10);
 			const map = [
-				{ label: "Draft",     cls: "ev-doc-draft"     },
-				{ label: "Submitted", cls: "ev-doc-submitted"  },
-				{ label: "Cancelled", cls: "ev-doc-cancelled"  },
+				{ label: "Draft", cls: "ev-doc-draft" },
+				{ label: "Submitted", cls: "ev-doc-submitted" },
+				{ label: "Cancelled", cls: "ev-doc-cancelled" },
 			];
 			const entry = map[v];
 			TD.innerHTML = entry
@@ -796,7 +846,8 @@ frappe.views.ExcelBoard = class ExcelBoard {
 				TD.classList.add("ev-formula-raw");
 			} else {
 				const computed = this.formula_bridge.get_display_value(row, col);
-				const display  = computed !== null && computed !== undefined ? String(computed) : "";
+				const display =
+					computed !== null && computed !== undefined ? String(computed) : "";
 				TD.textContent = display;
 
 				if (typeof computed === "number") {
@@ -814,20 +865,20 @@ frappe.views.ExcelBoard = class ExcelBoard {
 		// Reset all custom styles first — prevents stale styles from recycled TDs
 		// (HOT reuses DOM elements; without reset, a previously-bold cell's TD keeps bold)
 		TD.style.removeProperty("--ev-cell-fill");
-		TD.style.fontWeight     = "";
-		TD.style.fontStyle      = "";
+		TD.style.fontWeight = "";
+		TD.style.fontStyle = "";
 		TD.style.textDecoration = "";
-		TD.style.color          = "";
-		TD.style.textAlign      = "";
-		TD.style.fontSize       = "";
-		TD.style.fontFamily     = "";
-		TD.style.whiteSpace     = "";
-		TD.style.verticalAlign  = "";
-		TD.style.paddingLeft    = "";
-		TD.style.borderTop      = "";
-		TD.style.borderRight    = "";
-		TD.style.borderBottom   = "";
-		TD.style.borderLeft     = "";
+		TD.style.color = "";
+		TD.style.textAlign = "";
+		TD.style.fontSize = "";
+		TD.style.fontFamily = "";
+		TD.style.whiteSpace = "";
+		TD.style.verticalAlign = "";
+		TD.style.paddingLeft = "";
+		TD.style.borderTop = "";
+		TD.style.borderRight = "";
+		TD.style.borderBottom = "";
+		TD.style.borderLeft = "";
 		TD.style.removeProperty("background-image");
 		TD.style.removeProperty("background-color");
 
@@ -844,13 +895,13 @@ frappe.views.ExcelBoard = class ExcelBoard {
 		const fmt = this.format_store?.[`${row}:${col}`];
 
 		if (fmt) {
-			if (fmt.bold)   TD.style.fontWeight = "bold";
-			if (fmt.italic) TD.style.fontStyle  = "italic";
+			if (fmt.bold) TD.style.fontWeight = "bold";
+			if (fmt.italic) TD.style.fontStyle = "italic";
 
 			const decs = [];
 			if (fmt.underline) decs.push("underline");
-			if (fmt.strike)    decs.push("line-through");
-			if (decs.length)   TD.style.textDecoration = decs.join(" ");
+			if (fmt.strike) decs.push("line-through");
+			if (decs.length) TD.style.textDecoration = decs.join(" ");
 
 			if (fmt.color) TD.style.color = fmt.color;
 			if (fmt.bg) {
@@ -859,25 +910,30 @@ frappe.views.ExcelBoard = class ExcelBoard {
 				TD.style.setProperty("background-image", "none", "important");
 			}
 			if (fmt.align) TD.style.textAlign = fmt.align;
-			if (fmt.size)  TD.style.fontSize  = fmt.size + "px";
-			if (fmt.font)  TD.style.fontFamily = fmt.font;
-			if (fmt.wrap)  TD.style.whiteSpace = "normal";
+			if (fmt.size) TD.style.fontSize = fmt.size + "px";
+			if (fmt.font) TD.style.fontFamily = fmt.font;
+			if (fmt.wrap) TD.style.whiteSpace = "normal";
 			TD.style.verticalAlign = fmt.valign || "middle";
 
-			if (fmt.indent) TD.style.paddingLeft = (fmt.indent * 8 + 4) + "px";
+			if (fmt.indent) TD.style.paddingLeft = fmt.indent * 8 + 4 + "px";
 
 			if (fmt.borders) {
-				if (fmt.borders.top)    TD.style.borderTop    = fmt.borders.top;
-				if (fmt.borders.right)  TD.style.borderRight  = fmt.borders.right;
+				if (fmt.borders.top) TD.style.borderTop = fmt.borders.top;
+				if (fmt.borders.right) TD.style.borderRight = fmt.borders.right;
 				if (fmt.borders.bottom) TD.style.borderBottom = fmt.borders.bottom;
-				if (fmt.borders.left)   TD.style.borderLeft   = fmt.borders.left;
+				if (fmt.borders.left) TD.style.borderLeft = fmt.borders.left;
 			}
 
 			if (fmt.numfmt && fmt.numfmt !== "general" && !is_formula) {
 				const raw = this.list_view?.data?.[row]?.[this.columns[col]?.data];
 				const num = parseFloat(raw);
 				if (!isNaN(num)) {
-					TD.textContent = ExcelBoard._format_num(num, fmt.numfmt, fmt.decimals ?? 2, fmt.currency_sym ?? null);
+					TD.textContent = ExcelBoard._format_num(
+						num,
+						fmt.numfmt,
+						fmt.decimals ?? 2,
+						fmt.currency_sym ?? null
+					);
 					if (!fmt.align) TD.style.textAlign = "right";
 				}
 			}
@@ -899,18 +955,22 @@ frappe.views.ExcelBoard = class ExcelBoard {
 				// Fallback: full eval for colorscale / topbottom / dupuniq rules only
 				const raw_val = this.list_view?.data?.[row]?.[this.columns[col]?.data];
 				const row_data = this.list_view?.data?.[row];
-				let _cf_bg_set = false, _cf_color_set = false;
+				let _cf_bg_set = false,
+					_cf_color_set = false;
 				for (const rule of this.cond_fmt_rules) {
 					if (_cf_bg_set && _cf_color_set) break;
 					if (rule.type === "cell") continue; // already handled by cache above
 					const rng = rule.range || {};
-					const minC = Math.min(rng.c1, rng.c2), maxC = Math.max(rng.c1, rng.c2);
+					const minC = Math.min(rng.c1, rng.c2),
+						maxC = Math.max(rng.c1, rng.c2);
 					if (col < minC || col > maxC) continue;
 					if (_cf_bg_set && rule.fmt?.bg && !rule.fmt?.color) continue;
 					if (_cf_color_set && rule.fmt?.color && !rule.fmt?.bg) continue;
-					const minR = Math.min(rng.r1, rng.r2), maxR = Math.max(rng.r1, rng.r2);
+					const minR = Math.min(rng.r1, rng.r2),
+						maxR = Math.max(rng.r1, rng.r2);
 					if (row_data?._tree_is_child) {
-						const parent_idx = this._tree_parent_map?.get(row_data._tree_group_key) ?? -1;
+						const parent_idx =
+							this._tree_parent_map?.get(row_data._tree_group_key) ?? -1;
 						if (parent_idx < 0 || parent_idx < minR || parent_idx > maxR) continue;
 					} else if (row < minR || row > maxR) {
 						continue;
@@ -929,7 +989,11 @@ frappe.views.ExcelBoard = class ExcelBoard {
 						}
 					} else if (result && result.colorscale_bg && !_cf_bg_set) {
 						TD.style.setProperty("--ev-cell-fill", result.colorscale_bg);
-						TD.style.setProperty("background-color", result.colorscale_bg, "important");
+						TD.style.setProperty(
+							"background-color",
+							result.colorscale_bg,
+							"important"
+						);
 						TD.style.setProperty("background-image", "none", "important");
 						_cf_bg_set = true;
 					}
@@ -967,8 +1031,8 @@ frappe.views.ExcelBoard = class ExcelBoard {
 	// V3.1 — Focus Cell crosshair overlay (applied after CF so it has priority)
 	_apply_focus_overlay(TD, row, col) {
 		if (!this._focus_enabled || this._focus_row < 0) return;
-		const on_row = (row === this._focus_row);
-		const on_col = (col === this._focus_col);
+		const on_row = row === this._focus_row;
+		const on_col = col === this._focus_col;
 		if (!on_row && !on_col) return;
 		const { r, g, b } = this._focus_color_rgb || { r: 33, g: 115, b: 70 };
 		const is_dark = document.documentElement.getAttribute("data-theme") === "dark";
@@ -976,11 +1040,11 @@ frappe.views.ExcelBoard = class ExcelBoard {
 		if (is_dark) {
 			// rgba blends against HOT's internal white backing in dark mode → use opaque blend over dark base
 			const bg = 28; // ≈ Frappe dark bg (#1c1c1c)
-			const a  = (on_row && on_col) ? 0.65 : 0.28;
+			const a = on_row && on_col ? 0.65 : 0.28;
 			const mx = (c) => Math.round(bg * (1 - a) + c * a);
 			bg_color = `rgb(${mx(r)},${mx(g)},${mx(b)})`;
 		} else {
-			const alpha = (on_row && on_col) ? 0.38 : 0.18;
+			const alpha = on_row && on_col ? 0.38 : 0.18;
 			bg_color = `rgba(${r},${g},${b},${alpha})`;
 		}
 		TD.style.setProperty("background-color", bg_color, "important");
@@ -991,24 +1055,24 @@ frappe.views.ExcelBoard = class ExcelBoard {
 	// Called from afterOnCellMouseDown (e.detail === 2) — fires for readOnly cells too.
 	_maybe_open_html_editor(row, col) {
 		const col_def = this.columns?.[col];
-		const ft      = col_def?._df?.fieldtype;
+		const ft = col_def?._df?.fieldtype;
 		if (!["Text Editor", "Long Text"].includes(ft)) return;
 
 		// Cancel any native HOT editor (Long Text is not readOnly in HOT)
 		const hot_ed = this.hot?.getActiveEditor?.();
 		if (hot_ed?.isOpened?.()) hot_ed.cancelChanges?.();
 
-		const d_src    = this.sheet_manager?.get_current()?.data || this.list_view?.data;
+		const d_src = this.sheet_manager?.get_current()?.data || this.list_view?.data;
 		const row_data = d_src?.[row];
 		if (!row_data) return;
 
-		const fn       = col_def.data;
-		const label    = col_def._df?.label || fn;
-		const raw_val  = row_data[fn];
-		const html_val = (raw_val != null && raw_val !== "") ? String(raw_val) : "";
+		const fn = col_def.data;
+		const label = col_def._df?.label || fn;
+		const raw_val = row_data[fn];
+		const html_val = raw_val != null && raw_val !== "" ? String(raw_val) : "";
 		// Text Editor is readOnly in HOT grid (display only) but editable here if user
 		// has write permission and the DocType meta doesn't mark it read_only.
-		const df_ro    = !!(col_def._df?.read_only);
+		const df_ro = !!col_def._df?.read_only;
 		const can_edit = !df_ro && !!this.list_view.can_write && !row_data._is_ct_spacer;
 
 		// ── Build modal ──────────────────────────────────────────────────────────
@@ -1033,14 +1097,16 @@ frappe.views.ExcelBoard = class ExcelBoard {
 							<span class="ev-rte-ft-tag">${frappe.utils.escape_html(ft)}</span>
 						</div>
 						<div class="ev-rte-header-right">
-							${can_edit
-								? `<span class="ev-rte-status ev-rte-status--edit">
+							${
+								can_edit
+									? `<span class="ev-rte-status ev-rte-status--edit">
 									<span class="ev-rte-status-dot"></span>
 									${__("Editing")}
 								   </span>`
-								: `<span class="ev-rte-status ev-rte-status--view">
+									: `<span class="ev-rte-status ev-rte-status--view">
 									${__("View Only")}
-								   </span>`}
+								   </span>`
+							}
 							<button class="ev-rte-close-btn" aria-label="${__("Close")}">
 								<svg width="12" height="12" viewBox="0 0 12 12" fill="none">
 									<path d="M1 1l10 10M11 1L1 11" stroke="currentColor"
@@ -1056,8 +1122,9 @@ frappe.views.ExcelBoard = class ExcelBoard {
 						</span>
 						<div class="ev-rte-footer-actions">
 							<button class="ev-rte-cancel-btn">${__("Cancel")}</button>
-							${can_edit
-								? `<button class="ev-rte-save-btn">
+							${
+								can_edit
+									? `<button class="ev-rte-save-btn">
 									<svg width="11" height="11" viewBox="0 0 16 16" fill="currentColor" aria-hidden="true">
 										<path d="M2 1a1 1 0 0 0-1 1v12a1 1 0 0 0 1 1h12a1 1 0 0 0
 										1-1V4.5a.5.5 0 0 0-.146-.354l-3-3A.5.5 0 0 0 11.5
@@ -1067,7 +1134,8 @@ frappe.views.ExcelBoard = class ExcelBoard {
 									</svg>
 									${__("Save Changes")}
 								   </button>`
-								: ""}
+									: ""
+							}
 						</div>
 					</div>
 				</div>
@@ -1075,8 +1143,8 @@ frappe.views.ExcelBoard = class ExcelBoard {
 		`).appendTo(document.body);
 
 		// ── Inject Frappe editor control ─────────────────────────────────────────
-		const $area   = $overlay.find(".ev-rte-editor-area");
-		let _control  = null;
+		const $area = $overlay.find(".ev-rte-editor-area");
+		let _control = null;
 
 		try {
 			_control = frappe.ui.form.make_control({
@@ -1086,11 +1154,17 @@ frappe.views.ExcelBoard = class ExcelBoard {
 					label: "",
 					read_only: can_edit ? 0 : 1,
 				},
-				parent:       $area[0],
+				parent: $area[0],
 				render_input: true,
 			});
 			// Set value after ProseMirror mounts (needs one tick)
-			setTimeout(() => { try { _control.set_value(html_val); } catch (_) {} }, 60);
+			setTimeout(() => {
+				try {
+					_control.set_value(html_val);
+				} catch (_) {
+					// the editor may not be ready yet; the value is set again on the next edit
+				}
+			}, 60);
 		} catch (_e) {
 			// Fallback: raw textarea
 			$area.html(`<textarea class="ev-rte-fallback-ta"
@@ -1101,7 +1175,11 @@ frappe.views.ExcelBoard = class ExcelBoard {
 
 		const _get_value = () => {
 			if (_control) {
-				try { return _control.get_value() ?? ""; } catch (_) {}
+				try {
+					return _control.get_value() ?? "";
+				} catch (_) {
+					// editor not mounted; fall back to the cell value below
+				}
 			}
 			return $area.find(".ev-rte-fallback-ta").val() || "";
 		};
@@ -1115,7 +1193,10 @@ frappe.views.ExcelBoard = class ExcelBoard {
 
 		const save = () => {
 			const new_val = _get_value();
-			if (new_val === html_val) { close(); return; }
+			if (new_val === html_val) {
+				close();
+				return;
+			}
 			this.hot?.setDataAtRowProp(row, fn, new_val, "edit");
 			if (row_data) row_data[fn] = new_val;
 			this.hot?.render();
@@ -1125,11 +1206,16 @@ frappe.views.ExcelBoard = class ExcelBoard {
 
 		$overlay
 			.on("click", ".ev-rte-close-btn, .ev-rte-cancel-btn", close)
-			.on("click", (e) => { if ($(e.target).is(".ev-rte-overlay")) close(); })
+			.on("click", (e) => {
+				if ($(e.target).is(".ev-rte-overlay")) close();
+			})
 			.on("click", ".ev-rte-save-btn", save);
 
 		$(document).on("keydown.ev-rte", (e) => {
-			if (e.key === "Escape") { close(); return; }
+			if (e.key === "Escape") {
+				close();
+				return;
+			}
 			if ((e.ctrlKey || e.metaKey) && e.key === "s" && can_edit) {
 				e.preventDefault();
 				save();
@@ -1137,17 +1223,21 @@ frappe.views.ExcelBoard = class ExcelBoard {
 		});
 
 		// Animate in (double rAF for CSS transition)
-		requestAnimationFrame(() => requestAnimationFrame(() => {
-			$overlay[0].classList.add("ev-rte-overlay--in");
-		}));
+		requestAnimationFrame(() =>
+			requestAnimationFrame(() => {
+				$overlay[0].classList.add("ev-rte-overlay--in");
+			})
+		);
 	}
 
 	// V3.1 — Toggle Focus Cell crosshair
 	_toggle_focus_cell(enabled) {
 		this._focus_enabled = enabled !== undefined ? enabled : !this._focus_enabled;
 		this.hot?.render();
-		frappe.model.user_settings.save(this.doctype, "excel_focus_cell",
-			{ enabled: this._focus_enabled, color: this._focus_color });
+		frappe.model.user_settings.save(this.doctype, "excel_focus_cell", {
+			enabled: this._focus_enabled,
+			color: this._focus_color,
+		});
 	}
 
 	// V3.1 — Set focus cell color
@@ -1155,16 +1245,24 @@ frappe.views.ExcelBoard = class ExcelBoard {
 		this._focus_color = color;
 		// Cache parsed RGB so afterRenderer doesn't parseInt on every cell
 		const hex = color || "#217346";
-		this._focus_color_rgb = { r: parseInt(hex.slice(1,3),16), g: parseInt(hex.slice(3,5),16), b: parseInt(hex.slice(5,7),16) };
+		this._focus_color_rgb = {
+			r: parseInt(hex.slice(1, 3), 16),
+			g: parseInt(hex.slice(3, 5), 16),
+			b: parseInt(hex.slice(5, 7), 16),
+		};
 		if (this._focus_enabled) this.hot?.render();
-		frappe.model.user_settings.save(this.doctype, "excel_focus_cell",
-			{ enabled: this._focus_enabled, color: this._focus_color });
+		frappe.model.user_settings.save(this.doctype, "excel_focus_cell", {
+			enabled: this._focus_enabled,
+			color: this._focus_color,
+		});
 	}
 
 	// V3.1 — Hide rows (HOT 6.2.2 community: no hiddenRows plugin)
 	// State update + hot.render() — afterRenderer/afterGetRowHeader/afterRender handle the DOM
 	_hide_rows(rows_to_hide) {
-		rows_to_hide.forEach(r => { this._hidden_rows.add(r); });
+		rows_to_hide.forEach((r) => {
+			this._hidden_rows.add(r);
+		});
 		this._dirty_hidden_rows = true;
 		this.hot?.render();
 		this._save_hidden_rows();
@@ -1179,7 +1277,7 @@ frappe.views.ExcelBoard = class ExcelBoard {
 			to_show.push(r);
 			r--;
 		}
-		to_show.forEach(x => this._hidden_rows.delete(x));
+		to_show.forEach((x) => this._hidden_rows.delete(x));
 		this._dirty_hidden_rows = true;
 		this.hot?.render();
 		this._save_hidden_rows();
@@ -1194,7 +1292,7 @@ frappe.views.ExcelBoard = class ExcelBoard {
 			to_show.push(r);
 			r++;
 		}
-		to_show.forEach(x => this._hidden_rows.delete(x));
+		to_show.forEach((x) => this._hidden_rows.delete(x));
 		this._dirty_hidden_rows = true;
 		this.hot?.render();
 		this._save_hidden_rows();
@@ -1218,8 +1316,10 @@ frappe.views.ExcelBoard = class ExcelBoard {
 		const sel = this.hot?.getSelectedLast();
 		if (!sel) return;
 		const [r1, c1, r2, c2] = sel;
-		const min_r = Math.min(r1, r2), max_r = Math.max(r1, r2);
-		const min_c = Math.min(c1, c2), max_c = Math.max(c1, c2);
+		const min_r = Math.min(r1, r2),
+			max_r = Math.max(r1, r2);
+		const min_c = Math.min(c1, c2),
+			max_c = Math.max(c1, c2);
 		const act = this._last_action;
 		switch (act.type) {
 			case "format":
@@ -1278,12 +1378,15 @@ frappe.views.ExcelBoard = class ExcelBoard {
 		const c2 = Math.max(sel[1], sel[3]);
 
 		if (r2 <= r1) {
-			frappe.show_alert({ message: __("Select 2+ rows to fill down"), indicator: "orange" }, 2);
+			frappe.show_alert(
+				{ message: __("Select 2+ rows to fill down"), indicator: "orange" },
+				2
+			);
 			return;
 		}
 
 		const data = this.list_view.data;
-		const save_changes = [];   // format: [row, fieldname, oldVal, newVal] for queue_save
+		const save_changes = []; // format: [row, fieldname, oldVal, newVal] for queue_save
 
 		for (let c = c1; c <= c2; c++) {
 			const col_def = this.columns[c];
@@ -1333,9 +1436,9 @@ frappe.views.ExcelBoard = class ExcelBoard {
 		const col_key = this.columns[col]?.data;
 		if (!col_key) return;
 
-		const all_vals = data.map(row => String(row[col_key] ?? "").trim());
-		const filled   = all_vals.map((v, i) => ({ v, i })).filter(x => x.v !== "");
-		const blanks   = all_vals.map((v, i) => i).filter(i => all_vals[i] === "");
+		const all_vals = data.map((row) => String(row[col_key] ?? "").trim());
+		const filled = all_vals.map((v, i) => ({ v, i })).filter((x) => x.v !== "");
+		const blanks = all_vals.map((v, i) => i).filter((i) => all_vals[i] === "");
 
 		if (!blanks.length) {
 			frappe.show_alert({ message: __("No blank cells to fill."), indicator: "blue" });
@@ -1344,16 +1447,23 @@ frappe.views.ExcelBoard = class ExcelBoard {
 
 		// ── 1. In-column pattern (sequence / prefix / constant) ─────────────
 		if (filled.length >= 2) {
-			const pattern = this._ff_detect_pattern(filled.map(x => x.v));
+			const pattern = this._ff_detect_pattern(filled.map((x) => x.v));
 			if (pattern) {
-				const changes = blanks.map(ri => {
-					const v = this._ff_predict(pattern, ri, all_vals);
-					return v !== null ? [ri, col, v] : null;
-				}).filter(Boolean);
+				const changes = blanks
+					.map((ri) => {
+						const v = this._ff_predict(pattern, ri, all_vals);
+						return v !== null ? [ri, col, v] : null;
+					})
+					.filter(Boolean);
 				if (changes.length) {
-					changes.forEach(([r, , v]) => { data[r][col_key] = v; });
+					changes.forEach(([r, , v]) => {
+						data[r][col_key] = v;
+					});
 					this.hot.setDataAtCell(changes, "flash_fill");
-					frappe.show_alert({ message: __(`Flash Fill: filled ${changes.length} cells.`), indicator: "green" });
+					frappe.show_alert({
+						message: __(`Flash Fill: filled ${changes.length} cells.`),
+						indicator: "green",
+					});
 					return;
 				}
 			}
@@ -1362,8 +1472,9 @@ frappe.views.ExcelBoard = class ExcelBoard {
 		// ── 2. Cross-column transform (1+ example enough) ───────────────────
 		// Check adjacent columns: left-1, right+1, left-2 (skips virtual cols)
 		if (filled.length >= 1) {
-			const adj = [col - 1, col + 1, col - 2, col + 2]
-				.filter(c => c >= 0 && c < this.columns.length && c !== col);
+			const adj = [col - 1, col + 1, col - 2, col + 2].filter(
+				(c) => c >= 0 && c < this.columns.length && c !== col
+			);
 
 			for (const ac of adj) {
 				const ak = this.columns[ac]?.data;
@@ -1372,39 +1483,54 @@ frappe.views.ExcelBoard = class ExcelBoard {
 				// Build examples from rows that have BOTH columns filled
 				const examples = filled
 					.map(({ v, i }) => ({ my: v, adj: String(data[i]?.[ak] ?? "").trim() }))
-					.filter(e => e.adj !== "");
+					.filter((e) => e.adj !== "");
 
 				if (!examples.length) continue;
 
 				const transform = this._ff_detect_transform(examples);
 				if (!transform) continue;
 
-				const changes = blanks.map(ri => {
-					const adj_val = String(data[ri]?.[ak] ?? "").trim();
-					if (!adj_val) return null;
-					const v = transform.fn(adj_val);
-					return v !== null && v !== "" ? [ri, col, v] : null;
-				}).filter(Boolean);
+				const changes = blanks
+					.map((ri) => {
+						const adj_val = String(data[ri]?.[ak] ?? "").trim();
+						if (!adj_val) return null;
+						const v = transform.fn(adj_val);
+						return v !== null && v !== "" ? [ri, col, v] : null;
+					})
+					.filter(Boolean);
 
 				if (changes.length) {
-					changes.forEach(([r, , v]) => { data[r][col_key] = v; });
+					changes.forEach(([r, , v]) => {
+						data[r][col_key] = v;
+					});
 					this.hot.setDataAtCell(changes, "flash_fill");
 					// Save transform config for lazy-load auto-fill + persistence
 					if (this.columns[col]?._is_blank_col) {
 						this._blank_col_configs = this._blank_col_configs || new Map();
 						const existing = this._blank_col_configs.get(col_key) || {};
-						this._blank_col_configs.set(col_key, { ...existing,
-							ff_transform: { adj_col_key: ak, fn_idx: transform.fn_idx, example_len: transform.example_len }
+						this._blank_col_configs.set(col_key, {
+							...existing,
+							ff_transform: {
+								adj_col_key: ak,
+								fn_idx: transform.fn_idx,
+								example_len: transform.example_len,
+							},
 						});
 						this._save_blank_col_settings();
 					}
-					frappe.show_alert({ message: __(`Flash Fill: filled ${changes.length} cells.`), indicator: "green" });
+					frappe.show_alert({
+						message: __(`Flash Fill: filled ${changes.length} cells.`),
+						indicator: "green",
+					});
 					return;
 				}
 			}
 		}
 
-		frappe.show_alert({ message: __("Could not detect a pattern. Fill 1–2 example cells first."), indicator: "orange" });
+		frappe.show_alert({
+			message: __("Could not detect a pattern. Fill 1–2 example cells first."),
+			indicator: "orange",
+		});
 	}
 
 	// Detect a cross-column transform function from {my, adj} example pairs.
@@ -1414,32 +1540,39 @@ frappe.views.ExcelBoard = class ExcelBoard {
 
 		const candidates = [
 			// Initials: "Preeti Shah" → "PS"
-			v => v.split(/\s+/).filter(Boolean).map(w => w[0].toUpperCase()).join(""),
+			(v) =>
+				v
+					.split(/\s+/)
+					.filter(Boolean)
+					.map((w) => w[0].toUpperCase())
+					.join(""),
 			// First word / first name: "Preeti Shah" → "Preeti"
-			v => v.split(/\s+/)[0],
+			(v) => v.split(/\s+/)[0],
 			// Last word / last name: "Preeti Shah" → "Shah"
-			v => v.split(/\s+/).pop(),
+			(v) => v.split(/\s+/).pop(),
 			// Uppercase
-			v => v.toUpperCase(),
+			(v) => v.toUpperCase(),
 			// Lowercase
-			v => v.toLowerCase(),
+			(v) => v.toLowerCase(),
 			// First N chars (same length as example)
-			v => v.slice(0, n),
+			(v) => v.slice(0, n),
 			// First token before comma/paren/dash
-			v => v.split(/[,;(\-]/)[0].trim(),
+			(v) => v.split(/[,;(\-]/)[0].trim(),
 			// Digits only
-			v => v.replace(/\D/g, ""),
+			(v) => v.replace(/\D/g, ""),
 			// Letters only
-			v => v.replace(/[^a-zA-Z]/g, ""),
+			(v) => v.replace(/[^a-zA-Z]/g, ""),
 			// Remove spaces
-			v => v.replace(/\s+/g, ""),
+			(v) => v.replace(/\s+/g, ""),
 		];
 
 		for (let i = 0; i < candidates.length; i++) {
 			try {
-				if (examples.every(e => candidates[i](e.adj) === e.my))
+				if (examples.every((e) => candidates[i](e.adj) === e.my))
 					return { fn: candidates[i], fn_idx: i, example_len: n };
-			} catch (_) { /* skip */ }
+			} catch (_) {
+				/* skip */
+			}
 		}
 		return null;
 	}
@@ -1447,25 +1580,31 @@ frappe.views.ExcelBoard = class ExcelBoard {
 	_ff_detect_pattern(filled_vals) {
 		// 1. Numeric sequence: all values are numbers
 		const nums = filled_vals.map(Number);
-		if (filled_vals.every(v => !isNaN(Number(v)) && v !== "")) {
+		if (filled_vals.every((v) => !isNaN(Number(v)) && v !== "")) {
 			const diffs = nums.slice(1).map((n, i) => n - nums[i]);
 			const step = diffs[0];
-			if (diffs.every(d => d === step)) {
+			if (diffs.every((d) => d === step)) {
 				return { type: "numeric", last_val: nums[nums.length - 1], step };
 			}
 		}
 
 		// 2. Code prefix+num: "PREFIX-001", "PREFIX-002" → prefix + zero-padded number
 		const prefix_re = /^(.*?)(\d+)$/;
-		const matches = filled_vals.map(v => v.match(prefix_re));
-		if (matches.every(m => m && m[1] === matches[0][1])) {
+		const matches = filled_vals.map((v) => v.match(prefix_re));
+		if (matches.every((m) => m && m[1] === matches[0][1])) {
 			const prefix = matches[0][1];
 			const pad = matches[0][2].length;
-			const nums_p = matches.map(m => parseInt(m[2], 10));
+			const nums_p = matches.map((m) => parseInt(m[2], 10));
 			const diffs_p = nums_p.slice(1).map((n, i) => n - nums_p[i]);
 			const step_p = diffs_p[0] || 1;
-			if (diffs_p.every(d => d === step_p)) {
-				return { type: "prefix_num", prefix, pad, last_num: nums_p[nums_p.length - 1], step: step_p };
+			if (diffs_p.every((d) => d === step_p)) {
+				return {
+					type: "prefix_num",
+					prefix,
+					pad,
+					last_num: nums_p[nums_p.length - 1],
+					step: step_p,
+				};
 			}
 		}
 
@@ -1497,7 +1636,9 @@ frappe.views.ExcelBoard = class ExcelBoard {
 			let anchor_num = pattern.last_num;
 			let anchor_idx = all_vals.length - 1;
 			for (let i = all_vals.length - 1; i >= 0; i--) {
-				const m = String(all_vals[i]).trim().match(/^(.*?)(\d+)$/);
+				const m = String(all_vals[i])
+					.trim()
+					.match(/^(.*?)(\d+)$/);
 				if (m && m[1] === pattern.prefix && i < row_idx) {
 					anchor_num = parseInt(m[2], 10);
 					anchor_idx = i;
@@ -1522,41 +1663,42 @@ frappe.views.ExcelBoard = class ExcelBoard {
 	 */
 	_inject_meta_column() {
 		// Idempotent guard — never add a second _meta column
-		if (this._master_columns.some(c => c.data === "_meta")) return;
+		if (this._master_columns.some((c) => c.data === "_meta")) return;
 
 		const META_FIELDS = new Set(["owner", "creation", "modified_by", "modified"]);
 
 		// Check if any raw meta fields exist in master
-		if (!this._master_columns.some(c => META_FIELDS.has(c.data))) return;
+		if (!this._master_columns.some((c) => META_FIELDS.has(c.data))) return;
 
 		// Find insert position (right after name = index 1, or wherever first meta field is)
-		const first_idx = this._master_columns.findIndex(c => META_FIELDS.has(c.data));
+		const first_idx = this._master_columns.findIndex((c) => META_FIELDS.has(c.data));
 		const insert_at = first_idx >= 1 ? first_idx : 1;
 
 		// Permanently remove the 4 raw meta fields from _master_columns.
 		// They must NEVER appear as HOT columns — only the combined _meta col shows.
-		this._master_columns = this._master_columns.filter(c => !META_FIELDS.has(c.data));
+		this._master_columns = this._master_columns.filter((c) => !META_FIELDS.has(c.data));
 
 		// Build the combined virtual column
 		const meta_col = {
-			data:       "_meta",
-			title:      "Created / Updated",
-			readOnly:   true,
-			_readonly:  true,
+			data: "_meta",
+			title: "Created / Updated",
+			readOnly: true,
+			_readonly: true,
 			_is_meta_col: true,
-			width:      200,
-			renderer:   "text",    // overridden in afterRenderer
-			className:  "htDimmed",
+			width: 200,
+			renderer: "text", // overridden in afterRenderer
+			className: "htDimmed",
 		};
 
 		this._master_columns.splice(insert_at, 0, meta_col);
 
 		// Belt-and-suspenders: keep hidden_col_keys in sync so _sync_visible_columns
 		// never re-admits them even if they appear on a sheet switch.
-		META_FIELDS.forEach(f => this._hidden_col_keys.add(f));
+		META_FIELDS.forEach((f) => this._hidden_col_keys.add(f));
 
 		// Rebuild visible columns
-		this.columns = this._master_columns.filter(c => !this._hidden_col_keys.has(c.data)); this._col_index_map = null;
+		this.columns = this._master_columns.filter((c) => !this._hidden_col_keys.has(c.data));
+		this._col_index_map = null;
 	}
 
 	/**
@@ -1564,23 +1706,42 @@ frappe.views.ExcelBoard = class ExcelBoard {
 	 * Shows Created By (avatar + name + date) and Updated By rows.
 	 */
 	_render_meta_cell(TD, row_data) {
-		if (!row_data) { TD.textContent = ""; return; }
+		if (!row_data) {
+			TD.textContent = "";
+			return;
+		}
 		// Cache keyed by name+modified — reuse within session (relative dates are stable enough)
 		const _cache_key = `${row_data.name || ""}:${row_data.modified || ""}`;
 		const _cached = this._meta_html_cache?.get(_cache_key);
-		if (_cached) { TD.innerHTML = _cached; return; }
+		if (_cached) {
+			TD.innerHTML = _cached;
+			return;
+		}
 
 		// Avatar — image or color-coded letter chip (16px, no title — tooltip is on the row)
 		const _avatar = (user, fullname) => {
 			const info = frappe.boot?.user_info?.[user];
-			const img  = info?.image;
+			const img = info?.image;
 			if (img) {
-				return `<img src="${frappe.utils.escape_html(img)}" class="ev-meta-avatar ev-meta-avatar--img" alt="">`;
+				return `<img src="${frappe.utils.escape_html(
+					img
+				)}" class="ev-meta-avatar ev-meta-avatar--img" alt="">`;
 			}
 			const initials = (fullname || user || "?").substring(0, 1).toUpperCase();
-			const colors = ["#e53935","#8e24aa","#1565c0","#00838f","#2e7d32","#ef6c00","#6d4c41","#546e7a"];
+			const colors = [
+				"#e53935",
+				"#8e24aa",
+				"#1565c0",
+				"#00838f",
+				"#2e7d32",
+				"#ef6c00",
+				"#6d4c41",
+				"#546e7a",
+			];
 			const bg = colors[((user || " ").charCodeAt(0) || 0) % colors.length];
-			return `<span class="ev-meta-avatar" style="background:${bg}">${frappe.utils.escape_html(initials)}</span>`;
+			return `<span class="ev-meta-avatar" style="background:${bg}">${frappe.utils.escape_html(
+				initials
+			)}</span>`;
 		};
 
 		// First name only (max 10 chars) — email-safe: splits on space, dot, @
@@ -1591,25 +1752,41 @@ frappe.views.ExcelBoard = class ExcelBoard {
 		};
 
 		// Relative time for cell; full datetime for tooltip
-		const _rel  = (val) => { try { return frappe.datetime.comment_when(val) || ""; } catch (_) { return ""; } };
-		const _full = (val) => { try { return frappe.datetime.str_to_user(val) || val || ""; } catch (_) { return String(val || "").substring(0, 16); } };
+		const _rel = (val) => {
+			try {
+				return frappe.datetime.comment_when(val) || "";
+			} catch (_) {
+				return "";
+			}
+		};
+		const _full = (val) => {
+			try {
+				return frappe.datetime.str_to_user(val) || val || "";
+			} catch (_) {
+				return String(val || "").substring(0, 16);
+			}
+		};
 
-		const owner       = row_data.owner || "";
-		const owner_name  = frappe.boot?.user_info?.[owner]?.fullname || owner;
-		const mod_by      = row_data.modified_by || "";
-		const mod_name    = frappe.boot?.user_info?.[mod_by]?.fullname || mod_by;
+		const owner = row_data.owner || "";
+		const owner_name = frappe.boot?.user_info?.[owner]?.fullname || owner;
+		const mod_by = row_data.modified_by || "";
+		const mod_name = frappe.boot?.user_info?.[mod_by]?.fullname || mod_by;
 
 		// Pencil icon for "last edited" row — same Bootstrap icon, 10px, inherits color
 		const _pencil = `<svg class="ev-meta-pencil" viewBox="0 0 16 16" fill="currentColor" aria-hidden="true"><path d="M12.146.146a.5.5 0 0 1 .708 0l3 3a.5.5 0 0 1 0 .708l-10 10a.5.5 0 0 1-.168.11l-5 2a.5.5 0 0 1-.65-.65l2-5a.5.5 0 0 1 .11-.168l10-10zM11.207 2.5 13.5 4.793 14.793 3.5 12.5 1.207zm1.586 3L10.5 3.207 4 9.707V10h.5a.5.5 0 0 1 .5.5v.5h.5a.5.5 0 0 1 .5.5v.5h.293zm-9.761 5.175-.106.106-1.528 3.821 3.821-1.528.106-.106A.5.5 0 0 1 5 12.5V12h-.5a.5.5 0 0 1-.5-.5V11h-.5a.5.5 0 0 1-.468-.325z"/></svg>`;
 
 		const _html = `<div class="ev-meta-cell">
-			<div class="ev-meta-row ev-meta-row--cr" title="${frappe.utils.escape_html(owner_name)} \u00b7 ${frappe.utils.escape_html(_full(row_data.creation))}">
+			<div class="ev-meta-row ev-meta-row--cr" title="${frappe.utils.escape_html(
+				owner_name
+			)} \u00b7 ${frappe.utils.escape_html(_full(row_data.creation))}">
 				${_avatar(owner, owner_name)}
 				<span class="ev-meta-who">${_first(owner_name)}</span>
 				<span class="ev-meta-sep"></span>
 				<span class="ev-meta-ts">${_rel(row_data.creation)}</span>
 			</div>
-			<div class="ev-meta-row ev-meta-row--md" title="${frappe.utils.escape_html(mod_name)} \u00b7 ${frappe.utils.escape_html(_full(row_data.modified))}">
+			<div class="ev-meta-row ev-meta-row--md" title="${frappe.utils.escape_html(
+				mod_name
+			)} \u00b7 ${frappe.utils.escape_html(_full(row_data.modified))}">
 				${_pencil}
 				<span class="ev-meta-who ev-meta-who--mod">${_first(mod_name)}</span>
 				<span class="ev-meta-sep"></span>
@@ -1625,29 +1802,37 @@ frappe.views.ExcelBoard = class ExcelBoard {
 	 * virtual "_social" column. Mirrors _inject_meta_column() pattern exactly.
 	 */
 	_inject_social_column() {
-		if (this._master_columns.some(c => c.data === "_social")) return;
+		if (this._master_columns.some((c) => c.data === "_social")) return;
 
-		const SOCIAL_FIELDS = new Set(["_user_tags", "_comments", "_assign", "_liked_by", "docstatus", "idx"]);
-		if (!this._master_columns.some(c => SOCIAL_FIELDS.has(c.data))) return;
+		const SOCIAL_FIELDS = new Set([
+			"_user_tags",
+			"_comments",
+			"_assign",
+			"_liked_by",
+			"docstatus",
+			"idx",
+		]);
+		if (!this._master_columns.some((c) => SOCIAL_FIELDS.has(c.data))) return;
 
-		const first_idx = this._master_columns.findIndex(c => SOCIAL_FIELDS.has(c.data));
+		const first_idx = this._master_columns.findIndex((c) => SOCIAL_FIELDS.has(c.data));
 		if (first_idx < 0) return;
 
-		this._master_columns = this._master_columns.filter(c => !SOCIAL_FIELDS.has(c.data));
+		this._master_columns = this._master_columns.filter((c) => !SOCIAL_FIELDS.has(c.data));
 
 		this._master_columns.splice(first_idx, 0, {
-			data:            "_social",
-			title:           "Activity",
-			readOnly:        true,
-			_readonly:       true,
-			_is_social_col:  true,
-			width:           180,
-			renderer:        "text",
-			className:       "htDimmed",
+			data: "_social",
+			title: "Activity",
+			readOnly: true,
+			_readonly: true,
+			_is_social_col: true,
+			width: 180,
+			renderer: "text",
+			className: "htDimmed",
 		});
 
-		SOCIAL_FIELDS.forEach(f => this._hidden_col_keys.add(f));
-		this.columns = this._master_columns.filter(c => !this._hidden_col_keys.has(c.data)); this._col_index_map = null;
+		SOCIAL_FIELDS.forEach((f) => this._hidden_col_keys.add(f));
+		this.columns = this._master_columns.filter((c) => !this._hidden_col_keys.has(c.data));
+		this._col_index_map = null;
 	}
 
 	// ── V3.5 — Child Table expand column ─────────────────────────────────────
@@ -1663,24 +1848,24 @@ frappe.views.ExcelBoard = class ExcelBoard {
 	_inject_ct_expand_column() {
 		if (!this.child_table_manager?.has_child_tables()) return;
 		// Guard: don't inject twice (workbook apply_config may call _inject_* again)
-		if (this._master_columns.some(c => c._is_ct_expand_col)) return;
+		if (this._master_columns.some((c) => c._is_ct_expand_col)) return;
 
 		const col = {
-			data:              "_ct_expand",
-			title:             "",
-			readOnly:          true,
-			_readonly:         true,
+			data: "_ct_expand",
+			title: "",
+			readOnly: true,
+			_readonly: true,
 			_is_ct_expand_col: true,
-			width:             24,
+			width: 24,
 			// Disable header menu / sorting for this column
-			dropdownMenu:      false,
-			columnSorting:     { sortEmptyCells: false, headerAction: false },
+			dropdownMenu: false,
+			columnSorting: { sortEmptyCells: false, headerAction: false },
 			disableVisualSelection: true,
 		};
 
 		// Prepend — always at index 0 so toPhysicalColumn maps are unaffected
 		this._master_columns.unshift(col);
-		this.columns = this._master_columns.filter(c => !this._hidden_col_keys.has(c.data));
+		this.columns = this._master_columns.filter((c) => !this._hidden_col_keys.has(c.data));
 		this._col_index_map = null;
 	}
 
@@ -1691,31 +1876,56 @@ frappe.views.ExcelBoard = class ExcelBoard {
 	 * Clicking ♥ toggles like inline; clicking avatars/tags opens frappe dialogs.
 	 */
 	_render_social_cell(TD, row_data) {
-		if (!row_data) { TD.textContent = ""; return; }
+		if (!row_data) {
+			TD.textContent = "";
+			return;
+		}
 
 		// Cache key — any social field change invalidates
-		const _ck = `${row_data.name}|${row_data.docstatus}|${row_data._user_tags || ""}|${(row_data._assign || "").substring(0, 80)}|${(row_data._liked_by || "").substring(0, 80)}|${(row_data._comments || "").substring(0, 30)}`;
+		const _ck = `${row_data.name}|${row_data.docstatus}|${row_data._user_tags || ""}|${(
+			row_data._assign || ""
+		).substring(0, 80)}|${(row_data._liked_by || "").substring(0, 80)}|${(
+			row_data._comments || ""
+		).substring(0, 30)}`;
 		const _cached = this._social_html_cache?.get(_ck);
-		if (_cached) { TD.innerHTML = _cached; return; }
+		if (_cached) {
+			TD.innerHTML = _cached;
+			return;
+		}
 
-		const _esc = s => frappe.utils.escape_html(String(s ?? ""));
-		const _colors = ["#e53935","#8e24aa","#1565c0","#00838f","#2e7d32","#ef6c00","#6d4c41","#546e7a"];
+		const _esc = (s) => frappe.utils.escape_html(String(s ?? ""));
+		const _colors = [
+			"#e53935",
+			"#8e24aa",
+			"#1565c0",
+			"#00838f",
+			"#2e7d32",
+			"#ef6c00",
+			"#6d4c41",
+			"#546e7a",
+		];
 		const _avatar = (u) => {
 			const info = frappe.boot?.user_info?.[u];
 			const name = info?.fullname || u;
 			const code = (u || " ").charCodeAt(0) || 0;
-			if (info?.image) return `<img src="${_esc(info.image)}" class="ev-sc-av ev-sc-av--img" title="${_esc(name)}" alt="">`;
-			return `<span class="ev-sc-av" style="background:${_colors[code % _colors.length]}" title="${_esc(name)}">${_esc(name.substring(0, 1).toUpperCase())}</span>`;
+			if (info?.image)
+				return `<img src="${_esc(
+					info.image
+				)}" class="ev-sc-av ev-sc-av--img" title="${_esc(name)}" alt="">`;
+			return `<span class="ev-sc-av" style="background:${
+				_colors[code % _colors.length]
+			}" title="${_esc(name)}">${_esc(name.substring(0, 1).toUpperCase())}</span>`;
 		};
 
 		// ── Docstatus (only for submittable doctypes) ────────────────────
 		// For secondary sheets the flag is cached on the sheet state object
-		const _submittable = this.sheet_manager?.get_current()?._is_submittable ?? this._is_submittable;
+		const _submittable =
+			this.sheet_manager?.get_current()?._is_submittable ?? this._is_submittable;
 		let ds_html = "";
 		if (_submittable) {
 			const ds = row_data.docstatus ?? 0;
 			const DS = [
-				{ label: __("Draft"),     cls: "ev-sc-ds--draft" },
+				{ label: __("Draft"), cls: "ev-sc-ds--draft" },
 				{ label: __("Submitted"), cls: "ev-sc-ds--submitted" },
 				{ label: __("Cancelled"), cls: "ev-sc-ds--cancelled" },
 			];
@@ -1725,34 +1935,80 @@ frappe.views.ExcelBoard = class ExcelBoard {
 
 		// ── Assigned To ──────────────────────────────────────────────────
 		let assigned = [];
-		try { assigned = JSON.parse(row_data._assign || "[]"); } catch(_) {}
-		const all_names = assigned.map(u => frappe.boot?.user_info?.[u]?.fullname || u).join(", ");
+		try {
+			assigned = JSON.parse(row_data._assign || "[]");
+		} catch (_) {
+			// malformed _assign JSON: show no assignees
+		}
+		const all_names = assigned
+			.map((u) => frappe.boot?.user_info?.[u]?.fullname || u)
+			.join(", ");
 		const av_html = assigned.length
-			? `<span class="ev-sc-avatars" data-sc="assign" data-name="${_esc(row_data.name)}" title="${_esc(all_names)}">${assigned.slice(0, 3).map(_avatar).join("")}${assigned.length > 3 ? `<span class="ev-sc-av ev-sc-av--more">+${assigned.length - 3}</span>` : ""}</span>`
-			: `<button class="ev-sc-add-btn" data-sc="assign" data-name="${_esc(row_data.name)}" title="${__("Assign to someone")}"><svg viewBox="0 0 16 16" fill="currentColor" width="11" height="11"><path d="M8 8a3 3 0 1 0 0-6 3 3 0 0 0 0 6zm2-3a2 2 0 1 1-4 0 2 2 0 0 1 4 0zm4 8c0 1-1 1-1 1H3s-1 0-1-1 1-4 6-4 6 3 6 4zm-1-.004c-.001-.246-.154-.986-.832-1.664C11.516 10.68 10.029 10 8 10c-2.029 0-3.516.68-4.168 1.332-.678.678-.83 1.418-.832 1.664h10z"/></svg></button>`;
+			? `<span class="ev-sc-avatars" data-sc="assign" data-name="${_esc(
+					row_data.name
+			  )}" title="${_esc(all_names)}">${assigned.slice(0, 3).map(_avatar).join("")}${
+					assigned.length > 3
+						? `<span class="ev-sc-av ev-sc-av--more">+${assigned.length - 3}</span>`
+						: ""
+			  }</span>`
+			: `<button class="ev-sc-add-btn" data-sc="assign" data-name="${_esc(
+					row_data.name
+			  )}" title="${__(
+					"Assign to someone"
+			  )}"><svg viewBox="0 0 16 16" fill="currentColor" width="11" height="11"><path d="M8 8a3 3 0 1 0 0-6 3 3 0 0 0 0 6zm2-3a2 2 0 1 1-4 0 2 2 0 0 1 4 0zm4 8c0 1-1 1-1 1H3s-1 0-1-1 1-4 6-4 6 3 6 4zm-1-.004c-.001-.246-.154-.986-.832-1.664C11.516 10.68 10.029 10 8 10c-2.029 0-3.516.68-4.168 1.332-.678.678-.83 1.418-.832 1.664h10z"/></svg></button>`;
 
 		// ── Tags ─────────────────────────────────────────────────────────
 		let tags = [];
-		try { tags = (row_data._user_tags || "").split(",").map(t => t.trim()).filter(Boolean); } catch(_) {}
-		const tag_html = `<button class="ev-sc-btn${tags.length ? " ev-sc-btn--active" : ""}" data-sc="tags" data-name="${_esc(row_data.name)}" title="${tags.length ? _esc(tags.join(", ")) : __("Add tag")}">
+		try {
+			tags = (row_data._user_tags || "")
+				.split(",")
+				.map((t) => t.trim())
+				.filter(Boolean);
+		} catch (_) {
+			// malformed _user_tags: show no tags
+		}
+		const tag_html = `<button class="ev-sc-btn${
+			tags.length ? " ev-sc-btn--active" : ""
+		}" data-sc="tags" data-name="${_esc(row_data.name)}" title="${
+			tags.length ? _esc(tags.join(", ")) : __("Add tag")
+		}">
 			<svg class="ev-sc-ic" viewBox="0 0 16 16" fill="currentColor"><path d="M2 2a1 1 0 0 1 1-1h4.586a1 1 0 0 1 .707.293l7 7a1 1 0 0 1 0 1.414l-4.586 4.586a1 1 0 0 1-1.414 0l-7-7A1 1 0 0 1 2 6.586V2zm3.5 4a1.5 1.5 0 1 0 0-3 1.5 1.5 0 0 0 0 3z"/></svg>
 			${tags.length ? `<span class="ev-sc-count">${tags.length}</span>` : ""}
 		</button>`;
 
 		// ── Liked By ─────────────────────────────────────────────────────
 		let liked = [];
-		try { liked = JSON.parse(row_data._liked_by || "[]"); } catch(_) {}
+		try {
+			liked = JSON.parse(row_data._liked_by || "[]");
+		} catch (_) {
+			// malformed _liked_by JSON: show no likes
+		}
 		const me_liked = liked.includes(frappe.session?.user);
-		const liked_names = liked.map(u => frappe.boot?.user_info?.[u]?.fullname || u).join(", ");
-		const like_html = `<button class="ev-sc-btn ev-sc-btn--heart${me_liked ? " ev-sc-btn--liked" : ""}" data-sc="like" data-name="${_esc(row_data.name)}" data-liked="${me_liked ? "1" : "0"}" title="${_esc(liked.length ? liked_names : __("Like"))}">
+		const liked_names = liked
+			.map((u) => frappe.boot?.user_info?.[u]?.fullname || u)
+			.join(", ");
+		const like_html = `<button class="ev-sc-btn ev-sc-btn--heart${
+			me_liked ? " ev-sc-btn--liked" : ""
+		}" data-sc="like" data-name="${_esc(row_data.name)}" data-liked="${
+			me_liked ? "1" : "0"
+		}" title="${_esc(liked.length ? liked_names : __("Like"))}">
 			<svg class="ev-sc-ic ev-sc-ic--heart" viewBox="0 0 16 16" fill="currentColor"><path d="M8 1.314C12.438-3.248 23.534 4.735 8 15-7.534 4.736 3.562-3.248 8 1.314z"/></svg>
 			${liked.length ? `<span class="ev-sc-count">${liked.length}</span>` : ""}
 		</button>`;
 
 		// ── Comments ─────────────────────────────────────────────────────
 		let cc = 0;
-		try { const c = JSON.parse(row_data._comments || "[]"); cc = Array.isArray(c) ? c.length : 0; } catch(_) {}
-		const comment_html = `<button class="ev-sc-btn${cc ? " ev-sc-btn--active" : ""}" data-sc="comment" data-name="${_esc(row_data.name)}" title="${cc ? cc + " " + __("comment(s)") : __("Add comment")}">
+		try {
+			const c = JSON.parse(row_data._comments || "[]");
+			cc = Array.isArray(c) ? c.length : 0;
+		} catch (_) {
+			// malformed _comments JSON: show a count of 0
+		}
+		const comment_html = `<button class="ev-sc-btn${
+			cc ? " ev-sc-btn--active" : ""
+		}" data-sc="comment" data-name="${_esc(row_data.name)}" title="${
+			cc ? cc + " " + __("comment(s)") : __("Add comment")
+		}">
 			<svg class="ev-sc-ic" viewBox="0 0 16 16" fill="currentColor"><path d="M2.678 11.894a1 1 0 0 1 .287.801 10.97 10.97 0 0 1-.398 2c1.395-.323 2.247-.697 2.634-.893a1 1 0 0 1 .71-.074A8.06 8.06 0 0 0 8 14c3.996 0 7-2.807 7-6 0-3.192-3.004-6-7-6S1 4.808 1 8c0 1.468.617 2.83 1.678 3.894zm-.493 3.905a21.682 21.682 0 0 1-.713.129c-.2.032-.352-.176-.273-.362a9.68 9.68 0 0 0 .244-.637l.003-.01c.248-.72.45-1.548.524-2.319C.743 11.37 0 9.76 0 8c0-3.866 3.582-7 8-7s8 3.134 8 7-3.582 7-8 7a9.06 9.06 0 0 1-2.347-.306c-.52.263-1.639.742-3.468 1.105z"/></svg>
 			${cc ? `<span class="ev-sc-count">${cc}</span>` : ""}
 		</button>`;
@@ -1767,22 +2023,36 @@ frappe.views.ExcelBoard = class ExcelBoard {
 
 	/** Handle CRUD actions for social column cells (like toggle, assign, tags). */
 	_bind_social_clicks() {
-		const _dlg_colors = ["#e53935","#8e24aa","#1565c0","#00838f","#2e7d32","#ef6c00","#6d4c41","#546e7a"];
+		const _dlg_colors = [
+			"#e53935",
+			"#8e24aa",
+			"#1565c0",
+			"#00838f",
+			"#2e7d32",
+			"#ef6c00",
+			"#6d4c41",
+			"#546e7a",
+		];
 		const _dlg_av = (email, fullname) => {
 			const info = frappe.boot?.user_info?.[email];
-			const img  = info?.image;
+			const img = info?.image;
 			const name = fullname || info?.fullname || email || "?";
-			if (img) return `<img src="${frappe.utils.escape_html(img)}" class="ev-dlg-av ev-dlg-av--img" alt="">`;
+			if (img)
+				return `<img src="${frappe.utils.escape_html(
+					img
+				)}" class="ev-dlg-av ev-dlg-av--img" alt="">`;
 			const bg = _dlg_colors[((email || "").charCodeAt(0) || 0) % _dlg_colors.length];
-			return `<span class="ev-dlg-av" style="background:${bg}">${frappe.utils.escape_html(name.substring(0, 1).toUpperCase())}</span>`;
+			return `<span class="ev-dlg-av" style="background:${bg}">${frappe.utils.escape_html(
+				name.substring(0, 1).toUpperCase()
+			)}</span>`;
 		};
 
 		this.$hot_container.on("click.social", "[data-sc]", (e) => {
-			const $el    = $(e.target).closest("[data-sc]");
+			const $el = $(e.target).closest("[data-sc]");
 			const action = $el.data("sc");
-			const name   = $el.data("name");
+			const name = $el.data("name");
 			// Use current sheet's doctype so secondary sheets operate on the right DocType
-			const dt     = this.sheet_manager?.get_current()?.doctype || this.doctype;
+			const dt = this.sheet_manager?.get_current()?.doctype || this.doctype;
 			if (!name) return;
 			e.stopPropagation();
 
@@ -1793,55 +2063,92 @@ frappe.views.ExcelBoard = class ExcelBoard {
 					method: "frappe.desk.like.toggle_like",
 					args: { doctype: dt, name, add },
 					callback: (r) => {
-						const _cur_data = this.sheet_manager?.get_current()?.data || this.list_view?.data;
-						const row = _cur_data?.find(d => d.name === name);
+						const _cur_data =
+							this.sheet_manager?.get_current()?.data || this.list_view?.data;
+						const row = _cur_data?.find((d) => d.name === name);
 						if (row) {
 							row._liked_by = r.message;
 							[...this._social_html_cache.keys()]
-								.filter(k => k.startsWith(`${name}|`))
-								.forEach(k => this._social_html_cache.delete(k));
+								.filter((k) => k.startsWith(`${name}|`))
+								.forEach((k) => this._social_html_cache.delete(k));
 							this.hot?.render();
 						}
 					},
 				});
 
-			// ── Assign dialog ────────────────────────────────────────────────
+				// ── Assign dialog ────────────────────────────────────────────────
 			} else if (action === "assign") {
 				const can_write = frappe.model.can_write(dt);
 				frappe.call({
 					method: "frappe.client.get_list",
 					args: {
 						doctype: "ToDo",
-						filters: { reference_type: dt, reference_name: name, status: ["!=", "Cancelled"] },
+						filters: {
+							reference_type: dt,
+							reference_name: name,
+							status: ["!=", "Cancelled"],
+						},
 						fields: ["owner", "description", "allocated_to"],
 						limit: 50,
 					},
 					callback: (r) => {
 						const current = r.message || [];
 						const list_html = current.length
-							? current.map(a => {
-								const user  = a.allocated_to || a.owner;
-								const info  = frappe.boot?.user_info?.[user];
-								const fname = info?.fullname || user;
-								return `<div class="ev-dlg-user-row">
+							? current
+									.map((a) => {
+										const user = a.allocated_to || a.owner;
+										const info = frappe.boot?.user_info?.[user];
+										const fname = info?.fullname || user;
+										return `<div class="ev-dlg-user-row">
 									${_dlg_av(user, fname)}
 									<div class="ev-dlg-user-info">
 										<div class="ev-dlg-user-name">${frappe.utils.escape_html(fname)}</div>
-										${a.description ? `<div class="ev-dlg-user-note">${frappe.utils.escape_html(a.description)}</div>` : ""}
+										${
+											a.description
+												? `<div class="ev-dlg-user-note">${frappe.utils.escape_html(
+														a.description
+												  )}</div>`
+												: ""
+										}
 									</div>
-									${can_write ? `<button class="ev-dlg-icon-btn ev-dlg-icon-btn--danger" data-remove-user="${frappe.utils.escape_html(user)}" title="${__("Remove")}"><svg viewBox="0 0 16 16" fill="currentColor" width="10" height="10"><path d="M2.146 2.854a.5.5 0 1 1 .708-.708L8 7.293l5.146-5.147a.5.5 0 0 1 .708.708L8.707 8l5.147 5.146a.5.5 0 0 1-.708.708L8 8.707l-5.146 5.147a.5.5 0 0 1-.708-.708L7.293 8z"/></svg></button>` : ""}
+									${
+										can_write
+											? `<button class="ev-dlg-icon-btn ev-dlg-icon-btn--danger" data-remove-user="${frappe.utils.escape_html(
+													user
+											  )}" title="${__(
+													"Remove"
+											  )}"><svg viewBox="0 0 16 16" fill="currentColor" width="10" height="10"><path d="M2.146 2.854a.5.5 0 1 1 .708-.708L8 7.293l5.146-5.147a.5.5 0 0 1 .708.708L8.707 8l5.147 5.146a.5.5 0 0 1-.708.708L8 8.707l-5.146 5.147a.5.5 0 0 1-.708-.708L7.293 8z"/></svg></button>`
+											: ""
+									}
 								</div>`;
-							}).join("")
-							: `<div class="ev-dlg-empty"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" width="28" height="28"><path stroke-linecap="round" stroke-linejoin="round" d="M15.75 6a3.75 3.75 0 11-7.5 0 3.75 3.75 0 017.5 0zM4.501 20.118a7.5 7.5 0 0114.998 0A17.933 17.933 0 0112 21.75c-2.676 0-5.216-.584-7.499-1.632z"/></svg><div>${__("No one assigned yet")}</div></div>`;
+									})
+									.join("")
+							: `<div class="ev-dlg-empty"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" width="28" height="28"><path stroke-linecap="round" stroke-linejoin="round" d="M15.75 6a3.75 3.75 0 11-7.5 0 3.75 3.75 0 017.5 0zM4.501 20.118a7.5 7.5 0 0114.998 0A17.933 17.933 0 0112 21.75c-2.676 0-5.216-.584-7.499-1.632z"/></svg><div>${__(
+									"No one assigned yet"
+							  )}</div></div>`;
 
 						const fields = [
-							{ fieldtype: "HTML", fieldname: "assign_list", options: `<div class="ev-dlg-list">${list_html}</div>` },
+							{
+								fieldtype: "HTML",
+								fieldname: "assign_list",
+								options: `<div class="ev-dlg-list">${list_html}</div>`,
+							},
 						];
 						if (can_write) {
 							fields.push(
 								{ fieldtype: "Section Break", label: __("Add Assignment") },
-								{ fieldtype: "Link", fieldname: "user", label: __("Assign To"), options: "User", reqd: 1 },
-								{ fieldtype: "Small Text", fieldname: "description", label: __("Note (optional)") },
+								{
+									fieldtype: "Link",
+									fieldname: "user",
+									label: __("Assign To"),
+									options: "User",
+									reqd: 1,
+								},
+								{
+									fieldtype: "Small Text",
+									fieldname: "description",
+									label: __("Note (optional)"),
+								}
 							);
 						}
 						const d = new frappe.ui.Dialog({
@@ -1849,12 +2156,24 @@ frappe.views.ExcelBoard = class ExcelBoard {
 							fields,
 							primary_action_label: can_write ? __("Assign") : __("Close"),
 							primary_action: (vals) => {
-								if (!can_write) { d.hide(); return; }
+								if (!can_write) {
+									d.hide();
+									return;
+								}
 								if (!vals.user) return;
 								frappe.call({
 									method: "frappe.desk.form.assign_to.add",
-									args: { doctype: dt, name, assign_to: [vals.user], description: vals.description || "", bulk_assign: false },
-									callback: () => { d.hide(); this.list_view.refresh(); },
+									args: {
+										doctype: dt,
+										name,
+										assign_to: [vals.user],
+										description: vals.description || "",
+										bulk_assign: false,
+									},
+									callback: () => {
+										d.hide();
+										this.list_view.refresh();
+									},
 								});
 							},
 						});
@@ -1864,17 +2183,23 @@ frappe.views.ExcelBoard = class ExcelBoard {
 							frappe.call({
 								method: "frappe.desk.form.assign_to.remove",
 								args: { doctype: dt, name, assign_to: user },
-								callback: () => { d.hide(); this.list_view.refresh(); },
+								callback: () => {
+									d.hide();
+									this.list_view.refresh();
+								},
 							});
 						});
 					},
 				});
 
-			// ── Tags dialog ──────────────────────────────────────────────────
+				// ── Tags dialog ──────────────────────────────────────────────────
 			} else if (action === "tags") {
 				const can_write = frappe.model.can_write(dt);
-				const row = this.list_view.data?.find(d => d.name === name);
-				const current_tags = (row?._user_tags || "").split(",").map(t => t.trim()).filter(Boolean);
+				const row = this.list_view.data?.find((d) => d.name === name);
+				const current_tags = (row?._user_tags || "")
+					.split(",")
+					.map((t) => t.trim())
+					.filter(Boolean);
 				frappe.call({
 					method: "excel_view.api.get_doctype_tags",
 					args: { doctype: dt },
@@ -1882,24 +2207,49 @@ frappe.views.ExcelBoard = class ExcelBoard {
 						const available = (r.message || []).filter(Boolean);
 						const d = new frappe.ui.Dialog({
 							title: __("Tags — {0}", [name]),
-							fields: [{
-								fieldtype: "MultiSelectList",
-								fieldname: "tags",
-								label: __("Tags"),
-								get_data: (txt) => available
-									.filter(t => !txt || t.toLowerCase().includes(txt.toLowerCase()))
-									.map(t => ({ label: t, value: t })),
-							}],
+							fields: [
+								{
+									fieldtype: "MultiSelectList",
+									fieldname: "tags",
+									label: __("Tags"),
+									get_data: (txt) =>
+										available
+											.filter(
+												(t) =>
+													!txt ||
+													t.toLowerCase().includes(txt.toLowerCase())
+											)
+											.map((t) => ({ label: t, value: t })),
+								},
+							],
 							primary_action_label: can_write ? __("Save") : __("Close"),
 							primary_action: (vals) => {
-								if (!can_write) { d.hide(); return; }
-								const new_tags  = vals.tags || [];
-								const to_add    = new_tags.filter(t => !current_tags.includes(t));
-								const to_remove = current_tags.filter(t => !new_tags.includes(t));
+								if (!can_write) {
+									d.hide();
+									return;
+								}
+								const new_tags = vals.tags || [];
+								const to_add = new_tags.filter((t) => !current_tags.includes(t));
+								const to_remove = current_tags.filter(
+									(t) => !new_tags.includes(t)
+								);
 								Promise.all([
-									...to_add.map(tag => frappe.call({ method: "excel_view.api.add_doc_tag", args: { doctype: dt, docname: name, tag } })),
-									...to_remove.map(tag => frappe.call({ method: "excel_view.api.remove_doc_tag", args: { doctype: dt, docname: name, tag } })),
-								]).then(() => { d.hide(); this.list_view.refresh(); });
+									...to_add.map((tag) =>
+										frappe.call({
+											method: "excel_view.api.add_doc_tag",
+											args: { doctype: dt, docname: name, tag },
+										})
+									),
+									...to_remove.map((tag) =>
+										frappe.call({
+											method: "excel_view.api.remove_doc_tag",
+											args: { doctype: dt, docname: name, tag },
+										})
+									),
+								]).then(() => {
+									d.hide();
+									this.list_view.refresh();
+								});
 							},
 						});
 						d.get_field("tags").set_value(current_tags);
@@ -1907,7 +2257,7 @@ frappe.views.ExcelBoard = class ExcelBoard {
 					},
 				});
 
-			// ── Comments dialog ──────────────────────────────────────────────
+				// ── Comments dialog ──────────────────────────────────────────────
 			} else if (action === "comment") {
 				const can_write = frappe.model.can_write(dt);
 				const me = frappe.session?.user;
@@ -1916,7 +2266,11 @@ frappe.views.ExcelBoard = class ExcelBoard {
 					method: "frappe.client.get_list",
 					args: {
 						doctype: "Comment",
-						filters: { reference_doctype: dt, reference_name: name, comment_type: "Comment" },
+						filters: {
+							reference_doctype: dt,
+							reference_name: name,
+							comment_type: "Comment",
+						},
 						fields: ["name", "content", "comment_email", "comment_by", "creation"],
 						order_by: "creation asc",
 						limit: 50,
@@ -1924,42 +2278,81 @@ frappe.views.ExcelBoard = class ExcelBoard {
 					callback: (r) => {
 						const comments = r.message || [];
 						const comments_html = comments.length
-							? comments.map(c => {
-								const fname = c.comment_by || frappe.boot?.user_info?.[c.comment_email]?.fullname || c.comment_email;
-								const can_del = c.comment_email === me || is_manager;
-								return `<div class="ev-dlg-comment">
+							? comments
+									.map((c) => {
+										const fname =
+											c.comment_by ||
+											frappe.boot?.user_info?.[c.comment_email]?.fullname ||
+											c.comment_email;
+										const can_del = c.comment_email === me || is_manager;
+										return `<div class="ev-dlg-comment">
 									<div class="ev-dlg-comment-head">
 										${_dlg_av(c.comment_email, fname)}
 										<span class="ev-dlg-comment-by">${frappe.utils.escape_html(fname)}</span>
 										<span class="ev-dlg-comment-when">${frappe.datetime.comment_when(c.creation) || ""}</span>
-										${can_del ? `<button class="ev-dlg-icon-btn ev-dlg-icon-btn--danger" data-remove-comment="${frappe.utils.escape_html(c.name)}" title="${__("Delete")}"><svg viewBox="0 0 16 16" fill="currentColor" width="10" height="10"><path d="M2.146 2.854a.5.5 0 1 1 .708-.708L8 7.293l5.146-5.147a.5.5 0 0 1 .708.708L8.707 8l5.147 5.146a.5.5 0 0 1-.708.708L8 8.707l-5.146 5.147a.5.5 0 0 1-.708-.708L7.293 8z"/></svg></button>` : ""}
+										${
+											can_del
+												? `<button class="ev-dlg-icon-btn ev-dlg-icon-btn--danger" data-remove-comment="${frappe.utils.escape_html(
+														c.name
+												  )}" title="${__(
+														"Delete"
+												  )}"><svg viewBox="0 0 16 16" fill="currentColor" width="10" height="10"><path d="M2.146 2.854a.5.5 0 1 1 .708-.708L8 7.293l5.146-5.147a.5.5 0 0 1 .708.708L8.707 8l5.147 5.146a.5.5 0 0 1-.708.708L8 8.707l-5.146 5.147a.5.5 0 0 1-.708-.708L7.293 8z"/></svg></button>`
+												: ""
+										}
 									</div>
 									<div class="ev-dlg-comment-body">${c.content}</div>
 								</div>`;
-							}).join("")
-							: `<div class="ev-dlg-empty"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" width="28" height="28"><path stroke-linecap="round" stroke-linejoin="round" d="M8.625 12a.375.375 0 11-.75 0 .375.375 0 01.75 0zm0 0H8.25m4.125 0a.375.375 0 11-.75 0 .375.375 0 01.75 0zm0 0H12m4.125 0a.375.375 0 11-.75 0 .375.375 0 01.75 0zm0 0h-.375M21 12c0 4.556-4.03 8.25-9 8.25a9.764 9.764 0 01-2.555-.337A5.972 5.972 0 015.41 20.97a5.969 5.969 0 01-.474-.065 4.48 4.48 0 00.978-2.025c.09-.457-.133-.901-.467-1.226C3.93 16.178 3 14.189 3 12c0-4.556 4.03-8.25 9-8.25s9 3.694 9 8.25z"/></svg><div>${__("No comments yet")}</div></div>`;
+									})
+									.join("")
+							: `<div class="ev-dlg-empty"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" width="28" height="28"><path stroke-linecap="round" stroke-linejoin="round" d="M8.625 12a.375.375 0 11-.75 0 .375.375 0 01.75 0zm0 0H8.25m4.125 0a.375.375 0 11-.75 0 .375.375 0 01.75 0zm0 0H12m4.125 0a.375.375 0 11-.75 0 .375.375 0 01.75 0zm0 0h-.375M21 12c0 4.556-4.03 8.25-9 8.25a9.764 9.764 0 01-2.555-.337A5.972 5.972 0 015.41 20.97a5.969 5.969 0 01-.474-.065 4.48 4.48 0 00.978-2.025c.09-.457-.133-.901-.467-1.226C3.93 16.178 3 14.189 3 12c0-4.556 4.03-8.25 9-8.25s9 3.694 9 8.25z"/></svg><div>${__(
+									"No comments yet"
+							  )}</div></div>`;
 
 						const fields = [
-							{ fieldtype: "HTML", fieldname: "comments_list", options: `<div class="ev-dlg-comments">${comments_html}</div>` },
+							{
+								fieldtype: "HTML",
+								fieldname: "comments_list",
+								options: `<div class="ev-dlg-comments">${comments_html}</div>`,
+							},
 						];
 						if (can_write) {
 							fields.push(
 								{ fieldtype: "Section Break", label: __("Add Comment") },
-								{ fieldtype: "Text Editor", fieldname: "new_comment" },
+								{ fieldtype: "Text Editor", fieldname: "new_comment" }
 							);
 						}
 						const d = new frappe.ui.Dialog({
-							title: `${__("Comments")}${comments.length ? " (" + comments.length + ")" : ""}`,
+							title: `${__("Comments")}${
+								comments.length ? " (" + comments.length + ")" : ""
+							}`,
 							fields,
 							primary_action_label: can_write ? __("Post") : __("Close"),
 							primary_action: (vals) => {
-								if (!can_write) { d.hide(); return; }
+								if (!can_write) {
+									d.hide();
+									return;
+								}
 								const content = (vals.new_comment || "").trim();
-								if (!content) { frappe.show_alert({ message: __("Enter a comment"), indicator: "orange" }, 2); return; }
+								if (!content) {
+									frappe.show_alert(
+										{ message: __("Enter a comment"), indicator: "orange" },
+										2
+									);
+									return;
+								}
 								frappe.call({
 									method: "frappe.desk.form.utils.add_comment",
-									args: { reference_doctype: dt, reference_name: name, content, comment_email: me, comment_by: frappe.boot?.user?.full_name || me },
-									callback: () => { d.hide(); this.list_view.refresh(); },
+									args: {
+										reference_doctype: dt,
+										reference_name: name,
+										content,
+										comment_email: me,
+										comment_by: frappe.boot?.user?.full_name || me,
+									},
+									callback: () => {
+										d.hide();
+										this.list_view.refresh();
+									},
 								});
 							},
 						});
@@ -1970,7 +2363,10 @@ frappe.views.ExcelBoard = class ExcelBoard {
 								frappe.call({
 									method: "frappe.client.delete",
 									args: { doctype: "Comment", name: cname },
-									callback: () => { d.hide(); this.list_view.refresh(); },
+									callback: () => {
+										d.hide();
+										this.list_view.refresh();
+									},
 								});
 							});
 						});
@@ -1979,8 +2375,6 @@ frappe.views.ExcelBoard = class ExcelBoard {
 			}
 		});
 	}
-
-
 
 	/**
 	 * Format a numeric value according to numfmt type.
@@ -1992,27 +2386,55 @@ frappe.views.ExcelBoard = class ExcelBoard {
 	static _format_num(value, numfmt, decimals = 2, sym = null) {
 		if (!sym) {
 			const def_cur = frappe.boot?.sysdefaults?.currency;
-			sym = (def_cur && frappe.currency_symbols?.[def_cur]) || frappe.boot?.sysdefaults?.currency || "$";
+			sym =
+				(def_cur && frappe.currency_symbols?.[def_cur]) ||
+				frappe.boot?.sysdefaults?.currency ||
+				"$";
 		}
 		switch (numfmt) {
 			case "number":
-				return value.toLocaleString(undefined, { minimumFractionDigits: decimals, maximumFractionDigits: decimals });
+				return value.toLocaleString(undefined, {
+					minimumFractionDigits: decimals,
+					maximumFractionDigits: decimals,
+				});
 			case "currency":
-				return sym + Math.abs(value).toLocaleString(undefined, { minimumFractionDigits: decimals, maximumFractionDigits: decimals });
+				return (
+					sym +
+					Math.abs(value).toLocaleString(undefined, {
+						minimumFractionDigits: decimals,
+						maximumFractionDigits: decimals,
+					})
+				);
 			case "accounting":
-				if (value < 0) return `(${sym}${Math.abs(value).toLocaleString(undefined, { minimumFractionDigits: decimals, maximumFractionDigits: decimals })})`;
-				return sym + value.toLocaleString(undefined, { minimumFractionDigits: decimals, maximumFractionDigits: decimals });
+				if (value < 0)
+					return `(${sym}${Math.abs(value).toLocaleString(undefined, {
+						minimumFractionDigits: decimals,
+						maximumFractionDigits: decimals,
+					})})`;
+				return (
+					sym +
+					value.toLocaleString(undefined, {
+						minimumFractionDigits: decimals,
+						maximumFractionDigits: decimals,
+					})
+				);
 			case "percentage":
 				return (value * 100).toFixed(decimals) + "%";
 			case "fraction": {
 				const int_part = Math.trunc(value);
 				const frac = Math.abs(value - int_part);
 				// Find best fraction denominator up to 16
-				let best_num = 0, best_den = 1, best_diff = frac;
+				let best_num = 0,
+					best_den = 1,
+					best_diff = frac;
 				for (let d = 2; d <= 16; d++) {
 					const n = Math.round(frac * d);
 					const diff = Math.abs(frac - n / d);
-					if (diff < best_diff) { best_diff = diff; best_num = n; best_den = d; }
+					if (diff < best_diff) {
+						best_diff = diff;
+						best_num = n;
+						best_den = d;
+					}
 				}
 				if (best_num === 0) return String(int_part || 0);
 				return (int_part ? int_part + " " : "") + `${best_num}/${best_den}`;
@@ -2037,15 +2459,24 @@ frappe.views.ExcelBoard = class ExcelBoard {
 				const v1 = parseFloat(rule.val1);
 				const v2 = parseFloat(rule.val2);
 				switch (rule.op) {
-					case ">":        return !isNaN(num) && num > v1;
-					case "<":        return !isNaN(num) && num < v1;
-					case "=":        return String(value) === String(rule.val1);
-					case "!=":       return String(value) !== String(rule.val1);
-					case ">=":       return !isNaN(num) && num >= v1;
-					case "<=":       return !isNaN(num) && num <= v1;
-					case "between":  return !isNaN(num) && num >= Math.min(v1, v2) && num <= Math.max(v1, v2);
-					case "contains": return String(value).includes(String(rule.val1 ?? ""));
-					default:         return false;
+					case ">":
+						return !isNaN(num) && num > v1;
+					case "<":
+						return !isNaN(num) && num < v1;
+					case "=":
+						return String(value) === String(rule.val1);
+					case "!=":
+						return String(value) !== String(rule.val1);
+					case ">=":
+						return !isNaN(num) && num >= v1;
+					case "<=":
+						return !isNaN(num) && num <= v1;
+					case "between":
+						return !isNaN(num) && num >= Math.min(v1, v2) && num <= Math.max(v1, v2);
+					case "contains":
+						return String(value).includes(String(rule.val1 ?? ""));
+					default:
+						return false;
 				}
 			}
 			case "colorscale": {
@@ -2054,11 +2485,17 @@ frappe.views.ExcelBoard = class ExcelBoard {
 				if (!this._cf_cs_cache) this._cf_cs_cache = {};
 				if (!this._cf_cs_cache[cache_key]) {
 					const { r1, c1, r2, c2 } = rule.range;
-					let mn = Infinity, mx = -Infinity;
+					let mn = Infinity,
+						mx = -Infinity;
 					for (let r = r1; r <= r2; r++) {
 						for (let c = c1; c <= c2; c++) {
-							const v = parseFloat(this.list_view?.data?.[r]?.[this.columns[c]?.data]);
-							if (!isNaN(v)) { mn = Math.min(mn, v); mx = Math.max(mx, v); }
+							const v = parseFloat(
+								this.list_view?.data?.[r]?.[this.columns[c]?.data]
+							);
+							if (!isNaN(v)) {
+								mn = Math.min(mn, v);
+								mx = Math.max(mx, v);
+							}
 						}
 					}
 					this._cf_cs_cache[cache_key] = { mn, mx };
@@ -2069,22 +2506,39 @@ frappe.views.ExcelBoard = class ExcelBoard {
 				const lerp_ch = (a, b, lt) => Math.round(a + (b - a) * lt);
 				const parse_hex = (h) => {
 					const hx = h.replace("#", "");
-					return [parseInt(hx.slice(0,2),16), parseInt(hx.slice(2,4),16), parseInt(hx.slice(4,6),16)];
+					return [
+						parseInt(hx.slice(0, 2), 16),
+						parseInt(hx.slice(2, 4), 16),
+						parseInt(hx.slice(4, 6), 16),
+					];
 				};
-				const to_hex = (rgb) => "#" + rgb.map(v => v.toString(16).padStart(2,"0")).join("");
+				const to_hex = (rgb) =>
+					"#" + rgb.map((v) => v.toString(16).padStart(2, "0")).join("");
 				let color;
 				const min_c = parse_hex(rule.min_color || "#ffffff");
 				const max_c = parse_hex(rule.max_color || "#ff0000");
 				if (rule.mid_color && t <= 0.5) {
 					const mid_c = parse_hex(rule.mid_color);
 					const t2 = t * 2;
-					color = to_hex([lerp_ch(min_c[0],mid_c[0],t2), lerp_ch(min_c[1],mid_c[1],t2), lerp_ch(min_c[2],mid_c[2],t2)]);
+					color = to_hex([
+						lerp_ch(min_c[0], mid_c[0], t2),
+						lerp_ch(min_c[1], mid_c[1], t2),
+						lerp_ch(min_c[2], mid_c[2], t2),
+					]);
 				} else if (rule.mid_color) {
 					const mid_c = parse_hex(rule.mid_color);
 					const t2 = (t - 0.5) * 2;
-					color = to_hex([lerp_ch(mid_c[0],max_c[0],t2), lerp_ch(mid_c[1],max_c[1],t2), lerp_ch(mid_c[2],max_c[2],t2)]);
+					color = to_hex([
+						lerp_ch(mid_c[0], max_c[0], t2),
+						lerp_ch(mid_c[1], max_c[1], t2),
+						lerp_ch(mid_c[2], max_c[2], t2),
+					]);
 				} else {
-					color = to_hex([lerp_ch(min_c[0],max_c[0],t), lerp_ch(min_c[1],max_c[1],t), lerp_ch(min_c[2],max_c[2],t)]);
+					color = to_hex([
+						lerp_ch(min_c[0], max_c[0], t),
+						lerp_ch(min_c[1], max_c[1], t),
+						lerp_ch(min_c[2], max_c[2], t),
+					]);
 				}
 				return { colorscale_bg: color };
 			}
@@ -2096,7 +2550,9 @@ frappe.views.ExcelBoard = class ExcelBoard {
 					const vals = [];
 					for (let r = r1; r <= r2; r++) {
 						for (let c = c1; c <= c2; c++) {
-							const v = parseFloat(this.list_view?.data?.[r]?.[this.columns[c]?.data]);
+							const v = parseFloat(
+								this.list_view?.data?.[r]?.[this.columns[c]?.data]
+							);
 							if (!isNaN(v)) vals.push(v);
 						}
 					}
@@ -2119,7 +2575,9 @@ frappe.views.ExcelBoard = class ExcelBoard {
 					const counts = {};
 					for (let r = r1; r <= r2; r++) {
 						for (let c = c1; c <= c2; c++) {
-							const v = String(this.list_view?.data?.[r]?.[this.columns[c]?.data] ?? "");
+							const v = String(
+								this.list_view?.data?.[r]?.[this.columns[c]?.data] ?? ""
+							);
 							counts[v] = (counts[v] || 0) + 1;
 						}
 					}
@@ -2135,7 +2593,9 @@ frappe.views.ExcelBoard = class ExcelBoard {
 					const counts = {};
 					for (let r = r1; r <= r2; r++) {
 						for (let c = c1; c <= c2; c++) {
-							const v = String(this.list_view?.data?.[r]?.[this.columns[c]?.data] ?? "");
+							const v = String(
+								this.list_view?.data?.[r]?.[this.columns[c]?.data] ?? ""
+							);
 							counts[v] = (counts[v] || 0) + 1;
 						}
 					}
@@ -2161,9 +2621,15 @@ frappe.views.ExcelBoard = class ExcelBoard {
 		this._cf_cell_cache = new Map();
 		if (!this.cond_fmt_rules?.length || !this.list_view?.data?.length) return;
 		const data = this.list_view.data;
-		this.cond_fmt_rules.forEach(rule => {
+		this.cond_fmt_rules.forEach((rule) => {
 			const { r1, c1, r2, c2 } = rule.range || {};
-			if (r1 == null || rule.type === "colorscale" || rule.type === "topbottom" || rule.type === "dupuniq") return;
+			if (
+				r1 == null ||
+				rule.type === "colorscale" ||
+				rule.type === "topbottom" ||
+				rule.type === "dupuniq"
+			)
+				return;
 			// colorscale/topbottom/dupuniq need full column scan — keep their per-cell path
 			for (let r = r1; r <= Math.min(r2, data.length - 1); r++) {
 				for (let c = c1; c <= c2; c++) {
@@ -2173,7 +2639,7 @@ frappe.views.ExcelBoard = class ExcelBoard {
 					if (match === true) {
 						const key = `${r}:${c}`;
 						const existing = this._cf_cell_cache.get(key) || {};
-						if (rule.fmt?.bg)    existing.bg    = rule.fmt.bg;
+						if (rule.fmt?.bg) existing.bg = rule.fmt.bg;
 						if (rule.fmt?.color) existing.color = rule.fmt.color;
 						this._cf_cell_cache.set(key, existing);
 					}
@@ -2223,7 +2689,14 @@ frappe.views.ExcelBoard = class ExcelBoard {
 	 * Visual feedback: brief red flash on the cell TD.
 	 */
 	_validate_changes(changes, source) {
-		if (!changes || source === "loadData" || source === "autofetch" || source === "flash_fill" || source === "fill_down") return;
+		if (
+			!changes ||
+			source === "loadData" ||
+			source === "autofetch" ||
+			source === "flash_fill" ||
+			source === "fill_down"
+		)
+			return;
 
 		const _reject = (row, col, msg) => {
 			// Flash cell red for 600ms
@@ -2258,7 +2731,11 @@ frappe.views.ExcelBoard = class ExcelBoard {
 					continue;
 				}
 				if (df.fieldtype === "Int" && !Number.isInteger(Number(new_val))) {
-					_reject(row, col_idx, __(`{0}: must be a whole number`, [df.label || df.fieldname]));
+					_reject(
+						row,
+						col_idx,
+						__(`{0}: must be a whole number`, [df.label || df.fieldname])
+					);
 					changes[i] = null;
 					continue;
 				}
@@ -2266,9 +2743,16 @@ frappe.views.ExcelBoard = class ExcelBoard {
 
 			// Select: value must be in options list
 			if (df.fieldtype === "Select" && df.options) {
-				const opts = df.options.split("\n").map(o => o.trim());
+				const opts = df.options.split("\n").map((o) => o.trim());
 				if (new_val && !opts.includes(String(new_val))) {
-					_reject(row, col_idx, __(`{0}: must be one of: {1}`, [df.label || df.fieldname, opts.slice(0, 5).join(", ")]));
+					_reject(
+						row,
+						col_idx,
+						__(`{0}: must be one of: {1}`, [
+							df.label || df.fieldname,
+							opts.slice(0, 5).join(", "),
+						])
+					);
 					changes[i] = null;
 					continue;
 				}
@@ -2278,7 +2762,11 @@ frappe.views.ExcelBoard = class ExcelBoard {
 			if (df.fieldtype === "Date" && new_val) {
 				const v = String(new_val);
 				if (!/^\d{4}-\d{2}-\d{2}$/.test(v) || isNaN(Date.parse(v))) {
-					_reject(row, col_idx, __(`{0}: use YYYY-MM-DD format`, [df.label || df.fieldname]));
+					_reject(
+						row,
+						col_idx,
+						__(`{0}: use YYYY-MM-DD format`, [df.label || df.fieldname])
+					);
 					changes[i] = null;
 					continue;
 				}
@@ -2287,20 +2775,31 @@ frappe.views.ExcelBoard = class ExcelBoard {
 			// Link fields: async existence check (non-blocking — show warning after).
 			// Batched by (doctype, value) to avoid N HTTP calls on paste of N rows.
 			if (df.fieldtype === "Link" && df.options && new_val) {
-				const _row = row, _col = col_idx, _val = String(new_val),
-					_label = df.label || df.fieldname, _options = df.options;
+				const _row = row,
+					_col = col_idx,
+					_val = String(new_val),
+					_label = df.label || df.fieldname,
+					_options = df.options;
 				const _cache_key = `${_options}::${_val}`;
 				// Use a session-level check cache to avoid re-checking same value twice
 				if (!this._link_check_cache) this._link_check_cache = new Map();
 				if (this._link_check_cache.has(_cache_key)) {
 					if (this._link_check_cache.get(_cache_key) === false) {
-						_reject(_row, _col, __(`{0}: "{1}" not found in {2}`, [_label, _val, _options]));
+						_reject(
+							_row,
+							_col,
+							__(`{0}: "{1}" not found in {2}`, [_label, _val, _options])
+						);
 					}
 				} else {
-					frappe.db.exists(_options, _val).then(exists => {
+					frappe.db.exists(_options, _val).then((exists) => {
 						this._link_check_cache.set(_cache_key, !!exists);
 						if (!exists) {
-							_reject(_row, _col, __(`{0}: "{1}" not found in {2}`, [_label, _val, _options]));
+							_reject(
+								_row,
+								_col,
+								__(`{0}: "{1}" not found in {2}`, [_label, _val, _options])
+							);
 						}
 					});
 				}
@@ -2315,11 +2814,26 @@ frappe.views.ExcelBoard = class ExcelBoard {
 
 	_on_change(changes, source) {
 		// Skip internal HOT sources that aren't user edits
-		if (!changes || source === "loadData" || source === "MergeCells" || source === "UndoRedo.undo" && changes.every(([,,,v]) => v === null)) return;
+		if (
+			!changes ||
+			source === "loadData" ||
+			source === "MergeCells" ||
+			(source === "UndoRedo.undo" && changes.every(([, , , v]) => v === null))
+		)
+			return;
 
 		// Skip our own autofetch writes — they're already in list_view.data, no DB save needed
 		if (source === "autofetch") return;
-		if (source === "fill_scroll") return;  // formula cells written by _fill_new_rows
+		if (source === "fill_scroll") return; // formula cells written by _fill_new_rows
+
+		// Editing a cell clears its "server refused this" mark (set by DataManager).
+		if (this._failed_cells?.size) {
+			changes.forEach(([row, prop]) => {
+				const rec = this.list_view?.data?.[row];
+				if (rec && typeof prop === "string")
+					this._failed_cells.delete(`${rec.name}|${prop}`);
+			});
+		}
 
 		// Coerce Check field booleans → Frappe integers (0/1).
 		// HOT's checkbox autofill and our fill_down can produce true/false (boolean);
@@ -2346,6 +2860,15 @@ frappe.views.ExcelBoard = class ExcelBoard {
 		// Push raw values into HyperFormula first (needed before copy/paste adjustment).
 		this.formula_bridge.apply_changes(indexed);
 
+		// A typed formula (=SUM(...)) is calculated by HyperFormula but the cell is not
+		// repainted, so it looks empty. Redraw now, and again after the formula's own
+		// server fetch (FRAPPE_* functions resolve asynchronously).
+		if (changes.some(([, , , v]) => typeof v === "string" && v.charAt(0) === "=")) {
+			this.hot.render();
+			clearTimeout(this._formula_redraw_timer);
+			this._formula_redraw_timer = setTimeout(() => this.hot?.render(), 1500);
+		}
+
 		// For autofill: use HF copy+paste so relative references shift correctly.
 		// (Without this, =AF1*0.18 copied to row 2 stays =AF1*0.18 instead of =AF2*0.18)
 		if (source === "Autofill.fill") {
@@ -2353,9 +2876,10 @@ frappe.views.ExcelBoard = class ExcelBoard {
 		}
 
 		// Persist to Frappe DB — skip rows that are pending bulk creation (not in DB yet)
-		const _save_changes = this._bulk_add_start >= 0
-			? changes.filter(([row]) => row < this._bulk_add_start)
-			: changes;
+		const _save_changes =
+			this._bulk_add_start >= 0
+				? changes.filter(([row]) => row < this._bulk_add_start)
+				: changes;
 		if (_save_changes.length) {
 			this.data_manager.queue_save(_save_changes);
 		}
@@ -2392,14 +2916,14 @@ frappe.views.ExcelBoard = class ExcelBoard {
 	 */
 	_build_fetch_from_map(meta) {
 		const map = {};
-		(meta.fields || []).forEach(f => {
+		(meta.fields || []).forEach((f) => {
 			if (!f.fetch_from) return;
 			const dot = f.fetch_from.indexOf(".");
 			if (dot < 0) return;
 			const src = f.fetch_from.slice(0, dot);
 			const remote_fn = f.fetch_from.slice(dot + 1);
 
-			const src_df = (meta.fields || []).find(x => x.fieldname === src);
+			const src_df = (meta.fields || []).find((x) => x.fieldname === src);
 			if (!src_df) return;
 
 			let entry;
@@ -2445,8 +2969,14 @@ frappe.views.ExcelBoard = class ExcelBoard {
 
 		// Collect distinct new rows touched by these changes
 		const changed_rows = is_bulk
-			? [...new Set(initial_changes.map(([r]) => r).filter(r => r >= this._bulk_add_start))]
-			: (this._new_row_idx >= 0 ? [this._new_row_idx] : []);
+			? [
+					...new Set(
+						initial_changes.map(([r]) => r).filter((r) => r >= this._bulk_add_start)
+					),
+			  ]
+			: this._new_row_idx >= 0
+			? [this._new_row_idx]
+			: [];
 
 		for (const row_idx of changed_rows) {
 			const row_data = this.list_view.data[row_idx];
@@ -2459,7 +2989,7 @@ frappe.views.ExcelBoard = class ExcelBoard {
 		if (!this._fetch_from_map) return;
 
 		// BFS queue: [fieldname, newValue]
-		const queue   = [];
+		const queue = [];
 		const visited = new Set(); // "fieldname=value" pairs already processed
 
 		for (const [row, prop, , newVal] of initial_changes) {
@@ -2478,7 +3008,7 @@ frappe.views.ExcelBoard = class ExcelBoard {
 			if (!value) {
 				// Propagate clearing — empty source clears all dependents recursively
 				const clears = [];
-				deps.forEach(d => {
+				deps.forEach((d) => {
 					row_data[d.fieldname] = "";
 					const ci = this._get_col_idx(d.fieldname);
 					if (ci >= 0) clears.push([row_idx, ci, ""]);
@@ -2489,25 +3019,27 @@ frappe.views.ExcelBoard = class ExcelBoard {
 			}
 
 			// Resolve link_dt for Dynamic Link fields from current row_data
-			const resolved_deps = deps.map(d => {
-				if (d.link_dt) return d;
-				// Dynamic Link: read the actual doctype from row_data
-				const link_dt = row_data[d.dynamic_link_field] || "";
-				return link_dt ? { ...d, link_dt } : null;
-			}).filter(Boolean);
+			const resolved_deps = deps
+				.map((d) => {
+					if (d.link_dt) return d;
+					// Dynamic Link: read the actual doctype from row_data
+					const link_dt = row_data[d.dynamic_link_field] || "";
+					return link_dt ? { ...d, link_dt } : null;
+				})
+				.filter(Boolean);
 
 			// Batch fetch by link_dt so we issue one DB call per doctype per hop
 			const by_dt = {};
-			resolved_deps.forEach(d => (by_dt[d.link_dt] = by_dt[d.link_dt] || []).push(d));
+			resolved_deps.forEach((d) => (by_dt[d.link_dt] = by_dt[d.link_dt] || []).push(d));
 
 			for (const [link_dt, dt_deps] of Object.entries(by_dt)) {
 				try {
-					const remote_fields = [...new Set(dt_deps.map(d => d.remote_fn))];
+					const remote_fields = [...new Set(dt_deps.map((d) => d.remote_fn))];
 					const r = await frappe.db.get_value(link_dt, value, remote_fields);
 					if (!r?.message) continue;
 
 					const updates = [];
-					dt_deps.forEach(d => {
+					dt_deps.forEach((d) => {
 						const fetched = r.message[d.remote_fn];
 						if (fetched != null && fetched !== "") {
 							row_data[d.fieldname] = fetched;
@@ -2570,7 +3102,7 @@ frappe.views.ExcelBoard = class ExcelBoard {
 			// HF remembers relative offsets so each paste adjusts references correctly.
 			hf.copy({
 				start: { sheet, row: src_row, col },
-				end:   { sheet, row: src_row, col },
+				end: { sheet, row: src_row, col },
 			});
 
 			let needs_render = false;
@@ -2595,7 +3127,6 @@ frappe.views.ExcelBoard = class ExcelBoard {
 		}
 	}
 
-
 	// ── Fill Column ↓ (All Rows) ────────────────────────────────────────
 	// Fills a formula from src_row to every row in the loaded dataset.
 	// Uses HyperFormula copy+paste so relative references (A1 -> A2 -> A3) are
@@ -2606,14 +3137,17 @@ frappe.views.ExcelBoard = class ExcelBoard {
 
 		const src_formula = this.formula_bridge.get_formula(src_row, col);
 		if (!src_formula) {
-			frappe.show_alert({ message: __("Selected cell has no formula"), indicator: "orange" });
+			frappe.show_alert({
+				message: __("Selected cell has no formula"),
+				indicator: "orange",
+			});
 			return;
 		}
 
-		const hf    = this.formula_bridge.hf;
+		const hf = this.formula_bridge.hf;
 		const sheet = this.formula_bridge.sheet_id;
 		const total = this.list_view.data?.length || 0;
-		const prop  = this.columns[col]?.data;
+		const prop = this.columns[col]?.data;
 
 		hf.copy({ start: { sheet, row: src_row, col }, end: { sheet, row: src_row, col } });
 
@@ -2632,7 +3166,10 @@ frappe.views.ExcelBoard = class ExcelBoard {
 		this._save_formula_col_settings();
 
 		this.hot.render();
-		frappe.show_alert({ message: __("Formula filled to {0} rows", [total]), indicator: "green" });
+		frappe.show_alert({
+			message: __("Formula filled to {0} rows", [total]),
+			indicator: "green",
+		});
 	}
 
 	// Re-applies all tracked formula columns to rows [from_row, to_row].
@@ -2643,9 +3180,9 @@ frappe.views.ExcelBoard = class ExcelBoard {
 		if (!this.formula_bridge || !this.hot || !this._formula_col_map?.size) return;
 		if (to_row < 0 || from_row > to_row) return;
 
-		const hf    = this.formula_bridge.hf;
+		const hf = this.formula_bridge.hf;
 		const sheet = this.formula_bridge.sheet_id;
-		const data  = this.list_view.data;
+		const data = this.list_view.data;
 		const hot_changes = [];
 
 		for (const [col, template] of this._formula_col_map) {
@@ -2676,7 +3213,7 @@ frappe.views.ExcelBoard = class ExcelBoard {
 		// not numeric col index. afterRenderer sees formula string → async fetch fires.
 		// afterChange ignores 'fill_scroll' source.
 		if (hot_changes.length) {
-			this.hot.setDataAtRowProp(hot_changes, 'fill_scroll');
+			this.hot.setDataAtRowProp(hot_changes, "fill_scroll");
 		}
 	}
 
@@ -2687,10 +3224,16 @@ frappe.views.ExcelBoard = class ExcelBoard {
 		let added = false;
 		for (const fc of templates) {
 			// Skip if column already exists (handles duplicate keys in saved state gracefully)
-			if (this.columns.find(c => c.data === fc.key)) continue;
-			const new_col = { data: fc.key, title: fc.label, type: 'text', width: 140, _is_formula_col: true };
+			if (this.columns.find((c) => c.data === fc.key)) continue;
+			const new_col = {
+				data: fc.key,
+				title: fc.label,
+				type: "text",
+				width: 140,
+				_is_formula_col: true,
+			};
 			this.columns.push(new_col);
-			if (this._master_columns)   this._master_columns.push(new_col);
+			if (this._master_columns) this._master_columns.push(new_col);
 			if (this._original_columns) this._original_columns.push(new_col); // keep in sync (blank cols do this too)
 			this._invalidate_col_map();
 			added = true;
@@ -2705,7 +3248,7 @@ frappe.views.ExcelBoard = class ExcelBoard {
 		// but duplicates should never occur after the _formula_col_count fix below.
 		this._formula_col_map = this._formula_col_map || new Map();
 		for (const fc of templates) {
-			const col_idx = this.columns.findIndex(c => c.data === fc.key);
+			const col_idx = this.columns.findIndex((c) => c.data === fc.key);
 			if (col_idx >= 0 && fc.formula) this._formula_col_map.set(col_idx, fc.formula);
 		}
 		// Apply formulas to all currently loaded rows
@@ -2731,16 +3274,16 @@ frappe.views.ExcelBoard = class ExcelBoard {
 			const col = this.columns[col_idx];
 			if (col) templates.push({ key: col.data, label: col.title, formula });
 		}
-		frappe.model.user_settings.save(this.doctype, 'excel_formula_col_templates', templates);
+		frappe.model.user_settings.save(this.doctype, "excel_formula_col_templates", templates);
 
 		// Also sync formula_columns into the active sheet state so that workbook
 		// saves always include the current formula columns without requiring a
 		// separate "save workbook" click after adding/editing a formula column.
 		const sheet = this.sheet_manager?.get_current();
 		if (sheet) {
-			sheet.formula_columns = templates.map(t => ({
-				key:              t.key,
-				label:            t.label,
+			sheet.formula_columns = templates.map((t) => ({
+				key: t.key,
+				label: t.label,
 				formula_template: t.formula,
 			}));
 		}
@@ -2753,7 +3296,7 @@ frappe.views.ExcelBoard = class ExcelBoard {
 		(this._blank_col_configs || new Map()).forEach((cfg, key) => {
 			configs.push({ key, label: cfg.label, ff_transform: cfg.ff_transform || null });
 		});
-		frappe.model.user_settings.save(this.doctype, 'excel_blank_col_configs', configs);
+		frappe.model.user_settings.save(this.doctype, "excel_blank_col_configs", configs);
 	}
 
 	_restore_blank_cols(configs) {
@@ -2761,8 +3304,14 @@ frappe.views.ExcelBoard = class ExcelBoard {
 		this._blank_col_configs = this._blank_col_configs || new Map();
 		let added = false;
 		for (const cfg of configs) {
-			if (this.columns.find(c => c.data === cfg.key)) continue; // already present
-			const new_col = { data: cfg.key, title: cfg.label, type: "text", width: 140, _is_blank_col: true };
+			if (this.columns.find((c) => c.data === cfg.key)) continue; // already present
+			const new_col = {
+				data: cfg.key,
+				title: cfg.label,
+				type: "text",
+				width: 140,
+				_is_blank_col: true,
+			};
 			this.columns.push(new_col);
 			if (this._master_columns) this._master_columns.push(new_col);
 			if (this._original_columns) this._original_columns.push(new_col);
@@ -2788,16 +3337,21 @@ frappe.views.ExcelBoard = class ExcelBoard {
 	_ff_make_candidate(fn_idx, example_len) {
 		const n = example_len || 0;
 		const candidates = [
-			v => v.split(/\s+/).filter(Boolean).map(w => w[0].toUpperCase()).join(""),
-			v => v.split(/\s+/)[0],
-			v => v.split(/\s+/).pop(),
-			v => v.toUpperCase(),
-			v => v.toLowerCase(),
-			v => v.slice(0, n),
-			v => v.split(/[,;(\-]/)[0].trim(),
-			v => v.replace(/\D/g, ""),
-			v => v.replace(/[^a-zA-Z]/g, ""),
-			v => v.replace(/\s+/g, ""),
+			(v) =>
+				v
+					.split(/\s+/)
+					.filter(Boolean)
+					.map((w) => w[0].toUpperCase())
+					.join(""),
+			(v) => v.split(/\s+/)[0],
+			(v) => v.split(/\s+/).pop(),
+			(v) => v.toUpperCase(),
+			(v) => v.toLowerCase(),
+			(v) => v.slice(0, n),
+			(v) => v.split(/[,;(\-]/)[0].trim(),
+			(v) => v.replace(/\D/g, ""),
+			(v) => v.replace(/[^a-zA-Z]/g, ""),
+			(v) => v.replace(/\s+/g, ""),
 		];
 		return candidates[fn_idx] || null;
 	}
@@ -2813,7 +3367,7 @@ frappe.views.ExcelBoard = class ExcelBoard {
 			if (!ff) return; // blank col with no flash fill yet
 			const fn = this._ff_make_candidate(ff.fn_idx, ff.example_len);
 			if (!fn) return;
-			const col_idx = this.columns.findIndex(c => c.data === col_key);
+			const col_idx = this.columns.findIndex((c) => c.data === col_key);
 			if (col_idx < 0) return;
 			for (let r = from_row; r <= to_row; r++) {
 				if (String(data[r]?.[col_key] ?? "") !== "") continue; // already filled
@@ -2825,12 +3379,13 @@ frappe.views.ExcelBoard = class ExcelBoard {
 						data[r][col_key] = v;
 						changes.push([r, col_idx, v]);
 					}
-				} catch (_) { /* skip */ }
+				} catch (_) {
+					/* skip */
+				}
 			}
 		});
 		if (changes.length) this.hot.setDataAtCell(changes, "flash_fill");
 	}
-
 
 	// ── Column header formatting (afterGetColHeader hook) ─────────────────────
 	// Applies border stored at format_store key "h_<col>" to the <th> element.
@@ -2840,17 +3395,17 @@ frappe.views.ExcelBoard = class ExcelBoard {
 		if (this.columns[col]?._is_bulk_temp) {
 			const _dark = document.documentElement.getAttribute("data-theme") === "dark";
 			TH.style.background = _dark ? "#2c1010" : "#fff0f0";
-			TH.style.color      = _dark ? "#f48a8a" : "#c62828";
+			TH.style.color = _dark ? "#f48a8a" : "#c62828";
 			return;
 		}
 		const key = `h_${col}`;
 		const fmt = this.format_store[key];
 		if (!fmt?.borders) return;
 		const b = fmt.borders;
-		if (b.top)    TH.style.borderTop    = b.top;
-		if (b.right)  TH.style.borderRight  = b.right;
+		if (b.top) TH.style.borderTop = b.top;
+		if (b.right) TH.style.borderRight = b.right;
 		if (b.bottom) TH.style.borderBottom = b.bottom;
-		if (b.left)   TH.style.borderLeft   = b.left;
+		if (b.left) TH.style.borderLeft = b.left;
 	}
 
 	_on_selection(row, col, row2, col2) {
@@ -2880,7 +3435,10 @@ frappe.views.ExcelBoard = class ExcelBoard {
 		clearTimeout(this._precedent_timer);
 		this._precedent_timer = setTimeout(() => {
 			if (!this._show_precedents) {
-				if (this._precedent_cells?.size) { this._precedent_cells = new Set(); this.hot?.render(); }
+				if (this._precedent_cells?.size) {
+					this._precedent_cells = new Set();
+					this.hot?.render();
+				}
 				return;
 			}
 			const prev_size = this._precedent_cells?.size || 0;
@@ -2888,10 +3446,12 @@ frappe.views.ExcelBoard = class ExcelBoard {
 			const formula = this.formula_bridge?.get_formula?.(row, col);
 			if (formula && this.formula_bridge?.hf) {
 				try {
-					const deps = this.formula_bridge.hf.getCellDependencies(
-						{ sheet: this.formula_bridge.sheet_id || 0, row, col }
-					);
-					deps.forEach(dep => {
+					const deps = this.formula_bridge.hf.getCellDependencies({
+						sheet: this.formula_bridge.sheet_id || 0,
+						row,
+						col,
+					});
+					deps.forEach((dep) => {
 						if (dep.row !== undefined && dep.col !== undefined) {
 							this._precedent_cells.add(`${dep.row}:${dep.col}`);
 						} else if (dep.start) {
@@ -2903,7 +3463,9 @@ frappe.views.ExcelBoard = class ExcelBoard {
 						}
 					});
 					if (deps.length || prev_size) this.hot?.render();
-				} catch (_) { /* non-formula cell */ }
+				} catch (_) {
+					/* non-formula cell */
+				}
 			} else if (prev_size) {
 				this.hot?.render();
 			}
@@ -2994,7 +3556,7 @@ frappe.views.ExcelBoard = class ExcelBoard {
 
 		if (this._loading_more || this._no_more_data) return;
 
-		const lv           = this.list_view;
+		const lv = this.list_view;
 		const total_loaded = lv.data?.length || 0;
 
 		// Pixel-based bottom detection — works whether HOT scrolls internally
@@ -3003,15 +3565,15 @@ frappe.views.ExcelBoard = class ExcelBoard {
 		if (!container) return;
 
 		// Try HOT inner holder first, fall back to container itself
-		const holder     = container.querySelector(".wtHolder") || container;
+		const holder = container.querySelector(".wtHolder") || container;
 		const scrollable = holder.scrollHeight > holder.clientHeight ? holder : window;
 
 		let near_bottom;
 		if (scrollable === window) {
 			// Window scroll: check if HOT container bottom is close to viewport bottom
-			const rect     = container.getBoundingClientRect();
-			const vh       = window.innerHeight;
-			near_bottom    = rect.bottom - vh < 200;   // within 200px of viewport bottom
+			const rect = container.getBoundingClientRect();
+			const vh = window.innerHeight;
+			near_bottom = rect.bottom - vh < 200; // within 200px of viewport bottom
 		} else {
 			// HOT internal scroll
 			near_bottom = holder.scrollHeight - holder.scrollTop - holder.clientHeight < 200;
@@ -3027,9 +3589,9 @@ frappe.views.ExcelBoard = class ExcelBoard {
 			this._show_load_more_indicator(true);
 
 			const prev_len = lv.data?.length || 0;
-			lv.start       = prev_len;
-			this._prev_append_len = prev_len;   // for auto-fill in refresh()
-			lv.last_args   = null;   // bypass no-change throttle
+			lv.start = prev_len;
+			this._prev_append_len = prev_len; // for auto-fill in refresh()
+			lv.last_args = null; // bypass no-change throttle
 
 			// Monkey-patch render() for one call to detect empty response
 			const orig_render = lv.render.bind(lv);
@@ -3069,19 +3631,19 @@ frappe.views.ExcelBoard = class ExcelBoard {
 		this._sec_sheet_loading = true;
 		this._show_load_more_indicator(true);
 
-		const prev_len  = sheet.data?.length || 0;
+		const prev_len = sheet.data?.length || 0;
 		const page_size = 20; // Fixed for secondary sheets — list_view.page_length belongs to base sheet
 
 		frappe.call({
 			method: "frappe.client.get_list",
 			args: {
-				doctype:    sheet.doctype,
-				fields:     sheet._fetch_fields || ["name"],
-				filters:    sheet.filters || [],
-				order_by:   sheet.sort_by
+				doctype: sheet.doctype,
+				fields: sheet._fetch_fields || ["name"],
+				filters: sheet.filters || [],
+				order_by: sheet.sort_by
 					? `${sheet.sort_by.field} ${sheet.sort_by.order}`
 					: "modified desc",
-				limit:      page_size,
+				limit: page_size,
 				limit_start: prev_len,
 			},
 			error: () => {
@@ -3147,13 +3709,14 @@ frappe.views.ExcelBoard = class ExcelBoard {
 
 			const { QueryAST } = frappe.views.excel;
 			const plain = JSON.parse(sheet.query_ast);
-			const ast   = (QueryAST && typeof QueryAST === "function")
-				? Object.assign(new QueryAST(), plain)
-				: plain;
+			const ast =
+				QueryAST && typeof QueryAST === "function"
+					? Object.assign(new QueryAST(), plain)
+					: plain;
 
 			const PAGE_SIZE = 100;
 			ast.offset = sheet.data?.length || 0;
-			ast.limit  = PAGE_SIZE;
+			ast.limit = PAGE_SIZE;
 
 			const { headers, rows } = await engine.run_ast(ast);
 
@@ -3162,9 +3725,11 @@ frappe.views.ExcelBoard = class ExcelBoard {
 				return;
 			}
 
-			const new_rows = rows.map(r => {
+			const new_rows = rows.map((r) => {
 				const obj = {};
-				headers.forEach((h, i) => { obj[h] = r[i] ?? ""; });
+				headers.forEach((h, i) => {
+					obj[h] = r[i] ?? "";
+				});
 				return obj;
 			});
 			sheet.data = [...(sheet.data || []), ...new_rows];
@@ -3177,7 +3742,8 @@ frappe.views.ExcelBoard = class ExcelBoard {
 			if (!sheet._no_more_data) {
 				setTimeout(() => {
 					const h = this.$hot_container?.[0]?.querySelector(".wtHolder");
-					if (!h || h.scrollHeight - h.clientHeight < 200) this._query_sheet_fetch(sheet);
+					if (!h || h.scrollHeight - h.clientHeight < 200)
+						this._query_sheet_fetch(sheet);
 				}, 100);
 			}
 		} catch (e) {
@@ -3192,8 +3758,9 @@ frappe.views.ExcelBoard = class ExcelBoard {
 		if (!this.$hot_container) return;
 		if (show) {
 			if (!this.$hot_container.find(".ev-load-more-ind").length) {
-				$('<div class="ev-load-more-ind">Loading more rows…</div>')
-					.appendTo(this.$hot_container);
+				$('<div class="ev-load-more-ind">Loading more rows…</div>').appendTo(
+					this.$hot_container
+				);
 			}
 		} else {
 			this.$hot_container.find(".ev-load-more-ind").remove();
@@ -3216,7 +3783,7 @@ frappe.views.ExcelBoard = class ExcelBoard {
 	_apply_col_resize(cols, size) {
 		const plugin = this.hot?.getPlugin("manualColumnResize");
 		if (!plugin) return;
-		cols.forEach(col => {
+		cols.forEach((col) => {
 			const phys = this.hot.toPhysicalColumn ? this.hot.toPhysicalColumn(col) : col;
 			plugin.manualColumnWidths[phys] = size;
 		});
@@ -3234,7 +3801,7 @@ frappe.views.ExcelBoard = class ExcelBoard {
 	_apply_row_resize(rows, size) {
 		const plugin = this.hot?.getPlugin("manualRowResize");
 		if (!plugin) return;
-		rows.forEach(row => {
+		rows.forEach((row) => {
 			// Skip hidden rows — keep them at 0
 			if (!this._hidden_rows?.has(row)) {
 				plugin.manualRowHeights[row] = size;
@@ -3275,19 +3842,71 @@ frappe.views.ExcelBoard = class ExcelBoard {
 	// ── Keyboard shortcuts ────────────────────────────────────────────────────
 
 	_bind_shortcuts() {
+		// Ask before the tab is closed or refreshed while edits are still unsaved. In
+		// auto-save mode that is only the moment before a save and after a failed save.
+		$(window)
+			.off("beforeunload.ev-manual-save")
+			.on("beforeunload.ev-manual-save", (e) => {
+				if (!this._destroyed && this.data_manager?.is_dirty()) {
+					e.preventDefault();
+					e.originalEvent.returnValue = "";
+				}
+			});
+
+		// Leaving the page inside the app saves whatever is still waiting (manual-save edits,
+		// or edits kept after a failed save). The view's
+		// on_hide() does not always run on a route change, so listen to the router itself.
+		// frappe.router's emitter cannot unbind a single handler, so ONE shared handler is
+		// registered for the page and it walks the boards that are still alive.
+		frappe.views.excel._live_boards = frappe.views.excel._live_boards || new Set();
+		frappe.views.excel._live_boards.add(this);
+		if (frappe.router?.on && !frappe.views.excel._route_save_bound) {
+			frappe.views.excel._route_save_bound = true;
+			frappe.router.on("change", () => {
+				frappe.views.excel._live_boards.forEach((b) => {
+					if (b._destroyed) {
+						frappe.views.excel._live_boards.delete(b);
+						return;
+					}
+					if (b.data_manager?.is_dirty()) b.data_manager._flush_saves();
+				});
+			});
+		}
+
 		$(document).on("keydown.ev", (e) => {
 			if (!this._is_active()) return;
 
 			const ctrl = e.ctrlKey || e.metaKey;
 
-			// Ctrl+S → force save
-			if (ctrl && e.key === "s") {
+			// Ctrl+S → save. A cell that is still open for typing is committed first, so
+			// what is on screen is what gets saved.
+			if (ctrl && !e.altKey && !e.shiftKey && (e.key || "").toLowerCase() === "s") {
 				e.preventDefault();
-				this.data_manager._flush_saves();
+				const editor = this.hot?.getActiveEditor?.();
+				if (editor?.isOpened?.()) {
+					editor.finishEditing(false);
+					setTimeout(() => this.data_manager._flush_saves(), 150);
+				} else {
+					this.data_manager._flush_saves();
+				}
 				return;
 			}
 
-					// Ctrl+F → Find,  Ctrl+H → Find & Replace
+			// Ctrl+Shift+C or Alt+Shift+C → Choose Columns (same as the toolbar button)
+			if (
+				e.shiftKey &&
+				(e.key || "").toLowerCase() === "c" &&
+				((ctrl && !e.altKey) || (e.altKey && !ctrl))
+			) {
+				if (!document.querySelector(".ev-fp-modal")) {
+					e.preventDefault();
+					e.stopPropagation();
+					this.open_field_picker();
+				}
+				return;
+			}
+
+			// Ctrl+F → Find,  Ctrl+H → Find & Replace
 			if (ctrl && e.key === "f") {
 				e.preventDefault();
 				this._show_find_replace("find");
@@ -3324,7 +3943,9 @@ frappe.views.ExcelBoard = class ExcelBoard {
 	}
 
 	_is_active() {
-		return this.list_view?.view_name === "Excel" && document.contains(this.$hot_container?.[0]);
+		return (
+			this.list_view?.view_name === "Excel" && document.contains(this.$hot_container?.[0])
+		);
 	}
 
 	// ── Column visibility ─────────────────────────────────────────────────────
@@ -3338,20 +3959,24 @@ frappe.views.ExcelBoard = class ExcelBoard {
 		let count = 0;
 		col_indices.forEach((c) => {
 			const key = this.columns[c]?.data;
-			if (key) { this._hidden_col_keys.add(key); count++; }
+			if (key) {
+				this._hidden_col_keys.add(key);
+				count++;
+			}
 		});
 		if (!count) return;
 		this._sync_visible_columns();
 		// Persist to current sheet object so Smart Lookup sees per-sheet hidden state
 		const _cur = this.sheet_manager?.get_current();
 		if (_cur) _cur._hidden_col_keys = new Set(this._hidden_col_keys);
-		frappe.model.user_settings.save(this.doctype, "excel_hidden_cols", [...this._hidden_col_keys]);
+		frappe.model.user_settings.save(this.doctype, "excel_hidden_cols", [
+			...this._hidden_col_keys,
+		]);
 		frappe.show_alert(
 			{
-				message: __(
-					"{0} column(s) hidden — right-click → Show all columns to restore",
-					[count]
-				),
+				message: __("{0} column(s) hidden — right-click → Show all columns to restore", [
+					count,
+				]),
 				indicator: "blue",
 			},
 			4
@@ -3383,9 +4008,7 @@ frappe.views.ExcelBoard = class ExcelBoard {
 	 * then push the new column config to HOT and HyperFormula.
 	 */
 	_sync_visible_columns() {
-		this.columns = this._master_columns.filter(
-			(c) => !this._hidden_col_keys.has(c.data)
-		);
+		this.columns = this._master_columns.filter((c) => !this._hidden_col_keys.has(c.data));
 		this.matrix = this.data_manager.to_matrix(this.list_view.data, this.columns);
 		this.formula_bridge.reload(this.matrix);
 		this.hot.updateSettings({ columns: this.columns });
@@ -3432,10 +4055,7 @@ frappe.views.ExcelBoard = class ExcelBoard {
 				});
 
 				// Rebuild HyperFormula matrix with the new column
-				this.matrix = this.data_manager.to_matrix(
-					this.list_view.data,
-					this.columns
-				);
+				this.matrix = this.data_manager.to_matrix(this.list_view.data, this.columns);
 				this.formula_bridge.reload(this.matrix);
 
 				// Re-apply column config to HOT
@@ -3474,10 +4094,23 @@ frappe.views.ExcelBoard = class ExcelBoard {
 		const key = `__blk_${idx}__`;
 
 		frappe.prompt(
-			[{ fieldtype: "Data", fieldname: "label", label: __("Column Name"),
-			   default: __("Column {0}", [idx]), reqd: 1 }],
+			[
+				{
+					fieldtype: "Data",
+					fieldname: "label",
+					label: __("Column Name"),
+					default: __("Column {0}", [idx]),
+					reqd: 1,
+				},
+			],
 			({ label }) => {
-				const new_col = { data: key, title: label, type: "text", width: 140, _is_blank_col: true };
+				const new_col = {
+					data: key,
+					title: label,
+					type: "text",
+					width: 140,
+					_is_blank_col: true,
+				};
 
 				const insert_at = after_col + 1;
 				this.columns.splice(insert_at, 0, new_col);
@@ -3485,7 +4118,9 @@ frappe.views.ExcelBoard = class ExcelBoard {
 				if (this._original_columns) this._original_columns.splice(insert_at, 0, new_col);
 				this._invalidate_col_map();
 
-				(this.list_view.data || []).forEach((row) => { row[key] = ""; });
+				(this.list_view.data || []).forEach((row) => {
+					row[key] = "";
+				});
 
 				this.matrix = this.data_manager.to_matrix(this.list_view.data, this.columns);
 				this.formula_bridge.reload(this.matrix);
@@ -3504,7 +4139,16 @@ frappe.views.ExcelBoard = class ExcelBoard {
 				this._save_blank_col_settings();
 
 				this.hot.selectCell(0, insert_at);
-				frappe.show_alert({ message: __('Blank column "{0}" added — type an example, then Ctrl+E to Flash Fill', [label]), indicator: "blue" }, 4);
+				frappe.show_alert(
+					{
+						message: __(
+							'Blank column "{0}" added — type an example, then Ctrl+E to Flash Fill',
+							[label]
+						),
+						indicator: "blue",
+					},
+					4
+				);
 			},
 			__("Add Blank Column"),
 			__("Add")
@@ -3519,7 +4163,7 @@ frappe.views.ExcelBoard = class ExcelBoard {
 		if (!to_remove.length) return;
 
 		// Collect keys BEFORE splicing — indices become invalid after splice
-		const removed_keys = to_remove.map(c => this.columns[c].data);
+		const removed_keys = to_remove.map((c) => this.columns[c].data);
 
 		// Remove in reverse so earlier indices stay valid
 		for (let i = to_remove.length - 1; i >= 0; i--) {
@@ -3527,10 +4171,10 @@ frappe.views.ExcelBoard = class ExcelBoard {
 			const key = removed_keys[i];
 			this.columns.splice(c, 1);
 			this._invalidate_col_map();
-			const mi = this._master_columns.findIndex(col => col.data === key);
+			const mi = this._master_columns.findIndex((col) => col.data === key);
 			if (mi !== -1) this._master_columns.splice(mi, 1);
 			if (this._original_columns) {
-				const oi = this._original_columns.findIndex(col => col.data === key);
+				const oi = this._original_columns.findIndex((col) => col.data === key);
 				if (oi !== -1) this._original_columns.splice(oi, 1);
 			}
 		}
@@ -3541,7 +4185,7 @@ frappe.views.ExcelBoard = class ExcelBoard {
 		this.hot.render();
 
 		// Delete from configs using keys collected before splice, then persist
-		removed_keys.forEach(key => this._blank_col_configs?.delete(key));
+		removed_keys.forEach((key) => this._blank_col_configs?.delete(key));
 		this._save_blank_col_settings();
 	}
 
@@ -3574,7 +4218,8 @@ frappe.views.ExcelBoard = class ExcelBoard {
 			this._invalidate_col_map();
 			// Also remove from master list
 			this._master_columns = this._master_columns.filter((col) => col.data !== key);
-			if (this._original_columns) this._original_columns = this._original_columns.filter((col) => col.data !== key);
+			if (this._original_columns)
+				this._original_columns = this._original_columns.filter((col) => col.data !== key);
 			(this.list_view.data || []).forEach((row) => delete row[key]);
 		});
 
@@ -3592,7 +4237,7 @@ frappe.views.ExcelBoard = class ExcelBoard {
 		if (this._formula_col_map?.size) {
 			this._save_formula_col_settings();
 		} else {
-			frappe.model.user_settings.save(this.doctype, 'excel_formula_col_templates', []);
+			frappe.model.user_settings.save(this.doctype, "excel_formula_col_templates", []);
 		}
 
 		// Sync HyperFormula + HOT
@@ -3619,9 +4264,10 @@ frappe.views.ExcelBoard = class ExcelBoard {
 	_show_find_replace(focus_target = "find") {
 		if (!this.$fnr_panel) this._build_fnr_panel();
 		this.$fnr_panel.addClass("ev-fnr-visible");
-		const $input = focus_target === "replace"
-			? this.$fnr_panel.find(".ev-fnr-replace-input")
-			: this.$fnr_panel.find(".ev-fnr-find-input");
+		const $input =
+			focus_target === "replace"
+				? this.$fnr_panel.find(".ev-fnr-replace-input")
+				: this.$fnr_panel.find(".ev-fnr-find-input");
 		$input.focus().select();
 	}
 
@@ -3662,7 +4308,10 @@ frappe.views.ExcelBoard = class ExcelBoard {
 		this.$fnr_panel.find(".ev-fnr-close").on("click", () => this._close_find_replace());
 
 		this.$fnr_panel.find(".ev-fnr-find-input").on("keydown", (e) => {
-			if (e.key === "Escape") { this._close_find_replace(); return; }
+			if (e.key === "Escape") {
+				this._close_find_replace();
+				return;
+			}
 			if (e.key === "Enter") {
 				e.preventDefault();
 				e.shiftKey ? this._fnr_navigate(-1) : this._fnr_navigate(1);
@@ -3670,8 +4319,14 @@ frappe.views.ExcelBoard = class ExcelBoard {
 		});
 
 		this.$fnr_panel.find(".ev-fnr-replace-input").on("keydown", (e) => {
-			if (e.key === "Escape") { this._close_find_replace(); return; }
-			if (e.key === "Enter") { e.preventDefault(); this._fnr_replace_one(); }
+			if (e.key === "Escape") {
+				this._close_find_replace();
+				return;
+			}
+			if (e.key === "Enter") {
+				e.preventDefault();
+				this._fnr_replace_one();
+			}
 		});
 
 		// Live re-query as the user types (debounced)
@@ -3694,22 +4349,31 @@ frappe.views.ExcelBoard = class ExcelBoard {
 		});
 		$(document).on("mousemove.fnr_drag", (e) => {
 			if (!_drag_origin) return;
-			const max_x = window.innerWidth  - this.$fnr_panel[0].offsetWidth;
+			const max_x = window.innerWidth - this.$fnr_panel[0].offsetWidth;
 			const max_y = window.innerHeight - this.$fnr_panel[0].offsetHeight;
 			this.$fnr_panel.css({
-				left: Math.max(0, Math.min(max_x, _drag_origin.px + e.clientX - _drag_origin.mx)) + "px",
-				top:  Math.max(0, Math.min(max_y, _drag_origin.py + e.clientY - _drag_origin.my)) + "px",
+				left:
+					Math.max(0, Math.min(max_x, _drag_origin.px + e.clientX - _drag_origin.mx)) +
+					"px",
+				top:
+					Math.max(0, Math.min(max_y, _drag_origin.py + e.clientY - _drag_origin.my)) +
+					"px",
 				right: "auto",
 			});
 		});
-		$(document).on("mouseup.fnr_drag", () => { _drag_origin = null; });
+		$(document).on("mouseup.fnr_drag", () => {
+			_drag_origin = null;
+		});
 	}
 
 	_close_find_replace() {
 		this.$fnr_panel?.removeClass("ev-fnr-visible");
 		// Clear HOT search highlights
 		const plugin = this.hot?.getPlugin("search");
-		if (plugin) { plugin.query(""); this.hot.render(); }
+		if (plugin) {
+			plugin.query("");
+			this.hot.render();
+		}
 	}
 
 	/**
@@ -3750,8 +4414,11 @@ frappe.views.ExcelBoard = class ExcelBoard {
 	_fnr_navigate(direction) {
 		this._fnr_run_query(false);
 		const n = this._fnr_results.length;
-		if (!n) { this._fnr_update_status(__("No matches")); return; }
-		this._fnr_idx = ((this._fnr_idx + direction) % n + n) % n;
+		if (!n) {
+			this._fnr_update_status(__("No matches"));
+			return;
+		}
+		this._fnr_idx = (((this._fnr_idx + direction) % n) + n) % n;
 		const { row, col } = this._fnr_results[this._fnr_idx];
 		this.hot.selectCell(row, col);
 		this._fnr_update_status();
@@ -3764,13 +4431,23 @@ frappe.views.ExcelBoard = class ExcelBoard {
 			return;
 		}
 		const sel = this.hot.getSelected()?.[0];
-		if (!sel) { this._fnr_navigate(1); return; }
-		const row = sel[0], col = sel[1];
+		if (!sel) {
+			this._fnr_navigate(1);
+			return;
+		}
+		const row = sel[0],
+			col = sel[1];
 		// Only replace if this cell is actually a search match
 		const is_match = this._fnr_results.some((m) => m.row === row && m.col === col);
-		if (!is_match) { this._fnr_navigate(1); return; }
+		if (!is_match) {
+			this._fnr_navigate(1);
+			return;
+		}
 		// Use HOT's getCellMeta — covers both _readonly columns AND permission-based readonly
-		if (this.hot.getCellMeta(row, col).readOnly) { this._fnr_navigate(1); return; }
+		if (this.hot.getCellMeta(row, col).readOnly) {
+			this._fnr_navigate(1);
+			return;
+		}
 		const replace_val = this.$fnr_panel.find(".ev-fnr-replace-input").val();
 		this.hot.setDataAtCell(row, col, replace_val);
 		this._fnr_run_query(false);
@@ -3804,12 +4481,24 @@ frappe.views.ExcelBoard = class ExcelBoard {
 
 	_fnr_update_status(override_msg = null) {
 		const $s = this.$fnr_panel.find(".ev-fnr-status");
-		if (override_msg) { $s.text(override_msg); return; }
+		if (override_msg) {
+			$s.text(override_msg);
+			return;
+		}
 		const n = this._fnr_results.length;
 		const q = this.$fnr_panel.find(".ev-fnr-find-input").val();
-		if (!q)  { $s.text(""); return; }
-		if (!n)  { $s.text(__("No matches")); return; }
-		if (this._fnr_idx < 0) { $s.text(__("{0} match(es) found", [n])); return; }
+		if (!q) {
+			$s.text("");
+			return;
+		}
+		if (!n) {
+			$s.text(__("No matches"));
+			return;
+		}
+		if (this._fnr_idx < 0) {
+			$s.text(__("{0} match(es) found", [n]));
+			return;
+		}
 		$s.text(__("{0} of {1}", [this._fnr_idx + 1, n]));
 	}
 
@@ -3874,25 +4563,28 @@ frappe.views.ExcelBoard = class ExcelBoard {
 	_apply_join_result(joined_rows, join_config) {
 		// Group joined rows by base record name to detect 1:N fan-out.
 		const grouped = {};
-		joined_rows.forEach(jr => {
+		joined_rows.forEach((jr) => {
 			(grouped[jr.name] = grouped[jr.name] || []).push(jr);
 		});
 
-		const max_fan = Math.max(1, ...Object.values(grouped).map(v => v.length));
+		const max_fan = Math.max(1, ...Object.values(grouped).map((v) => v.length));
 
 		if (max_fan > 1) {
 			// 1:N join — tree structure: one header row per base doc, children hidden by default.
 			this._tree_groups = new Map();
 			this._expanded_keys = this._expanded_keys || new Set();
 			const result = [];
-			this.list_view.data.forEach(doc => {
+			this.list_view.data.forEach((doc) => {
 				const matches = grouped[doc.name];
-				if (!matches?.length) { result.push(doc); return; }
+				if (!matches?.length) {
+					result.push(doc);
+					return;
+				}
 				if (matches.length === 1) {
 					result.push(Object.assign({ ...doc }, matches[0]));
 					return;
 				}
-				const group = matches.map(jr => ({ ...doc, ...jr }));
+				const group = matches.map((jr) => ({ ...doc, ...jr }));
 				group[0]._tree_is_header = true;
 				group[0]._tree_size = matches.length;
 				group[0]._tree_group_key = doc.name;
@@ -3903,7 +4595,7 @@ frappe.views.ExcelBoard = class ExcelBoard {
 				this._tree_groups.set(doc.name, group);
 				// Start collapsed — only push header row
 				if (this._expanded_keys.has(doc.name)) {
-					group.forEach(r => result.push(r));
+					group.forEach((r) => result.push(r));
 				} else {
 					result.push(group[0]);
 				}
@@ -3912,36 +4604,40 @@ frappe.views.ExcelBoard = class ExcelBoard {
 		} else {
 			// 1:1 join — simple merge by name
 			const by_name = {};
-			joined_rows.forEach(jr => { by_name[jr.name] = jr; });
-			this.list_view.data.forEach(doc => Object.assign(doc, by_name[doc.name] || {}));
+			joined_rows.forEach((jr) => {
+				by_name[jr.name] = jr;
+			});
+			this.list_view.data.forEach((doc) => Object.assign(doc, by_name[doc.name] || {}));
 		}
 
 		// Add/update a read-only virtual column for each selected field on each edge.
-		const nodes_by_id = Object.fromEntries(join_config.nodes.map(n => [n.id, n]));
-		join_config.edges.forEach(edge => {
+		const nodes_by_id = Object.fromEntries(join_config.nodes.map((n) => [n.id, n]));
+		join_config.edges.forEach((edge) => {
 			const tgt_node = nodes_by_id[edge.tgt_node_id];
 			if (!tgt_node) return;
-			edge.selected_fields.forEach(field => {
+			edge.selected_fields.forEach((field) => {
 				const key = `${tgt_node.doctype}__${field}`;
-				const df = frappe.get_meta(tgt_node.doctype)?.fields?.find(f => f.fieldname === field);
+				const df = frappe
+					.get_meta(tgt_node.doctype)
+					?.fields?.find((f) => f.fieldname === field);
 				const field_label = df?.label || field;
 				const title = `${tgt_node.doctype}: ${field_label}`;
 
-				const existing = this.columns.find(c => c.data === key);
+				const existing = this.columns.find((c) => c.data === key);
 				if (existing) {
 					existing.title = title;
-					const master_existing = this._master_columns.find(c => c.data === key);
+					const master_existing = this._master_columns.find((c) => c.data === key);
 					if (master_existing) master_existing.title = title;
 					return;
 				}
 				const col = {
-					data:          key,
+					data: key,
 					title,
-					type:          "text",
-					width:         160,
-					readOnly:      true,
-					_readonly:     true,
-					_is_join_col:  true,
+					type: "text",
+					width: 160,
+					readOnly: true,
+					_readonly: true,
+					_is_join_col: true,
 				};
 				this.columns.push(col);
 				this._master_columns.push(col);
@@ -3974,16 +4670,16 @@ frappe.views.ExcelBoard = class ExcelBoard {
 		if (this._expanded_keys.has(key)) {
 			this._expanded_keys.delete(key);
 			const idx = this.list_view.data.findIndex(
-				r => r._tree_is_header && r._tree_group_key === key
+				(r) => r._tree_is_header && r._tree_group_key === key
 			);
 			if (idx >= 0) this._fix_tree_formulas_on_collapse(idx, n_children);
 			this.list_view.data = this.list_view.data.filter(
-				r => !(r._tree_is_child && r._tree_group_key === key)
+				(r) => !(r._tree_is_child && r._tree_group_key === key)
 			);
 		} else {
 			this._expanded_keys.add(key);
 			const idx = this.list_view.data.findIndex(
-				r => r._tree_is_header && r._tree_group_key === key
+				(r) => r._tree_is_header && r._tree_group_key === key
 			);
 			if (idx >= 0) {
 				this.list_view.data.splice(idx + 1, 0, ...group.slice(1));
@@ -4009,7 +4705,7 @@ frappe.views.ExcelBoard = class ExcelBoard {
 	// On expand: give children the header's formula (offset per child), then shift
 	// all rows that were pushed down by n_children.
 	_fix_tree_formulas_on_expand(header_idx, n_children) {
-		const formula_cols = this.columns?.filter(c => c._is_formula_col);
+		const formula_cols = this.columns?.filter((c) => c._is_formula_col);
 		if (!formula_cols?.length) return;
 		const header_row = this.list_view.data[header_idx];
 		for (const fc of formula_cols) {
@@ -4036,7 +4732,7 @@ frappe.views.ExcelBoard = class ExcelBoard {
 	// On collapse: shift rows that are about to move up by n_children back by -n_children.
 	// Must run BEFORE children are filtered out of list_view.data.
 	_fix_tree_formulas_on_collapse(header_idx, n_children) {
-		const formula_cols = this.columns?.filter(c => c._is_formula_col);
+		const formula_cols = this.columns?.filter((c) => c._is_formula_col);
 		if (!formula_cols?.length) return;
 		for (const fc of formula_cols) {
 			const prop = fc.data;
@@ -4057,19 +4753,26 @@ frappe.views.ExcelBoard = class ExcelBoard {
 		if (!this._applied_lookups?.length) return;
 		const sm = this.sheet_manager;
 
-		this._applied_lookups.forEach(cfg => {
+		this._applied_lookups.forEach((cfg) => {
 			const tgt_sheet = [...(sm?._sheets?.values() || [])].find(
-				s => s.label === cfg.tgt_sheet_label || s.id === cfg.tgt_sheet_id
+				(s) => s.label === cfg.tgt_sheet_label || s.id === cfg.tgt_sheet_id
 			);
 
 			// 1. Live data in the open sheet → fastest path, always fresh.
 			//    Skip if data is marked stale (restored from workbook blank_data).
-			const live = (tgt_sheet?.data?.length && !tgt_sheet._data_is_stale) ? tgt_sheet.data : null;
-			if (live) { this._slk_join(cfg, live, true); return; }
+			const live =
+				tgt_sheet?.data?.length && !tgt_sheet._data_is_stale ? tgt_sheet.data : null;
+			if (live) {
+				this._slk_join(cfg, live, true);
+				return;
+			}
 
 			// 2. Already fetched this session — use cached rows (no repeat API call)
 			//    _fresh_rows is set on cfg after any successful async fetch.
-			if (cfg._fresh_rows?.length) { this._slk_join(cfg, cfg._fresh_rows, false); return; }
+			if (cfg._fresh_rows?.length) {
+				this._slk_join(cfg, cfg._fresh_rows, false);
+				return;
+			}
 
 			// 3. Resolve tgt_source — or infer from the restored sheet (old workbook format)
 			let src = cfg.tgt_source;
@@ -4078,9 +4781,9 @@ frappe.views.ExcelBoard = class ExcelBoard {
 					src = { doctype: tgt_sheet.doctype };
 				} else if (tgt_sheet.report_meta?.name) {
 					src = {
-						report_name:    tgt_sheet.report_meta.name,
+						report_name: tgt_sheet.report_meta.name,
 						report_filters: tgt_sheet.report_meta.current_filters || {},
-						col_keys:       (tgt_sheet.columns_config || []).map(c => c.data),
+						col_keys: (tgt_sheet.columns_config || []).map((c) => c.data),
 					};
 				}
 				if (src) cfg.tgt_source = src;
@@ -4088,14 +4791,21 @@ frappe.views.ExcelBoard = class ExcelBoard {
 
 			// 4. Async fetch — DocType
 			if (src?.doctype) {
-				const fields = [...new Set([cfg.tgt_field, ...cfg.return_fields.map(f => f.fieldname)])];
-				frappe.db.get_list(src.doctype, { fields, limit: 500 })
-					.then(rows => {
-						if (!rows?.length) { this._slk_join_cache(cfg); return; }
-						cfg._fresh_rows = rows;                      // cache on cfg — survives missing tgt_sheet
-						if (tgt_sheet) { tgt_sheet.data = rows; tgt_sheet._data_is_stale = false; }
-						this._slk_join(cfg, rows, true);             // always join (empty list_view = 0 iters, no harm)
-					});
+				const fields = [
+					...new Set([cfg.tgt_field, ...cfg.return_fields.map((f) => f.fieldname)]),
+				];
+				frappe.db.get_list(src.doctype, { fields, limit: 500 }).then((rows) => {
+					if (!rows?.length) {
+						this._slk_join_cache(cfg);
+						return;
+					}
+					cfg._fresh_rows = rows; // cache on cfg — survives missing tgt_sheet
+					if (tgt_sheet) {
+						tgt_sheet.data = rows;
+						tgt_sheet._data_is_stale = false;
+					}
+					this._slk_join(cfg, rows, true); // always join (empty list_view = 0 iters, no harm)
+				});
 				return;
 			}
 
@@ -4103,27 +4813,42 @@ frappe.views.ExcelBoard = class ExcelBoard {
 			if (src?.report_name) {
 				frappe.call({
 					method: "frappe.desk.query_report.run",
-					args: { report_name: src.report_name, filters: src.report_filters || {}, ignore_prepared_report: 1 },
-					callback: r => {
-						if (!r.message?.result?.length) { this._slk_join_cache(cfg); return; }
+					args: {
+						report_name: src.report_name,
+						filters: src.report_filters || {},
+						ignore_prepared_report: 1,
+					},
+					callback: (r) => {
+						if (!r.message?.result?.length) {
+							this._slk_join_cache(cfg);
+							return;
+						}
 						const api_cols = r.message.columns || [];
 						const col_keys = src.col_keys?.length
 							? src.col_keys
-							: api_cols.map((c, i) => (typeof c === "object" ? c.fieldname || String(i) : String(i)));
-						const rows = r.message.result.map(row => {
+							: api_cols.map((c, i) =>
+									typeof c === "object" ? c.fieldname || String(i) : String(i)
+							  );
+						const rows = r.message.result.map((row) => {
 							if (Array.isArray(row)) {
-								return Object.fromEntries(col_keys.map((k, i) => [k, String(row[i] ?? "")]));
+								return Object.fromEntries(
+									col_keys.map((k, i) => [k, String(row[i] ?? "")])
+								);
 							}
 							const out = {};
 							api_cols.forEach((c, i) => {
-								const api_key = typeof c === "object" ? (c.fieldname || String(i)) : String(c);
+								const api_key =
+									typeof c === "object" ? c.fieldname || String(i) : String(c);
 								out[col_keys[i] ?? api_key] = row[api_key] ?? "";
 							});
 							return out;
 						});
-						cfg._fresh_rows = rows;                      // cache on cfg regardless of tgt_sheet state
-						if (tgt_sheet) { tgt_sheet.data = rows; tgt_sheet._data_is_stale = false; }
-						this._slk_join(cfg, rows, true);             // always join
+						cfg._fresh_rows = rows; // cache on cfg regardless of tgt_sheet state
+						if (tgt_sheet) {
+							tgt_sheet.data = rows;
+							tgt_sheet._data_is_stale = false;
+						}
+						this._slk_join(cfg, rows, true); // always join
 					},
 				});
 				return;
@@ -4137,38 +4862,52 @@ frappe.views.ExcelBoard = class ExcelBoard {
 	/** Perform the join against live tgt_data rows. */
 	_slk_join(cfg, tgt_data, update_cache = false) {
 		const tgt_map = new Map();
-		tgt_data.forEach(row => {
-			const key = String(row[cfg.tgt_field] ?? "").trim().toLowerCase();
+		tgt_data.forEach((row) => {
+			const key = String(row[cfg.tgt_field] ?? "")
+				.trim()
+				.toLowerCase();
 			if (key) tgt_map.set(key, row);
 		});
 
 		if (update_cache) {
 			const nc = {};
-			tgt_data.forEach(row => {
-				const key = String(row[cfg.tgt_field] ?? "").trim().toLowerCase();
+			tgt_data.forEach((row) => {
+				const key = String(row[cfg.tgt_field] ?? "")
+					.trim()
+					.toLowerCase();
 				if (!key) return;
 				const e = {};
-				cfg.return_fields.forEach(f => { e[f.fieldname] = row[f.fieldname] ?? ""; });
+				cfg.return_fields.forEach((f) => {
+					e[f.fieldname] = row[f.fieldname] ?? "";
+				});
 				nc[key] = e;
 			});
 			cfg._value_cache = nc;
 			// Strip runtime-only caches before persisting — rebuilt on restore.
-			const _slk_save = this._applied_lookups.map(({ _fresh_rows: _f, _value_cache: _v, ...rest }) => rest);
+			const _slk_save = this._applied_lookups.map(
+				({ _fresh_rows: _f, _value_cache: _v, ...rest }) => rest
+			);
 			// Synchronously patch cache to avoid race condition with concurrent saves (excel_sheets, cf_rules, etc.)
-			if (!frappe.model.user_settings[this.doctype]) frappe.model.user_settings[this.doctype] = {};
+			if (!frappe.model.user_settings[this.doctype])
+				frappe.model.user_settings[this.doctype] = {};
 			frappe.model.user_settings[this.doctype].excel_smart_lookups = _slk_save;
-			frappe.model.user_settings.update(this.doctype, frappe.model.user_settings[this.doctype]);
+			frappe.model.user_settings.update(
+				this.doctype,
+				frappe.model.user_settings[this.doctype]
+			);
 		}
 
 		// Enrich the correct source data array: src_sheet.data for non-base lookups, list_view.data for base.
 		const _slk_src_data = this._slk_src_data(cfg);
 
 		const _apply_join = () => {
-			_slk_src_data.forEach(row => {
-				const key = String(row[cfg.src_field] ?? "").trim().toLowerCase();
+			_slk_src_data.forEach((row) => {
+				const key = String(row[cfg.src_field] ?? "")
+					.trim()
+					.toLowerCase();
 				const tr = tgt_map.get(key);
-				cfg.return_fields.forEach(f => {
-					row[`_slk_${f.fieldname}`] = tr ? (tr[f.fieldname] ?? "") : "";
+				cfg.return_fields.forEach((f) => {
+					row[`_slk_${f.fieldname}`] = tr ? tr[f.fieldname] ?? "" : "";
 				});
 			});
 			this._slk_ensure_cols(cfg);
@@ -4176,17 +4915,24 @@ frappe.views.ExcelBoard = class ExcelBoard {
 		};
 
 		// Join key missing in secondary DocType sheet data — fetch it first
-		const src_sheet = cfg.src_sheet_id ? this.sheet_manager?._sheets?.get(cfg.src_sheet_id) : null;
-		const join_key_missing = src_sheet?.doctype
-			&& _slk_src_data.length > 0
-			&& !(cfg.src_field in _slk_src_data[0]);
+		const src_sheet = cfg.src_sheet_id
+			? this.sheet_manager?._sheets?.get(cfg.src_sheet_id)
+			: null;
+		const join_key_missing =
+			src_sheet?.doctype && _slk_src_data.length > 0 && !(cfg.src_field in _slk_src_data[0]);
 		if (join_key_missing) {
-			frappe.db.get_list(src_sheet.doctype, { fields: ["name", cfg.src_field], limit: 0 })
-				.then(rows => {
-					const key_map = new Map(rows.map(r => [r.name, r[cfg.src_field] ?? ""]));
-					_slk_src_data.forEach(row => { row[cfg.src_field] = key_map.get(row.name) ?? ""; });
+			frappe.db
+				.get_list(src_sheet.doctype, { fields: ["name", cfg.src_field], limit: 0 })
+				.then((rows) => {
+					const key_map = new Map(rows.map((r) => [r.name, r[cfg.src_field] ?? ""]));
+					_slk_src_data.forEach((row) => {
+						row[cfg.src_field] = key_map.get(row.name) ?? "";
+					});
 					// Also persist to _fetch_fields so future appends include it
-					if (src_sheet._fetch_fields && !src_sheet._fetch_fields.includes(cfg.src_field)) {
+					if (
+						src_sheet._fetch_fields &&
+						!src_sheet._fetch_fields.includes(cfg.src_field)
+					) {
 						src_sheet._fetch_fields.push(cfg.src_field);
 					}
 					_apply_join();
@@ -4199,11 +4945,13 @@ frappe.views.ExcelBoard = class ExcelBoard {
 	/** Perform the join using the saved _value_cache (offline / blank-sheet fallback). */
 	_slk_join_cache(cfg) {
 		if (!cfg._value_cache || !Object.keys(cfg._value_cache).length) return;
-		this._slk_src_data(cfg).forEach(row => {
-			const key = String(row[cfg.src_field] ?? "").trim().toLowerCase();
+		this._slk_src_data(cfg).forEach((row) => {
+			const key = String(row[cfg.src_field] ?? "")
+				.trim()
+				.toLowerCase();
 			const tr = cfg._value_cache[key];
-			cfg.return_fields.forEach(f => {
-				row[`_slk_${f.fieldname}`] = tr ? (tr[f.fieldname] ?? "") : "";
+			cfg.return_fields.forEach((f) => {
+				row[`_slk_${f.fieldname}`] = tr ? tr[f.fieldname] ?? "" : "";
 			});
 		});
 		this._slk_ensure_cols(cfg);
@@ -4226,11 +4974,11 @@ frappe.views.ExcelBoard = class ExcelBoard {
 		// Fallback: ID is stale (page reload) — find by persistent label/doctype
 		if (!src && (cfg.src_sheet_label || cfg.src_sheet_doctype)) {
 			const base_id = sm?._get_sheet0_id?.();
-			src = [...(sm?._sheets?.values() || [])].find(s =>
-				s.id !== base_id && (
-					(cfg.src_sheet_label   && s.label   === cfg.src_sheet_label) ||
-					(cfg.src_sheet_doctype && s.doctype === cfg.src_sheet_doctype)
-				)
+			src = [...(sm?._sheets?.values() || [])].find(
+				(s) =>
+					s.id !== base_id &&
+					((cfg.src_sheet_label && s.label === cfg.src_sheet_label) ||
+						(cfg.src_sheet_doctype && s.doctype === cfg.src_sheet_doctype))
 			);
 			if (src) cfg.src_sheet_id = src.id; // re-sync so next call hits Map directly
 		}
@@ -4246,8 +4994,8 @@ frappe.views.ExcelBoard = class ExcelBoard {
 			let src = sm?._sheets?.get(cfg.src_sheet_id);
 			if (!src && cfg.src_sheet_label) {
 				const base_id = sm?._get_sheet0_id?.();
-				src = [...(sm?._sheets?.values() || [])].find(s =>
-					s.id !== base_id && s.label === cfg.src_sheet_label
+				src = [...(sm?._sheets?.values() || [])].find(
+					(s) => s.id !== base_id && s.label === cfg.src_sheet_label
 				);
 				if (src) cfg.src_sheet_id = src.id;
 			}
@@ -4255,9 +5003,9 @@ frappe.views.ExcelBoard = class ExcelBoard {
 			// Secondary DocType sheets use _columns; report/blank sheets use columns_config
 			const col_list = src._columns || src.columns_config;
 			if (!col_list) return;
-			const existing = new Set(col_list.map(c => c.data));
+			const existing = new Set(col_list.map((c) => c.data));
 			let changed = false;
-			cfg.return_fields.forEach(f => {
+			cfg.return_fields.forEach((f) => {
 				const key = `_slk_${f.fieldname}`;
 				if (!existing.has(key)) {
 					const new_col = {
@@ -4287,18 +5035,24 @@ frappe.views.ExcelBoard = class ExcelBoard {
 			return;
 		}
 		// Base lookup → add to _master_columns
-		const existing = new Set(this._master_columns.map(c => c.data));
+		const existing = new Set(this._master_columns.map((c) => c.data));
 		let changed = false;
-		cfg.return_fields.forEach(f => {
+		cfg.return_fields.forEach((f) => {
 			const key = `_slk_${f.fieldname}`;
 			if (!existing.has(key)) {
-				this._master_columns.push({ data: key, title: `${f.label} [${cfg.tgt_sheet_label}]`, readOnly: true, _is_lookup_col: true });
+				this._master_columns.push({
+					data: key,
+					title: `${f.label} [${cfg.tgt_sheet_label}]`,
+					readOnly: true,
+					_is_lookup_col: true,
+				});
 				existing.add(key);
 				changed = true;
 			}
 		});
 		if (changed) {
-			this.columns = this._master_columns.filter(c => !this._hidden_col_keys.has(c.data)); this._col_index_map = null;
+			this.columns = this._master_columns.filter((c) => !this._hidden_col_keys.has(c.data));
+			this._col_index_map = null;
 			this.hot?.updateSettings({ columns: this.columns });
 		}
 	}
@@ -4325,17 +5079,26 @@ frappe.views.ExcelBoard = class ExcelBoard {
 	 */
 	apply_field_selection(fieldnames, { silent = false } = {}) {
 		// Virtual column keys that must never reach the Frappe server
-		const VIRTUAL_KEYS = new Set(["_meta", "_is_meta_col", "_social", "_is_social_col", "_is_join_col", "_is_lookup_col", "_is_formula_col"]);
+		const VIRTUAL_KEYS = new Set([
+			"_meta",
+			"_is_meta_col",
+			"_social",
+			"_is_social_col",
+			"_is_join_col",
+			"_is_lookup_col",
+			"_is_formula_col",
+		]);
 		// Separate CT fields (table__child) from regular Frappe fields; exclude virtual keys
 		// Also exclude _slk_* lookup cols and any other underscore-prefixed virtual keys
-		const regular = fieldnames.filter(f =>
-			f !== "name" &&
-			!f.includes("__") &&
-			!VIRTUAL_KEYS.has(f) &&
-			!f.startsWith("_slk_") &&
-			!f.startsWith("_join_")
+		const regular = fieldnames.filter(
+			(f) =>
+				f !== "name" &&
+				!f.includes("__") &&
+				!VIRTUAL_KEYS.has(f) &&
+				!f.startsWith("_slk_") &&
+				!f.startsWith("_join_")
 		);
-		this._ct_fieldnames = fieldnames.filter(f => f.includes("__"));
+		this._ct_fieldnames = fieldnames.filter((f) => f.includes("__"));
 
 		// ── Preserve virtual column dependencies ──────────────────────────────
 		// _inject_meta_column / _inject_social_column need their real field siblings
@@ -4343,24 +5106,33 @@ frappe.views.ExcelBoard = class ExcelBoard {
 		// auto-merge their backing fields into the effective list so rebuilding
 		// the columns doesn't silently drop them (e.g. when user adds a new field
 		// via the picker without noticing the individual meta/social fields).
-		const _META_FIELDS   = ["owner", "creation", "modified_by", "modified"];
-		const _SOCIAL_FIELDS = ["_user_tags", "_comments", "_assign", "_liked_by", "docstatus", "idx"];
-		const _had_meta   = this._master_columns?.some(c => c.data === "_meta");
-		const _had_social = this._master_columns?.some(c => c.data === "_social");
+		const _META_FIELDS = ["owner", "creation", "modified_by", "modified"];
+		const _SOCIAL_FIELDS = [
+			"_user_tags",
+			"_comments",
+			"_assign",
+			"_liked_by",
+			"docstatus",
+			"idx",
+		];
+		const _had_meta = this._master_columns?.some((c) => c.data === "_meta");
+		const _had_social = this._master_columns?.some((c) => c.data === "_social");
 
 		const effective_regular = [...regular];
 		if (_had_meta) {
-			_META_FIELDS.forEach(f => { if (!effective_regular.includes(f)) effective_regular.push(f); });
+			_META_FIELDS.forEach((f) => {
+				if (!effective_regular.includes(f)) effective_regular.push(f);
+			});
 		}
 
 		// column_manager gets ALL fields (regular + CT) for column config
 		this.column_manager.fields = [
-			...effective_regular.map(f => [f, this.doctype]),
-			...this._ct_fieldnames.map(f => [f, this.doctype]),
+			...effective_regular.map((f) => [f, this.doctype]),
+			...this._ct_fieldnames.map((f) => [f, this.doctype]),
 		];
 		if (_had_social) {
 			const _cm_keys = new Set(this.column_manager.fields.map(([fn]) => fn));
-			_SOCIAL_FIELDS.forEach(f => {
+			_SOCIAL_FIELDS.forEach((f) => {
 				if (!_cm_keys.has(f)) this.column_manager.fields.push([f, this.doctype]);
 			});
 		}
@@ -4376,10 +5148,10 @@ frappe.views.ExcelBoard = class ExcelBoard {
 		// Re-inject base-sheet Smart Lookup columns into _master_columns after column rebuild.
 		// Non-base lookups (src_sheet_id set) live in their own sheet's columns_config — skip here.
 		if (this._applied_lookups?.length) {
-			const existing_keys = new Set(this._master_columns.map(c => c.data));
-			this._applied_lookups.forEach(cfg => {
+			const existing_keys = new Set(this._master_columns.map((c) => c.data));
+			this._applied_lookups.forEach((cfg) => {
 				if (cfg.src_sheet_id) return; // belongs to a report/blank sheet, not _master_columns
-				cfg.return_fields.forEach(f => {
+				cfg.return_fields.forEach((f) => {
 					const key = `_slk_${f.fieldname}`;
 					if (!existing_keys.has(key)) {
 						this._master_columns.push({
@@ -4394,7 +5166,7 @@ frappe.views.ExcelBoard = class ExcelBoard {
 			});
 		}
 		// Remove stale hidden keys (columns no longer in the new set)
-		const _new_keys = new Set(this.columns.map(c => c.data));
+		const _new_keys = new Set(this.columns.map((c) => c.data));
 		for (const k of [...this._hidden_col_keys]) {
 			if (!_new_keys.has(k)) this._hidden_col_keys.delete(k);
 		}
@@ -4412,11 +5184,11 @@ frappe.views.ExcelBoard = class ExcelBoard {
 		// doesn't know about CT composite fieldnames (table__child).
 		this.list_view.fields = [
 			["name", this.doctype],
-			...effective_regular.map(f => [f, this.doctype]),
+			...effective_regular.map((f) => [f, this.doctype]),
 		];
 		if (_had_social) {
 			const _lv_keys = new Set(this.list_view.fields.map(([fn]) => fn));
-			_SOCIAL_FIELDS.forEach(f => {
+			_SOCIAL_FIELDS.forEach((f) => {
 				if (!_lv_keys.has(f)) this.list_view.fields.push([f, this.doctype]);
 			});
 		}
@@ -4442,7 +5214,7 @@ frappe.views.ExcelBoard = class ExcelBoard {
 
 		// Build requests: {table_fn: [child_fn, ...]}
 		const requests = {};
-		this._ct_fieldnames.forEach(fn => {
+		this._ct_fieldnames.forEach((fn) => {
 			const sep = fn.indexOf("__");
 			const table_fn = fn.slice(0, sep);
 			const child_fn = fn.slice(sep + 2);
@@ -4478,7 +5250,7 @@ frappe.views.ExcelBoard = class ExcelBoard {
 
 			if (!needs_tree) {
 				// All 1:1 — original behaviour: just assign comma-joined values
-				this.list_view.data?.forEach(row => {
+				this.list_view.data?.forEach((row) => {
 					const ct = data_map[row.name];
 					if (ct) Object.assign(row, ct);
 				});
@@ -4487,14 +5259,17 @@ frappe.views.ExcelBoard = class ExcelBoard {
 			}
 
 			// 1:N child data — build collapsible tree rows
-			this._tree_groups   = this._tree_groups   || new Map();
+			this._tree_groups = this._tree_groups || new Map();
 			this._expanded_keys = this._expanded_keys || new Set();
 			this._tree_groups.clear();
 
 			const result = [];
-			(this.list_view.data || []).forEach(doc => {
+			(this.list_view.data || []).forEach((doc) => {
 				const ct_raw = data_map[doc.name];
-				if (!ct_raw) { result.push(doc); return; }
+				if (!ct_raw) {
+					result.push(doc);
+					return;
+				}
 
 				const { parsed, max_c } = parsed_map[doc.name];
 				if (max_c <= 1) {
@@ -4504,8 +5279,13 @@ frappe.views.ExcelBoard = class ExcelBoard {
 				}
 
 				// Header row: shows comma-joined values (summary), tree flag set
-				const header = { ...doc, ...ct_raw,
-					_tree_is_header: true, _tree_size: max_c, _tree_group_key: doc.name };
+				const header = {
+					...doc,
+					...ct_raw,
+					_tree_is_header: true,
+					_tree_size: max_c,
+					_tree_group_key: doc.name,
+				};
 
 				// Child rows: each has individual CT field values
 				const children = [];
@@ -4514,7 +5294,7 @@ frappe.views.ExcelBoard = class ExcelBoard {
 					for (const [key, parts] of Object.entries(parsed)) {
 						child[key] = parts[i] ?? "";
 					}
-					child._tree_is_child  = true;
+					child._tree_is_child = true;
 					child._tree_group_key = doc.name;
 					children.push(child);
 				}
@@ -4523,7 +5303,7 @@ frappe.views.ExcelBoard = class ExcelBoard {
 				this._tree_groups.set(doc.name, group);
 
 				if (this._expanded_keys.has(doc.name)) {
-					group.forEach(r => result.push(r));
+					group.forEach((r) => result.push(r));
 				} else {
 					result.push(header);
 				}
@@ -4596,7 +5376,10 @@ frappe.views.ExcelBoard = class ExcelBoard {
 					let had_cached = false;
 					for (const pfx of prefixes) {
 						for (const key of fm._cache.keys()) {
-							if (key.startsWith(pfx)) { fm._cache.delete(key); had_cached = true; }
+							if (key.startsWith(pfx)) {
+								fm._cache.delete(key);
+								had_cached = true;
+							}
 						}
 					}
 					if (had_cached) {
@@ -4644,7 +5427,11 @@ frappe.views.ExcelBoard = class ExcelBoard {
 		}
 
 		// On first refresh, restore formula columns from user_settings if no workbook loaded
-		if (!append && this._pending_formula_col_templates?.length && !this._formula_col_map?.size) {
+		if (
+			!append &&
+			this._pending_formula_col_templates?.length &&
+			!this._formula_col_map?.size
+		) {
 			this._restore_formula_col_templates(this._pending_formula_col_templates);
 			this._pending_formula_col_templates = null;
 		}
@@ -4657,8 +5444,8 @@ frappe.views.ExcelBoard = class ExcelBoard {
 
 		// On load-more (append), save scroll row so we can restore it after
 		// loadData() resets the viewport to the top.
-		const saved_row   = append ? (this.hot?.getFirstFullyVisibleRow?.() ?? 0) : 0;
-		const prev_data_len = append ? (this._prev_append_len || 0) : 0;
+		const saved_row = append ? this.hot?.getFirstFullyVisibleRow?.() ?? 0 : 0;
+		const prev_data_len = append ? this._prev_append_len || 0 : 0;
 
 		this.data = new_data;
 		this.matrix = this.data_manager.to_matrix(new_data, this.columns);
@@ -4670,7 +5457,9 @@ frappe.views.ExcelBoard = class ExcelBoard {
 		this._meta_html_cache?.clear();
 		this._social_html_cache?.clear();
 		this._tree_parent_map = new Map();
-		new_data.forEach((row, i) => { if (row._tree_is_header) this._tree_parent_map.set(row._tree_group_key, i); });
+		new_data.forEach((row, i) => {
+			if (row._tree_is_header) this._tree_parent_map.set(row._tree_group_key, i);
+		});
 		this.hot.loadData(new_data);
 		// Perf: pre-compute CF cell cache after data load (O(rows×rules) once vs per-cell per-render)
 		requestAnimationFrame(() => this._rebuild_cf_cache());
@@ -4683,14 +5472,14 @@ frappe.views.ExcelBoard = class ExcelBoard {
 		// Re-apply formula columns: full reload on fresh refresh, new rows only on append
 		if (this._formula_col_map?.size) {
 			const from = append ? prev_data_len : 0;
-			const to   = new_data.length - 1;
+			const to = new_data.length - 1;
 			if (to >= from) requestAnimationFrame(() => this._reapply_formula_cols(from, to));
 		}
 
 		// Re-apply blank col flash-fill transforms for new/all rows
 		if (this._blank_col_configs?.size) {
 			const from = append ? prev_data_len : 0;
-			const to   = new_data.length - 1;
+			const to = new_data.length - 1;
 			if (to >= from) requestAnimationFrame(() => this._reapply_blank_col_fills(from, to));
 		}
 
@@ -4700,7 +5489,7 @@ frappe.views.ExcelBoard = class ExcelBoard {
 
 		// CT columns — re-enrich on every data refresh (idle refresh wipes values)
 		if (this._ct_fieldnames?.length && new_data?.length) {
-			this._enrich_ct_columns(new_data.map(d => d.name));
+			this._enrich_ct_columns(new_data.map((d) => d.name));
 		}
 
 		// Smart Lookup — re-join after every data refresh so lookup cols stay populated
@@ -4768,18 +5557,22 @@ frappe.views.ExcelBoard = class ExcelBoard {
 				Object.entries(tmp).forEach(([k, v]) => {
 					if (k !== "doctype" && v != null && v !== "") base_defaults[k] = v;
 				});
-			} catch (_) {}
+			} catch (_) {
+				// no default values for this doctype
+			}
 
 			// Layer 2: system / user defaults → matched against this doctype's fields
 			try {
-				const sys     = frappe.defaults.get_defaults() || {};
-				const meta_fns = new Set((meta?.fields || []).map(f => f.fieldname));
+				const sys = frappe.defaults.get_defaults() || {};
+				const meta_fns = new Set((meta?.fields || []).map((f) => f.fieldname));
 				Object.entries(sys).forEach(([k, v]) => {
 					if (meta_fns.has(k) && !base_defaults[k] && v != null && v !== "") {
 						base_defaults[k] = v;
 					}
 				});
-			} catch (_) {}
+			} catch (_) {
+				// no system defaults available
+			}
 		}
 
 		// Layer 3: prefill (pattern hints / duplicate) wins over base defaults
@@ -4787,21 +5580,31 @@ frappe.views.ExcelBoard = class ExcelBoard {
 
 		// Warn about required Table fields with no CT columns visible
 		if (!is_duplicate) {
-			const req_tables = (meta?.fields || []).filter(f => f.fieldtype === "Table" && f.reqd);
-			const missing = req_tables.filter(tf =>
-				!this.columns.some(c => c._is_ct_col && c._ct_table === tf.fieldname)
+			const req_tables = (meta?.fields || []).filter(
+				(f) => f.fieldtype === "Table" && f.reqd
+			);
+			const missing = req_tables.filter(
+				(tf) => !this.columns.some((c) => c._is_ct_col && c._ct_table === tf.fieldname)
 			);
 			if (missing.length) {
-				frappe.show_alert({
-					message: __("Required table(s) '{0}' not visible. Add CT columns or use Open Form.", [missing.map(f => f.label || f.fieldname).join(", ")]),
-					indicator: "orange",
-				}, 6);
+				frappe.show_alert(
+					{
+						message: __(
+							"Required table(s) '{0}' not visible. Add CT columns or use Open Form.",
+							[missing.map((f) => f.label || f.fieldname).join(", ")]
+						),
+						indicator: "orange",
+					},
+					6
+				);
 			}
 		}
 
 		// Build new row — seed empty strings for every column, then apply full prefill
 		const new_row = { _is_new: true };
-		this.columns.forEach(col => { new_row[col.data] = ""; });
+		this.columns.forEach((col) => {
+			new_row[col.data] = "";
+		});
 		Object.assign(new_row, full_prefill);
 
 		// Prepend to list_view.data and reload HOT
@@ -4817,7 +5620,9 @@ frappe.views.ExcelBoard = class ExcelBoard {
 		this._show_inline_insert_bar(is_duplicate);
 
 		// Select first writable column in the new row (skip name col at index 0)
-		const first_col = this.columns.findIndex((c, i) => i > 0 && !c._readonly && !c._is_join_col && !c._is_formula_col);
+		const first_col = this.columns.findIndex(
+			(c, i) => i > 0 && !c._readonly && !c._is_join_col && !c._is_formula_col
+		);
 		if (first_col >= 0) {
 			setTimeout(() => {
 				this.hot.scrollViewportTo(0, first_col);
@@ -4832,23 +5637,30 @@ frappe.views.ExcelBoard = class ExcelBoard {
 		this.$inline_insert_bar = $(`
 			<div class="ev-inline-insert-bar">
 				<span class="ev-iib-icon">${is_duplicate ? "📋" : "✨"}</span>
-				<span class="ev-iib-info">${is_duplicate
-					? __("Duplicate — review values and save")
-					: __("New record — fill required fields and save")}</span>
+				<span class="ev-iib-info">${
+					is_duplicate
+						? __("Duplicate — review values and save")
+						: __("New record — fill required fields and save")
+				}</span>
 				<button class="ev-iib-open-form btn btn-xs">${__("Open Form")}</button>
 				<button class="ev-iib-save btn btn-xs btn-primary">${__("Save Row")}</button>
 				<button class="ev-iib-cancel btn btn-xs">${__("✕ Cancel")}</button>
 			</div>
 		`).appendTo(document.body);
 
-		this.$inline_insert_bar.on("click", ".ev-iib-save",      () => this._finish_inline_insert());
-		this.$inline_insert_bar.on("click", ".ev-iib-cancel",    () => this._cancel_inline_insert());
+		this.$inline_insert_bar.on("click", ".ev-iib-save", () => this._finish_inline_insert());
+		this.$inline_insert_bar.on("click", ".ev-iib-cancel", () => this._cancel_inline_insert());
 		this.$inline_insert_bar.on("click", ".ev-iib-open-form", () => {
 			// Collect values typed so far, pass to new-doc form via route_options
 			const row = this.list_view.data[this._new_row_idx] || {};
 			const opts = {};
-			this.columns.forEach(col => {
-				if (!col._is_name_col && !col._is_ct_col && !col._is_join_col && !col._is_formula_col) {
+			this.columns.forEach((col) => {
+				if (
+					!col._is_name_col &&
+					!col._is_ct_col &&
+					!col._is_join_col &&
+					!col._is_formula_col
+				) {
 					const v = row[col.data];
 					if (v != null && v !== "") opts[col.data] = v;
 				}
@@ -4867,25 +5679,28 @@ frappe.views.ExcelBoard = class ExcelBoard {
 		const row_data = this.list_view.data[this._new_row_idx];
 		if (!row_data?._is_new) return;
 
-		const dt   = this.doctype;
+		const dt = this.doctype;
 		const meta = frappe.get_meta(dt);
 
 		// ── Validate visible required fields only ───────────────────────────
 		// Non-visible required fields (Company, Currency, Price List…) are NOT blocked
 		// here — Frappe fills many of them from user/system defaults at the server level.
 		// We only highlight required fields that ARE visible and empty so the user can fix them.
-		const visible_fns  = new Set(this.columns.map(c => c.data));
-		const req_fields   = (meta?.fields || []).filter(f =>
-			f.reqd && f.fieldtype !== "Table" && !f.read_only
+		const visible_fns = new Set(this.columns.map((c) => c.data));
+		const req_fields = (meta?.fields || []).filter(
+			(f) => f.reqd && f.fieldtype !== "Table" && !f.read_only
 		);
-		const missing_visible = req_fields.filter(f =>
-			visible_fns.has(f.fieldname) &&
-			(row_data[f.fieldname] == null || row_data[f.fieldname] === "")
+		const missing_visible = req_fields.filter(
+			(f) =>
+				visible_fns.has(f.fieldname) &&
+				(row_data[f.fieldname] == null || row_data[f.fieldname] === "")
 		);
 		if (missing_visible.length) {
-			const names = missing_visible.map(f => f.label || f.fieldname).join(", ");
+			const names = missing_visible.map((f) => f.label || f.fieldname).join(", ");
 			frappe.show_alert({ message: __("Fill required: {0}", [names]), indicator: "red" }, 3);
-			const first_col = this.columns.findIndex(c => c.data === missing_visible[0].fieldname);
+			const first_col = this.columns.findIndex(
+				(c) => c.data === missing_visible[0].fieldname
+			);
 			if (first_col >= 0) this.hot.selectCell(0, first_col);
 			return;
 		}
@@ -4894,20 +5709,29 @@ frappe.views.ExcelBoard = class ExcelBoard {
 		const doc = { doctype: dt };
 
 		// Keys to exclude from the scalar field sweep
-		const ct_keys      = new Set(this.columns.filter(c => c._is_ct_col).map(c => c.data));
+		const ct_keys = new Set(this.columns.filter((c) => c._is_ct_col).map((c) => c.data));
 		const virtual_keys = new Set([
-			"name", "_is_new",
-			...this.columns.filter(c => c._is_join_col || c._is_formula_col || c._is_name_col).map(c => c.data),
+			"name",
+			"_is_new",
+			...this.columns
+				.filter((c) => c._is_join_col || c._is_formula_col || c._is_name_col)
+				.map((c) => c.data),
 		]);
 
 		// Include ALL non-virtual, non-CT values from row_data.
 		// This covers both visible column values AND non-visible prefill values
 		// (company, currency, price_list, etc. from pattern detection / Property Setters).
-		const NUMERIC_TYPES = new Set(["Int","Float","Currency","Percent","Duration"]);
-		const CHECK_TYPES   = new Set(["Check"]);
+		const NUMERIC_TYPES = new Set(["Int", "Float", "Currency", "Percent", "Duration"]);
+		const CHECK_TYPES = new Set(["Check"]);
 		Object.entries(row_data).forEach(([k, v]) => {
-			if (!k.startsWith("_") && !virtual_keys.has(k) && !ct_keys.has(k) && v != null && v !== "") {
-				const df = meta?.fields?.find(f => f.fieldname === k);
+			if (
+				!k.startsWith("_") &&
+				!virtual_keys.has(k) &&
+				!ct_keys.has(k) &&
+				v != null &&
+				v !== ""
+			) {
+				const df = meta?.fields?.find((f) => f.fieldname === k);
 				if (df && NUMERIC_TYPES.has(df.fieldtype)) {
 					const n = parseFloat(v);
 					doc[k] = isNaN(n) ? 0 : n;
@@ -4921,29 +5745,33 @@ frappe.views.ExcelBoard = class ExcelBoard {
 
 		// CT columns → group into child table arrays (one child row per group)
 		const ct_groups = {};
-		this.columns.filter(c => c._is_ct_col).forEach(col => {
-			const table_fn = col._ct_table;
-			if (!ct_groups[table_fn]) {
-				const table_df = meta?.fields?.find(f => f.fieldname === table_fn);
-				ct_groups[table_fn] = [table_df ? { doctype: table_df.options } : {}];
-			}
-			const child_fn = col.data.slice(table_fn.length + 2);
-			const v = row_data[col.data];
-			if (v != null && v !== "") {
-				const ct_dt   = ct_groups[table_fn][0].doctype;
-				const ct_meta = ct_dt ? frappe.get_meta(ct_dt) : null;
-				const ct_df   = ct_meta?.fields?.find(f => f.fieldname === child_fn);
-				if (ct_df && NUMERIC_TYPES.has(ct_df.fieldtype)) {
-					const n = parseFloat(v);
-					ct_groups[table_fn][0][child_fn] = isNaN(n) ? 0 : n;
-				} else if (ct_df && CHECK_TYPES.has(ct_df.fieldtype)) {
-					ct_groups[table_fn][0][child_fn] = v ? 1 : 0;
-				} else {
-					ct_groups[table_fn][0][child_fn] = v;
+		this.columns
+			.filter((c) => c._is_ct_col)
+			.forEach((col) => {
+				const table_fn = col._ct_table;
+				if (!ct_groups[table_fn]) {
+					const table_df = meta?.fields?.find((f) => f.fieldname === table_fn);
+					ct_groups[table_fn] = [table_df ? { doctype: table_df.options } : {}];
 				}
-			}
+				const child_fn = col.data.slice(table_fn.length + 2);
+				const v = row_data[col.data];
+				if (v != null && v !== "") {
+					const ct_dt = ct_groups[table_fn][0].doctype;
+					const ct_meta = ct_dt ? frappe.get_meta(ct_dt) : null;
+					const ct_df = ct_meta?.fields?.find((f) => f.fieldname === child_fn);
+					if (ct_df && NUMERIC_TYPES.has(ct_df.fieldtype)) {
+						const n = parseFloat(v);
+						ct_groups[table_fn][0][child_fn] = isNaN(n) ? 0 : n;
+					} else if (ct_df && CHECK_TYPES.has(ct_df.fieldtype)) {
+						ct_groups[table_fn][0][child_fn] = v ? 1 : 0;
+					} else {
+						ct_groups[table_fn][0][child_fn] = v;
+					}
+				}
+			});
+		Object.entries(ct_groups).forEach(([fn, rows]) => {
+			doc[fn] = rows;
 		});
-		Object.entries(ct_groups).forEach(([fn, rows]) => { doc[fn] = rows; });
 
 		// ── Submit ──────────────────────────────────────────────────────────
 		const $save_btn = this.$inline_insert_bar?.find(".ev-iib-save");
@@ -4956,7 +5784,10 @@ frappe.views.ExcelBoard = class ExcelBoard {
 				freeze: false,
 			});
 			if (r.message) {
-				frappe.show_alert({ message: __("{0} created", [r.message.name]), indicator: "green" }, 3);
+				frappe.show_alert(
+					{ message: __("{0} created", [r.message.name]), indicator: "green" },
+					3
+				);
 				// Clear the inline state without splicing (refresh will fetch clean data)
 				this._new_row_idx = -1;
 				this.$inline_insert_bar?.remove();
@@ -5011,9 +5842,15 @@ frappe.views.ExcelBoard = class ExcelBoard {
 		requestAnimationFrame(() => this.hot?.render());
 	}
 
-	zoom_in()    { this._apply_zoom(this._zoom_level + 0.1); }
-	zoom_out()   { this._apply_zoom(this._zoom_level - 0.1); }
-	zoom_reset() { this._apply_zoom(1.0); }
+	zoom_in() {
+		this._apply_zoom(this._zoom_level + 0.1);
+	}
+	zoom_out() {
+		this._apply_zoom(this._zoom_level - 0.1);
+	}
+	zoom_reset() {
+		this._apply_zoom(1.0);
+	}
 
 	// ── V2.5 Sheet context switching ──────────────────────────────────────────
 
@@ -5039,7 +5876,8 @@ frappe.views.ExcelBoard = class ExcelBoard {
 		// Cache current base-sheet join config before switching
 		if (sheet.doctype === this.doctype) {
 			// Switching back to base — restore original columns, applying hidden filter
-			this.columns = this._master_columns.filter(c => !this._hidden_col_keys.has(c.data)); this._col_index_map = null;
+			this.columns = this._master_columns.filter((c) => !this._hidden_col_keys.has(c.data));
+			this._col_index_map = null;
 		} else if (sheet._columns) {
 			// Already built columns for this sheet — reuse
 			this.columns = sheet._columns;
@@ -5047,10 +5885,23 @@ frappe.views.ExcelBoard = class ExcelBoard {
 			// Build minimal columns from doctype meta (lazy)
 			frappe.model.with_doctype(sheet.doctype, () => {
 				const meta = frappe.get_meta(sheet.doctype);
-				const _NON_DATA = new Set(["Section Break", "Column Break", "HTML", "Table", "Tab Break", "Fold", "Heading"]);
+				const _NON_DATA = new Set([
+					"Section Break",
+					"Column Break",
+					"HTML",
+					"Table",
+					"Tab Break",
+					"Fold",
+					"Heading",
+				]);
 				// Mirror Frappe's Report/List view: show only in_list_view fields; fall back to first 5
-				let show_fields = meta.fields.filter(f => f.in_list_view && !_NON_DATA.has(f.fieldtype));
-				if (!show_fields.length) show_fields = meta.fields.filter(f => !_NON_DATA.has(f.fieldtype)).slice(0, 5);
+				let show_fields = meta.fields.filter(
+					(f) => f.in_list_view && !_NON_DATA.has(f.fieldtype)
+				);
+				if (!show_fields.length)
+					show_fields = meta.fields
+						.filter((f) => !_NON_DATA.has(f.fieldtype))
+						.slice(0, 5);
 
 				const cols = [
 					{
@@ -5081,7 +5932,9 @@ frappe.views.ExcelBoard = class ExcelBoard {
 			});
 
 			// Placeholder columns while meta loads
-			this.columns = [{ data: "name", title: "ID", type: "text", width: 160, readOnly: true }];
+			this.columns = [
+				{ data: "name", title: "ID", type: "text", width: 160, readOnly: true },
+			];
 		}
 	}
 
@@ -5095,7 +5948,9 @@ frappe.views.ExcelBoard = class ExcelBoard {
 		// Remove stale lookup cols of the same types (by data key prefix)
 		const new_keys = new Set(lookup_cols.map((c) => c.data));
 		this.columns = this.columns.filter((c) => !c._is_lookup_col || new_keys.has(c.data));
-		this._master_columns = this._master_columns.filter((c) => !c._is_lookup_col || new_keys.has(c.data));
+		this._master_columns = this._master_columns.filter(
+			(c) => !c._is_lookup_col || new_keys.has(c.data)
+		);
 
 		// Seed empty values so HOT rows have the key defined
 		(data || []).forEach((row) => {
@@ -5135,7 +5990,9 @@ frappe.views.ExcelBoard = class ExcelBoard {
 		// Build a blank row object matching the current column schema
 		const _blank_row = () => {
 			const row = {};
-			this.columns.forEach((col) => { if (col.data) row[col.data] = ""; });
+			this.columns.forEach((col) => {
+				if (col.data) row[col.data] = "";
+			});
 			return row;
 		};
 
@@ -5155,13 +6012,16 @@ frappe.views.ExcelBoard = class ExcelBoard {
 
 		// Scroll to first bulk row so user sees it immediately
 		this.hot.scrollViewportTo(this._bulk_add_start, 0);
-		frappe.show_alert({
-			message: __(
-				"{0} blank rows added — fill them in or paste from Excel/Sheets (Ctrl+V)",
-				[n]
-			),
-			indicator: "green",
-		}, 4);
+		frappe.show_alert(
+			{
+				message: __(
+					"{0} blank rows added — fill them in or paste from Excel/Sheets (Ctrl+V)",
+					[n]
+				),
+				indicator: "green",
+			},
+			4
+		);
 	}
 
 	/**
@@ -5179,21 +6039,40 @@ frappe.views.ExcelBoard = class ExcelBoard {
 	 */
 	async _bulk_duplicate(row_indices) {
 		if (this._bulk_add_start >= 0) {
-			frappe.show_alert({ message: __("Exit current bulk mode first (Cancel)"), indicator: "orange" }, 3);
+			frappe.show_alert(
+				{ message: __("Exit current bulk mode first (Cancel)"), indicator: "orange" },
+				3
+			);
 			return;
 		}
 
-		const SYSTEM = new Set(["name","creation","modified","modified_by","owner",
-			"docstatus","idx","_user_tags","_comments","_assign","_liked_by","_seen",
-			"amended_from","naming_series"]);
+		const SYSTEM = new Set([
+			"name",
+			"creation",
+			"modified",
+			"modified_by",
+			"owner",
+			"docstatus",
+			"idx",
+			"_user_tags",
+			"_comments",
+			"_assign",
+			"_liked_by",
+			"_seen",
+			"amended_from",
+			"naming_series",
+		]);
 
 		const data = this.list_view.data;
 		const valid_srcs = row_indices
-			.map(idx => data[idx])
-			.filter(r => r && !r._is_new && r.name);
+			.map((idx) => data[idx])
+			.filter((r) => r && !r._is_new && r.name);
 
 		if (!valid_srcs.length) {
-			frappe.show_alert({ message: __("No valid rows to duplicate"), indicator: "orange" }, 3);
+			frappe.show_alert(
+				{ message: __("No valid rows to duplicate"), indicator: "orange" },
+				3
+			);
 			return;
 		}
 
@@ -5201,26 +6080,48 @@ frappe.views.ExcelBoard = class ExcelBoard {
 		// fields are available even when those fields are not visible columns.
 		const full_map = new Map();
 		await Promise.all(
-			valid_srcs.map(src =>
-				frappe.call({ method: "frappe.client.get", args: { doctype: this.doctype, name: src.name } })
-					.then(r => { if (r.message?.name) full_map.set(r.message.name, r.message); })
+			valid_srcs.map((src) =>
+				frappe
+					.call({
+						method: "frappe.client.get",
+						args: { doctype: this.doctype, name: src.name },
+					})
+					.then((r) => {
+						if (r.message?.name) full_map.set(r.message.name, r.message);
+					})
 					.catch(() => {})
 			)
 		);
-		valid_srcs.forEach(src => { if (!full_map.has(src.name)) full_map.set(src.name, src); });
+		valid_srcs.forEach((src) => {
+			if (!full_map.has(src.name)) full_map.set(src.name, src);
+		});
 
 		// ── Mandatory-field temp columns ──────────────────────────────────────
 		// If a doctype has mandatory scalar fields not currently visible in the grid,
 		// add them as temporary editable columns so the user can see and fill them
 		// before clicking Create. These columns are removed on Cancel/Create.
 		const meta = frappe.get_meta(this.doctype);
-		const SKIP_TYPES = new Set(["Section Break","Column Break","Tab Break","HTML",
-			"Heading","Button","Fold","Table","Table MultiSelect"]);
-		const visible_keys_before = new Set(this.columns.map(c => c.data).filter(Boolean));
+		const SKIP_TYPES = new Set([
+			"Section Break",
+			"Column Break",
+			"Tab Break",
+			"HTML",
+			"Heading",
+			"Button",
+			"Fold",
+			"Table",
+			"Table MultiSelect",
+		]);
+		const visible_keys_before = new Set(this.columns.map((c) => c.data).filter(Boolean));
 
-		const mandatory_extra = (meta?.fields || []).filter(f =>
-			f.reqd && f.fieldname && !f.hidden && !f.read_only &&
-			!SKIP_TYPES.has(f.fieldtype) && !visible_keys_before.has(f.fieldname)
+		const mandatory_extra = (meta?.fields || []).filter(
+			(f) =>
+				f.reqd &&
+				f.fieldname &&
+				!f.hidden &&
+				!f.read_only &&
+				!SKIP_TYPES.has(f.fieldtype) &&
+				!visible_keys_before.has(f.fieldname)
 		);
 
 		if (mandatory_extra.length) {
@@ -5231,19 +6132,22 @@ frappe.views.ExcelBoard = class ExcelBoard {
 			// updateSettings({ columns: [...] }) resets this array, collapsing every
 			// column to auto-width and killing the horizontal scrollbar.
 			// We snapshot here and restore shifted by extra_count after the call.
-			const _rp = this.hot.getPlugin('manualColumnResize');
+			const _rp = this.hot.getPlugin("manualColumnResize");
 			this._bulk_dup_orig_widths = _rp?.manualColumnWidths
 				? [..._rp.manualColumnWidths]
 				: null;
 
 			// Use proper column config per fieldtype so pickers/dropdowns work in temp cols.
-			const extra_cols = mandatory_extra.map(df => {
+			const extra_cols = mandatory_extra.map((df) => {
 				const col = frappe.views.excel.get_column_config(df, true);
 				return {
 					...col,
-					title:    `* ${__(df.label || df.fieldname)}`,
-					width:    Math.max(100, Math.min(180, ((df.label || df.fieldname).length * 9) + 20)),
-					readOnly:  false,
+					title: `* ${__(df.label || df.fieldname)}`,
+					width: Math.max(
+						100,
+						Math.min(180, (df.label || df.fieldname).length * 9 + 20)
+					),
+					readOnly: false,
 					_readonly: false,
 					className: "",
 					_is_bulk_temp: true,
@@ -5252,8 +6156,10 @@ frappe.views.ExcelBoard = class ExcelBoard {
 			// Prepend so mandatory fields appear first — user sees them immediately
 			this.columns = [...extra_cols, ...this.columns];
 			// Backfill empty slots in ALL existing rows so HOT doesn't get confused
-			data.forEach(row => {
-				extra_cols.forEach(col => { if (!(col.data in row)) row[col.data] = ""; });
+			data.forEach((row) => {
+				extra_cols.forEach((col) => {
+					if (!(col.data in row)) row[col.data] = "";
+				});
 			});
 		}
 
@@ -5269,23 +6175,25 @@ frappe.views.ExcelBoard = class ExcelBoard {
 		this.hot.addHook("afterRenderer", this._bulk_renderer_hook);
 
 		// Recalculate visible keys after potential column expansion
-		const visible_keys = new Set(this.columns.map(c => c.data).filter(Boolean));
+		const visible_keys = new Set(this.columns.map((c) => c.data).filter(Boolean));
 
 		let added = 0;
 		for (const src of valid_srcs) {
 			const full = full_map.get(src.name) || src;
-			const row  = { _is_new: true };
-			this.columns.forEach(col => { if (col.data) row[col.data] = ""; });
+			const row = { _is_new: true };
+			this.columns.forEach((col) => {
+				if (col.data) row[col.data] = "";
+			});
 
 			const hidden = {};
 			for (const [k, v] of Object.entries(full)) {
 				if (SYSTEM.has(k) || k.startsWith("_")) continue;
 				// Skip null, empty, and complex types (arrays = child tables, objects = JSON fields)
-				if (v == null || v === "" || (typeof v === "object")) continue;
+				if (v == null || v === "" || typeof v === "object") continue;
 				if (visible_keys.has(k)) {
-					row[k] = v;       // editable in the grid (including mandatory temp cols)
+					row[k] = v; // editable in the grid (including mandatory temp cols)
 				} else {
-					hidden[k] = v;    // non-visible non-mandatory: silently included at create
+					hidden[k] = v; // non-visible non-mandatory: silently included at create
 				}
 			}
 			if (Object.keys(hidden).length) row._hidden_fields = hidden;
@@ -5300,9 +6208,9 @@ frappe.views.ExcelBoard = class ExcelBoard {
 		const _dup_last = start + added - 1;
 		const _scroll_once = () => {
 			this.hot.scrollViewportTo(_dup_last, 0, true);
-			this.hot.removeHook('afterRender', _scroll_once);
+			this.hot.removeHook("afterRender", _scroll_once);
 		};
-		this.hot.addHook('afterRender', _scroll_once);
+		this.hot.addHook("afterRender", _scroll_once);
 
 		if (this._bulk_dup_orig_columns) {
 			// Build widths: prepended extra cols first, then original widths.
@@ -5311,9 +6219,9 @@ frappe.views.ExcelBoard = class ExcelBoard {
 			// supplying widths via a separate assignment (or a later render) is ignored.
 			// Including them in the same call forces the plugin to re-init with the
 			// correct values, which restores the horizontal scrollbar.
-			const extra_n      = this.columns.length - this._bulk_dup_orig_columns.length;
-			const extra_widths = this.columns.slice(0, extra_n).map(c => c.width || 120);
-			const combined_w   = this._bulk_dup_orig_widths
+			const extra_n = this.columns.length - this._bulk_dup_orig_columns.length;
+			const extra_widths = this.columns.slice(0, extra_n).map((c) => c.width || 120);
+			const combined_w = this._bulk_dup_orig_widths
 				? [...extra_widths, ...this._bulk_dup_orig_widths]
 				: extra_widths;
 
@@ -5325,10 +6233,13 @@ frappe.views.ExcelBoard = class ExcelBoard {
 
 		this._show_bulk_bar(added);
 
-		frappe.show_alert({
-			message: __("{0} rows duplicated — edit inline then click Create", [added]),
-			indicator: "green",
-		}, 4);
+		frappe.show_alert(
+			{
+				message: __("{0} rows duplicated — edit inline then click Create", [added]),
+				indicator: "green",
+			},
+			4
+		);
 	}
 
 	/**
@@ -5338,16 +6249,21 @@ frappe.views.ExcelBoard = class ExcelBoard {
 	 */
 	_enter_bulk_add_mode_with_data(rows) {
 		if (this._bulk_add_start >= 0) {
-			frappe.confirm(__("Bulk mode is already active. Replace it with the imported data?"), () => {
-				this._exit_bulk_add_mode();
-				this._enter_bulk_add_mode_with_data(rows);
-			});
+			frappe.confirm(
+				__("Bulk mode is already active. Replace it with the imported data?"),
+				() => {
+					this._exit_bulk_add_mode();
+					this._enter_bulk_add_mode_with_data(rows);
+				}
+			);
 			return;
 		}
 
 		const _blank_row = () => {
 			const row = {};
-			this.columns.forEach(col => { if (col.data) row[col.data] = ""; });
+			this.columns.forEach((col) => {
+				if (col.data) row[col.data] = "";
+			});
 			return row;
 		};
 
@@ -5373,10 +6289,13 @@ frappe.views.ExcelBoard = class ExcelBoard {
 		this._show_bulk_bar(rows.length);
 		this._update_bulk_bar();
 		this.hot.scrollViewportTo(this._bulk_add_start, 0);
-		frappe.show_alert({
-			message: __("{0} rows imported — review and click Create", [rows.length]),
-			indicator: "green",
-		}, 4);
+		frappe.show_alert(
+			{
+				message: __("{0} rows imported — review and click Create", [rows.length]),
+				indicator: "green",
+			},
+			4
+		);
 	}
 
 	/** Exit bulk-add mode without creating: remove pending rows and clean up. */
@@ -5421,7 +6340,9 @@ frappe.views.ExcelBoard = class ExcelBoard {
 			</div>
 		`).appendTo(document.body);
 
-		this.$bulk_bar.on("click", ".ev-bulk-bar__create:not([disabled])", () => this._do_bulk_create());
+		this.$bulk_bar.on("click", ".ev-bulk-bar__create:not([disabled])", () =>
+			this._do_bulk_create()
+		);
 		this.$bulk_bar.on("click", ".ev-bulk-bar__cancel", () => this._exit_bulk_add_mode());
 	}
 
@@ -5431,14 +6352,17 @@ frappe.views.ExcelBoard = class ExcelBoard {
 		const pending = this.list_view.data.slice(this._bulk_add_start);
 		// A row is "ready" if it has at least one non-virtual, non-hidden visible value
 		// OR has hidden_fields (from duplicate — always considered filled)
-		const filled  = pending.filter((row) =>
-			row._hidden_fields ||
-			Object.entries(row).some(([k, v]) => k !== "name" && !k.startsWith("_") && v != null && v !== "")
+		const filled = pending.filter(
+			(row) =>
+				row._hidden_fields ||
+				Object.entries(row).some(
+					([k, v]) => k !== "name" && !k.startsWith("_") && v != null && v !== ""
+				)
 		).length;
 
-		this.$bulk_bar.find(".ev-bulk-bar__info").text(
-			__("{0} rows — {1} ready", [pending.length, filled])
-		);
+		this.$bulk_bar
+			.find(".ev-bulk-bar__info")
+			.text(__("{0} rows — {1} ready", [pending.length, filled]));
 		const $btn = this.$bulk_bar.find(".ev-bulk-bar__create");
 		$btn.text(__("Create {0} Record(s)", [filled]));
 		filled > 0 ? $btn.prop("disabled", false) : $btn.prop("disabled", true);
@@ -5458,9 +6382,12 @@ frappe.views.ExcelBoard = class ExcelBoard {
 		const _virtual = new Set(["_meta", "_social", "_is_new", "name"]);
 		return this.list_view.data
 			.slice(this._bulk_add_start)
-			.filter((row) =>
-				row._hidden_fields ||
-				Object.entries(row).some(([k, v]) => !_virtual.has(k) && !k.startsWith("_") && v != null && v !== "")
+			.filter(
+				(row) =>
+					row._hidden_fields ||
+					Object.entries(row).some(
+						([k, v]) => !_virtual.has(k) && !k.startsWith("_") && v != null && v !== ""
+					)
 			)
 			.map((row) => {
 				const clean = {};
@@ -5494,7 +6421,7 @@ frappe.views.ExcelBoard = class ExcelBoard {
 		try {
 			const r = await frappe.call({
 				method: "excel_view.api.bulk_create_records",
-				args:   { doctype: this.doctype, rows: JSON.stringify(rows) },
+				args: { doctype: this.doctype, rows: JSON.stringify(rows) },
 			});
 
 			const { created = [], errors = [] } = r.message || {};
@@ -5514,15 +6441,18 @@ frappe.views.ExcelBoard = class ExcelBoard {
 
 			// Show result summary
 			if (created.length && !errors.length) {
-				frappe.show_alert({
-					message: __("{0} record(s) created successfully", [created.length]),
-					indicator: "green",
-				}, 4);
+				frappe.show_alert(
+					{
+						message: __("{0} record(s) created successfully", [created.length]),
+						indicator: "green",
+					},
+					4
+				);
 				this._exit_bulk_add_mode();
 				this.list_view.refresh();
 			} else if (created.length && errors.length) {
 				frappe.msgprint({
-					title:   __("Partial Success"),
+					title: __("Partial Success"),
 					message: __(
 						"{0} record(s) created. {1} row(s) failed — they are highlighted red. Fix errors and try again.",
 						[created.length, errors.length]
@@ -5539,14 +6469,17 @@ frappe.views.ExcelBoard = class ExcelBoard {
 				this.list_view.refresh();
 			} else {
 				frappe.msgprint({
-					title:   __("All rows failed"),
+					title: __("All rows failed"),
 					message: errors.map((e) => `Row ${e.idx + 1}: ${e.message}`).join("<br>"),
 					indicator: "red",
 				});
 				$btn?.prop("disabled", false).text(__("Retry"));
 			}
 		} catch (e) {
-			frappe.show_alert({ message: __("Bulk create failed — see console"), indicator: "red" }, 4);
+			frappe.show_alert(
+				{ message: __("Bulk create failed — see console"), indicator: "red" },
+				4
+			);
 			$btn?.prop("disabled", false).text(__("Retry"));
 		}
 	}
@@ -5557,7 +6490,14 @@ frappe.views.ExcelBoard = class ExcelBoard {
 	 */
 	destroy() {
 		this._destroyed = true;
+		// Edits still waiting are saved when the user leaves the page.
+		try {
+			if (this.data_manager?.is_dirty()) this.data_manager._flush_saves();
+		} catch (e) {
+			console.error("[ExcelView] save on leave failed", e);
+		}
 		$(document).off("keydown.ev");
+		$(window).off("beforeunload.ev-manual-save");
 		this.$hot_container?.off("click.ev-ct-expand");
 		this._resize_observer?.disconnect();
 		// Remove formula-cache realtime listener
@@ -5574,7 +6514,9 @@ frappe.views.ExcelBoard = class ExcelBoard {
 		}
 		// Remove shift+wheel horizontal-scroll listener
 		if (this._wheel_listener) {
-			this._wheel_listener.target.removeEventListener("wheel", this._wheel_listener.fn, { capture: true });
+			this._wheel_listener.target.removeEventListener("wheel", this._wheel_listener.fn, {
+				capture: true,
+			});
 			this._wheel_listener = null;
 		}
 		this.toolbar_component?.destroy();

@@ -34,7 +34,7 @@ frappe.views.excel.WorkbookManager = class WorkbookManager {
 	 * @param {Object}  opts.board - ExcelBoard instance
 	 */
 	constructor({ board }) {
-		this.board    = board;
+		this.board = board;
 		// Tracks the currently loaded/saved workbook.  null = unsaved new view.
 		this._current = null; // { name, title }
 		this._dropdown_open = false;
@@ -64,7 +64,6 @@ frappe.views.excel.WorkbookManager = class WorkbookManager {
 				this._load_workbook(settings.excel_current_workbook.name, /* silent */ true);
 			}, 0);
 		}
-
 	}
 
 	// ── Toolbar event binding ─────────────────────────────────────────────────
@@ -117,6 +116,21 @@ frappe.views.excel.WorkbookManager = class WorkbookManager {
 		const $dd = $(this.board.toolbar).find(".ev-wb-dropdown");
 		this._dropdown_open = !this._dropdown_open;
 		$dd.toggleClass("hide", !this._dropdown_open);
+		if (this._dropdown_open) this._place_dropdown($dd);
+	}
+
+	// The toolbar is a thin strip that clips anything hanging below it, so the menu is
+	// drawn on top of the page (position: fixed) just under the "More options" arrow.
+	_place_dropdown($dd) {
+		const btn = $(this.board.toolbar).find(".ev-wb-dropdown-arrow")[0];
+		if (!btn || !$dd[0]) return;
+		const r = btn.getBoundingClientRect();
+		$dd.css({
+			position: "fixed",
+			top: `${r.bottom + 3}px`,
+			left: `${Math.max(8, r.right - ($dd.outerWidth() || 130))}px`,
+			"z-index": 5000,
+		});
 	}
 
 	_close_dropdown() {
@@ -177,7 +191,7 @@ frappe.views.excel.WorkbookManager = class WorkbookManager {
 			],
 			({ title, is_public }) => on_confirm(title, is_public),
 			__("Save View"),
-			__("Save"),
+			__("Save")
 		);
 	}
 
@@ -189,19 +203,26 @@ frappe.views.excel.WorkbookManager = class WorkbookManager {
 			method: "excel_view.api.save_workbook",
 			args: {
 				title,
-				doctype_name:    this.board.doctype,
-				columns_config:  JSON.stringify(config.columns_config),
+				doctype_name: this.board.doctype,
+				columns_config: JSON.stringify(config.columns_config),
 				formula_columns: JSON.stringify(config.formula_columns),
-				filters:         JSON.stringify(config.filters),
-				sort_by:         JSON.stringify(config.sort_by),
-				join_config:     JSON.stringify(config.join_config),
-				sheets:          JSON.stringify(config.sheets),
-				chart_overlays:  JSON.stringify(config.chart_overlays),
-				format_store:    JSON.stringify(config.format_store),
-				cond_fmt_rules:  JSON.stringify(config.cond_fmt_rules),
-				view_state:      JSON.stringify({ freeze_cols: config.freeze_cols, freeze_rows: config.freeze_rows, hide_gridlines: config.hide_gridlines, smart_lookups: config.smart_lookups || null, blank_columns: config.blank_columns?.length ? config.blank_columns : null, child_col_prefs: config.child_col_prefs || null }),
-				is_public:       is_public ? 1 : 0,
-				workbook_name:   workbook_name || null,
+				filters: JSON.stringify(config.filters),
+				sort_by: JSON.stringify(config.sort_by),
+				join_config: JSON.stringify(config.join_config),
+				sheets: JSON.stringify(config.sheets),
+				chart_overlays: JSON.stringify(config.chart_overlays),
+				format_store: JSON.stringify(config.format_store),
+				cond_fmt_rules: JSON.stringify(config.cond_fmt_rules),
+				view_state: JSON.stringify({
+					freeze_cols: config.freeze_cols,
+					freeze_rows: config.freeze_rows,
+					hide_gridlines: config.hide_gridlines,
+					smart_lookups: config.smart_lookups || null,
+					blank_columns: config.blank_columns?.length ? config.blank_columns : null,
+					child_col_prefs: config.child_col_prefs || null,
+				}),
+				is_public: is_public ? 1 : 0,
+				workbook_name: workbook_name || null,
 			},
 			freeze: false,
 			callback: (r) => {
@@ -212,14 +233,11 @@ frappe.views.excel.WorkbookManager = class WorkbookManager {
 				this.board._mark_saved?.();
 				frappe.show_alert(
 					{ message: __('View "{0}" saved', [saved.title]), indicator: "green" },
-					3,
+					3
 				);
 			},
 			error: () => {
-				frappe.show_alert(
-					{ message: __("Failed to save view"), indicator: "red" },
-					3,
-				);
+				frappe.show_alert({ message: __("Failed to save view"), indicator: "red" }, 3);
 			},
 		});
 	}
@@ -238,11 +256,11 @@ frappe.views.excel.WorkbookManager = class WorkbookManager {
 	}
 
 	_show_views_dialog(workbooks) {
-		const me   = this;
+		const me = this;
 		const user = frappe.session.user;
 
-		const mine   = workbooks.filter(w => w.owner === user);
-		const shared = workbooks.filter(w => w.owner !== user && w.is_public);
+		const mine = workbooks.filter((w) => w.owner === user);
+		const shared = workbooks.filter((w) => w.owner !== user && w.is_public);
 
 		// Mark the currently loaded workbook with a checkmark
 		const row_html = (w) => {
@@ -250,21 +268,27 @@ frappe.views.excel.WorkbookManager = class WorkbookManager {
 			return `
 			<div class="ev-wb-row${is_current ? " ev-wb-row--active" : ""}"
 				data-name="${frappe.utils.escape_html(w.name)}">
-				${is_current
-					? `<span class="ev-wb-active-check" title="${__("Currently loaded")}">✓</span>`
-					: `<svg class="ev-wb-row-icon" width="13" height="13" viewBox="0 0 16 16"
+				${
+					is_current
+						? `<span class="ev-wb-active-check" title="${__(
+								"Currently loaded"
+						  )}">✓</span>`
+						: `<svg class="ev-wb-row-icon" width="13" height="13" viewBox="0 0 16 16"
 							fill="currentColor" aria-hidden="true">
 							<rect x="1" y="1" width="4" height="14" rx="1"/>
 							<rect x="6" y="1" width="4" height="14" rx="1"/>
 							<rect x="11" y="1" width="4" height="14" rx="1"/>
-						</svg>`}
+						</svg>`
+				}
 				<span class="ev-wb-row-title">${frappe.utils.escape_html(w.title)}</span>
 				<span class="ev-wb-row-date">${frappe.datetime.prettyDate(w.modified)}</span>
-				${w.owner === user
-					? `<button class="ev-wb-row-del btn btn-xs"
+				${
+					w.owner === user
+						? `<button class="ev-wb-row-del btn btn-xs"
 							data-name="${frappe.utils.escape_html(w.name)}"
 							title="${__("Delete")}">✕</button>`
-					: `<span class="ev-wb-row-shared">${__("shared")}</span>`}
+						: `<span class="ev-wb-row-shared">${__("shared")}</span>`
+				}
 			</div>`;
 		};
 
@@ -285,10 +309,12 @@ frappe.views.excel.WorkbookManager = class WorkbookManager {
 		}
 
 		const d = new frappe.ui.Dialog({
-			title:               __("Open View — {0}", [this.board.doctype]),
-			fields:              [{ fieldtype: "HTML", fieldname: "wb_list", options: body_html }],
+			title: __("Open View — {0}", [this.board.doctype]),
+			fields: [{ fieldtype: "HTML", fieldname: "wb_list", options: body_html }],
 			primary_action_label: __("Close"),
-			primary_action()     { d.hide(); },
+			primary_action() {
+				d.hide();
+			},
 		});
 
 		// Use d.$body — the correct Frappe Dialog property for the modal body element.
@@ -306,28 +332,23 @@ frappe.views.excel.WorkbookManager = class WorkbookManager {
 		// Delete
 		$body.on("click", ".ev-wb-row-del", function (e) {
 			e.stopPropagation();
-			const name  = $(this).data("name");
+			const name = $(this).data("name");
 			const title = $(this).closest(".ev-wb-row").find(".ev-wb-row-title").text();
-			frappe.confirm(
-				__('Delete view "{0}"?', [title]),
-				() => {
-					frappe.call({
-						method:   "excel_view.api.delete_workbook",
-						args:     { name },
-						callback: () => {
-							$(this).closest(".ev-wb-row").remove();
-							frappe.show_alert(
-								{ message: __("View deleted"), indicator: "green" }, 2,
-							);
-							if (me._current?.name === name) {
-								me._current = null;
-								me._update_save_label(null);
-								me._save_current_to_user_settings(null, null);
-							}
-						},
-					});
-				},
-			);
+			frappe.confirm(__('Delete view "{0}"?', [title]), () => {
+				frappe.call({
+					method: "excel_view.api.delete_workbook",
+					args: { name },
+					callback: () => {
+						$(this).closest(".ev-wb-row").remove();
+						frappe.show_alert({ message: __("View deleted"), indicator: "green" }, 2);
+						if (me._current?.name === name) {
+							me._current = null;
+							me._update_save_label(null);
+							me._save_current_to_user_settings(null, null);
+						}
+					},
+				});
+			});
 		});
 
 		d.show();
@@ -339,8 +360,8 @@ frappe.views.excel.WorkbookManager = class WorkbookManager {
 	 */
 	_load_workbook(name, silent = false) {
 		frappe.call({
-			method:   "excel_view.api.load_workbook",
-			args:     { name },
+			method: "excel_view.api.load_workbook",
+			args: { name },
 			callback: (r) => {
 				const wb = r.message;
 
@@ -354,7 +375,7 @@ frappe.views.excel.WorkbookManager = class WorkbookManager {
 					if (!silent) {
 						frappe.show_alert(
 							{ message: __("This view no longer exists"), indicator: "orange" },
-							4,
+							4
 						);
 					}
 					return;
@@ -362,23 +383,26 @@ frappe.views.excel.WorkbookManager = class WorkbookManager {
 
 				const _vs = this._parse_json(wb.view_state, {});
 				const config = {
-					columns_config:  this._parse_json(wb.columns_config,  []),
+					columns_config: this._parse_json(wb.columns_config, []),
 					formula_columns: this._parse_json(wb.formula_columns, []),
-					filters:         this._parse_json(wb.filters,         []),
-					sort_by:         this._parse_json(wb.sort_by,         {}),
-					join_config:     this._parse_json(wb.join_config,     null),
-					sheets:          this._parse_json(wb.sheets,          null),
-					chart_overlays:  this._parse_json(wb.chart_overlays,  []),
-					format_store:    this._parse_json(wb.format_store,    {}),
-					cond_fmt_rules:  this._parse_json(wb.cond_fmt_rules,  []),
-					freeze_cols:     _vs.freeze_cols    || 0,
-					freeze_rows:     _vs.freeze_rows    || 0,
-					hide_gridlines:  _vs.hide_gridlines || false,
-					blank_columns:   _vs.blank_columns  || [],
+					filters: this._parse_json(wb.filters, []),
+					sort_by: this._parse_json(wb.sort_by, {}),
+					join_config: this._parse_json(wb.join_config, null),
+					sheets: this._parse_json(wb.sheets, null),
+					chart_overlays: this._parse_json(wb.chart_overlays, []),
+					format_store: this._parse_json(wb.format_store, {}),
+					cond_fmt_rules: this._parse_json(wb.cond_fmt_rules, []),
+					freeze_cols: _vs.freeze_cols || 0,
+					freeze_rows: _vs.freeze_rows || 0,
+					hide_gridlines: _vs.hide_gridlines || false,
+					blank_columns: _vs.blank_columns || [],
 					// smart_lookups packed inside view_state (no extra DocType field needed)
-					smart_lookups:   Array.isArray(_vs.smart_lookups) ? _vs.smart_lookups : null,
+					smart_lookups: Array.isArray(_vs.smart_lookups) ? _vs.smart_lookups : null,
 					// V3.5 — child table column prefs
-					child_col_prefs: (_vs.child_col_prefs && typeof _vs.child_col_prefs === "object") ? _vs.child_col_prefs : null,
+					child_col_prefs:
+						_vs.child_col_prefs && typeof _vs.child_col_prefs === "object"
+							? _vs.child_col_prefs
+							: null,
 				};
 
 				this._current = { name: wb.name, title: wb.title };
@@ -392,7 +416,7 @@ frappe.views.excel.WorkbookManager = class WorkbookManager {
 					if (!silent) {
 						frappe.show_alert(
 							{ message: __('View "{0}" loaded', [wb.title]), indicator: "green" },
-							3,
+							3
 						);
 					}
 				});
@@ -411,11 +435,7 @@ frappe.views.excel.WorkbookManager = class WorkbookManager {
 		// concurrent save() calls in apply_config see the correct value immediately.
 		const _cache = frappe.model.user_settings[this.board.doctype];
 		if (_cache) _cache.excel_current_workbook = val;
-		frappe.model.user_settings.save(
-			this.board.doctype,
-			"excel_current_workbook",
-			val,
-		);
+		frappe.model.user_settings.save(this.board.doctype, "excel_current_workbook", val);
 	}
 
 	// ── Serialise current state ───────────────────────────────────────────────
@@ -436,7 +456,7 @@ frappe.views.excel.WorkbookManager = class WorkbookManager {
 	 * sort_by: { field, order } from list_view.sort_by / sort_order.
 	 */
 	get_config() {
-		const board  = this.board;
+		const board = this.board;
 		const plugin = board.hot?.getPlugin("manualColumnResize");
 
 		// ── columns_config + formula_columns (single pass) ────────────────
@@ -451,18 +471,38 @@ frappe.views.excel.WorkbookManager = class WorkbookManager {
 			if (col._is_join_col || col._is_lookup_col) return; // excluded
 			if (col._is_blank_col) {
 				const cfg = board._blank_col_configs?.get(col.data) || {};
-				columns_config.push({ key: col.data, label: col.title, is_blank_col: true, width });
-				blank_columns.push({ key: col.data, label: col.title, ff_transform: cfg.ff_transform || null });
+				columns_config.push({
+					key: col.data,
+					label: col.title,
+					is_blank_col: true,
+					width,
+				});
+				blank_columns.push({
+					key: col.data,
+					label: col.title,
+					ff_transform: cfg.ff_transform || null,
+				});
 				return;
 			}
 			if (col._is_formula_col) {
 				const formula_template = board._formula_col_map?.get(i) || null;
-				columns_config.push({ key: col.data, label: col.title, is_formula_col: true, width });
+				columns_config.push({
+					key: col.data,
+					label: col.title,
+					is_formula_col: true,
+					width,
+				});
 				formula_columns.push({ key: col.data, label: col.title, formula_template });
 				return;
 			}
-			if (col._is_meta_col)    { columns_config.push({ fieldname: "_meta",    width, is_meta_col: true });   return; }
-			if (col._is_social_col)  { columns_config.push({ fieldname: "_social",  width, is_social_col: true }); return; }
+			if (col._is_meta_col) {
+				columns_config.push({ fieldname: "_meta", width, is_meta_col: true });
+				return;
+			}
+			if (col._is_social_col) {
+				columns_config.push({ fieldname: "_social", width, is_social_col: true });
+				return;
+			}
 			columns_config.push({ fieldname: col.data, width });
 		});
 
@@ -470,13 +510,16 @@ frappe.views.excel.WorkbookManager = class WorkbookManager {
 		// filter_area.get() returns filter objects; normalise to [dt, field, op, value] arrays.
 		let filters = [];
 		try {
-			filters = (board.list_view.filter_area?.get() ?? [])
-				.map(f => Array.isArray(f) ? f.slice(0, 4) : f);
-		} catch (_) { /* filter_area may not exist in all contexts */ }
+			filters = (board.list_view.filter_area?.get() ?? []).map((f) =>
+				Array.isArray(f) ? f.slice(0, 4) : f
+			);
+		} catch (_) {
+			/* filter_area may not exist in all contexts */
+		}
 
 		// ── sort_by ────────────────────────────────────────────────────────
 		const sort_by = {
-			field: board.list_view.sort_by    || "modified",
+			field: board.list_view.sort_by || "modified",
 			order: board.list_view.sort_order || "desc",
 		};
 
@@ -506,18 +549,18 @@ frappe.views.excel.WorkbookManager = class WorkbookManager {
 		const chart_overlays = (this.board.chart_overlays || []).map((c) => ({ ...c }));
 
 		// ── cell formatting (V2.6) — CF rules are user_settings-only, not in workbook ──
-		const format_store   = { ...this.board.format_store };
-		const cond_fmt_rules = [];  // intentionally empty — CF rules live in user_settings only
+		const format_store = { ...this.board.format_store };
+		const cond_fmt_rules = []; // intentionally empty — CF rules live in user_settings only
 		// V3.1 — Encode hidden_rows + manual row_heights inside format_store
 		// (no DocType schema change needed; __ prefix avoids collision with cell keys)
 		const plugin_rh = board.hot?.getPlugin("manualRowResize");
 		if (board._hidden_rows?.length) format_store.__hidden_rows = [...board._hidden_rows];
 		const _rh_arr = plugin_rh?.manualRowHeights ? [...plugin_rh.manualRowHeights] : [];
-		if (_rh_arr.some(h => h != null)) format_store.__row_heights = _rh_arr;
+		if (_rh_arr.some((h) => h != null)) format_store.__row_heights = _rh_arr;
 
 		// ── View tab state (V2.6) ───────────────────────────────────────────
-		const freeze_cols    = this.board._frozen_cols || 0;
-		const freeze_rows    = this.board._frozen_rows || 0;
+		const freeze_cols = this.board._frozen_cols || 0;
+		const freeze_rows = this.board._frozen_rows || 0;
 		const hide_gridlines = this.board.$hot_container?.hasClass("ev-hide-gridlines") || false;
 
 		const smart_lookups = board._applied_lookups?.length ? board._applied_lookups : null;
@@ -533,7 +576,22 @@ frappe.views.excel.WorkbookManager = class WorkbookManager {
 			}
 		}
 
-		return { columns_config: root_columns_config, formula_columns, blank_columns, filters, sort_by, sheets, chart_overlays, format_store, cond_fmt_rules, freeze_cols, freeze_rows, hide_gridlines, smart_lookups, child_col_prefs };
+		return {
+			columns_config: root_columns_config,
+			formula_columns,
+			blank_columns,
+			filters,
+			sort_by,
+			sheets,
+			chart_overlays,
+			format_store,
+			cond_fmt_rules,
+			freeze_cols,
+			freeze_rows,
+			hide_gridlines,
+			smart_lookups,
+			child_col_prefs,
+		};
 	}
 
 	// ── Restore state from config ─────────────────────────────────────────────
@@ -559,18 +617,18 @@ frappe.views.excel.WorkbookManager = class WorkbookManager {
 		// apply_field_selection.  apply_config's own step-6 refresh is the
 		// single authoritative fetch; two concurrent refreshes create a race
 		// condition where the second board.refresh() wipes joined-row values.
-		const META_AUDIT_FIELDS   = ["owner", "creation", "modified_by", "modified"];
-		const SOCIAL_REGULAR_FIELDS = ["docstatus", "idx"];  // _user_tags/_comments/_assign/_liked_by are auto-fetched
-		const has_meta_col   = (config.columns_config || []).some(c => c.is_meta_col);
-		const has_social_col = (config.columns_config || []).some(c => c.is_social_col);
+		const META_AUDIT_FIELDS = ["owner", "creation", "modified_by", "modified"];
+		const SOCIAL_REGULAR_FIELDS = ["docstatus", "idx"]; // _user_tags/_comments/_assign/_liked_by are auto-fetched
+		const has_meta_col = (config.columns_config || []).some((c) => c.is_meta_col);
+		const has_social_col = (config.columns_config || []).some((c) => c.is_social_col);
 		const regular_fieldnames = (config.columns_config || [])
-			.filter(c => !c.is_formula_col && !c.is_blank_col)
-			.flatMap(c => {
-				if (c.is_meta_col)   return META_AUDIT_FIELDS;
+			.filter((c) => !c.is_formula_col && !c.is_blank_col)
+			.flatMap((c) => {
+				if (c.is_meta_col) return META_AUDIT_FIELDS;
 				if (c.is_social_col) return SOCIAL_REGULAR_FIELDS;
 				return [c.fieldname];
 			})
-			.filter(f => f && !String(f).startsWith("_slk_") && !String(f).startsWith("_join_"));
+			.filter((f) => f && !String(f).startsWith("_slk_") && !String(f).startsWith("_join_"));
 
 		if (regular_fieldnames.length) {
 			board.apply_field_selection(regular_fieldnames, { silent: true });
@@ -584,9 +642,9 @@ frappe.views.excel.WorkbookManager = class WorkbookManager {
 		// ── 2. Re-add formula columns ──────────────────
 		// Use _restore_formula_col_templates: adds columns, rebuilds HF, fills all rows.
 		if ((config.formula_columns || []).length) {
-			const templates = config.formula_columns.map(fc => ({
-				key:     fc.key,
-				label:   fc.label,
+			const templates = config.formula_columns.map((fc) => ({
+				key: fc.key,
+				label: fc.label,
 				formula: fc.formula_template || null,
 			}));
 			board._restore_formula_col_templates(templates);
@@ -603,7 +661,7 @@ frappe.views.excel.WorkbookManager = class WorkbookManager {
 		const plugin = board.hot?.getPlugin("manualColumnResize");
 		if (plugin) {
 			const width_map = {};
-			(config.columns_config || []).forEach(cfg => {
+			(config.columns_config || []).forEach((cfg) => {
 				if (cfg.width && cfg.fieldname) width_map[cfg.fieldname] = cfg.width;
 				if (cfg.width && cfg.key) width_map[cfg.key] = cfg.width;
 			});
@@ -631,20 +689,25 @@ frappe.views.excel.WorkbookManager = class WorkbookManager {
 					await fa.set(config.filters);
 				} catch (err) {
 					// filter_area.set failed — fall back to direct filter_list insertion
-					console.error("[WorkbookManager] filter_area.set failed, using fallback:", err);
+					console.error(
+						"[WorkbookManager] filter_area.set failed, using fallback:",
+						err
+					);
 					try {
-						const non_std = config.filters.filter(f => {
+						const non_std = config.filters.filter((f) => {
 							const condition = f[2];
 							return !(condition === "=" || condition === "like");
 						});
 						if (non_std.length) {
 							await fa.filter_list.add_filters(non_std);
 						}
-						const std = config.filters.filter(f => {
+						const std = config.filters.filter((f) => {
 							const condition = f[2];
 							const fieldname = f[1];
-							return (condition === "=" || condition === "like")
-								&& board.list_view.page.fields_dict[fieldname];
+							return (
+								(condition === "=" || condition === "like") &&
+								board.list_view.page.fields_dict[fieldname]
+							);
 						});
 						for (const f of std) {
 							const ctrl = board.list_view.page.fields_dict[f[1]];
@@ -659,7 +722,7 @@ frappe.views.excel.WorkbookManager = class WorkbookManager {
 
 		// ── 5. Sort ────────────────────────────────────────────────────────
 		if (config.sort_by?.field) {
-			board.list_view.sort_by    = config.sort_by.field;
+			board.list_view.sort_by = config.sort_by.field;
 			board.list_view.sort_order = config.sort_by.order || "desc";
 		}
 
@@ -689,20 +752,32 @@ frappe.views.excel.WorkbookManager = class WorkbookManager {
 			// V3.1 — Extract __meta keys (hidden_rows + row_heights) from format_store
 			const { __hidden_rows, __row_heights, ...cell_formats } = config.format_store;
 			board.format_store = cell_formats;
-			frappe.model.user_settings.save(board.doctype, "excel_format_store", board.format_store);
+			frappe.model.user_settings.save(
+				board.doctype,
+				"excel_format_store",
+				board.format_store
+			);
 			// Restore hidden rows
 			if (Array.isArray(__hidden_rows) && __hidden_rows.length) {
 				board._hidden_rows = [...__hidden_rows];
-				frappe.model.user_settings.save(board.doctype, "excel_hidden_rows", board._hidden_rows);
+				frappe.model.user_settings.save(
+					board.doctype,
+					"excel_hidden_rows",
+					board._hidden_rows
+				);
 			}
 			// Restore manual row heights
-			if (Array.isArray(__row_heights) && __row_heights.some(h => h != null)) {
+			if (Array.isArray(__row_heights) && __row_heights.some((h) => h != null)) {
 				setTimeout(() => {
 					const rh_plugin = board.hot?.getPlugin("manualRowResize");
 					if (rh_plugin) {
 						rh_plugin.manualRowHeights = [...__row_heights];
 						board.hot.render();
-						frappe.model.user_settings.save(board.doctype, "excel_row_heights", __row_heights);
+						frappe.model.user_settings.save(
+							board.doctype,
+							"excel_row_heights",
+							__row_heights
+						);
 					}
 				}, 0);
 			}
@@ -715,7 +790,11 @@ frappe.views.excel.WorkbookManager = class WorkbookManager {
 		// ── 11. Restore Smart Lookup configs (V3.2) ────────────────────────────────
 		if (Array.isArray(config.smart_lookups) && config.smart_lookups.length) {
 			board._applied_lookups = config.smart_lookups;
-			frappe.model.user_settings.save(board.doctype, "excel_smart_lookups", board._applied_lookups);
+			frappe.model.user_settings.save(
+				board.doctype,
+				"excel_smart_lookups",
+				board._applied_lookups
+			);
 			// Re-run joins after sheets + data are loaded (sheets restore at t=50ms)
 			setTimeout(() => board._reapply_smart_lookups?.(), 300);
 		}
@@ -750,8 +829,15 @@ frappe.views.excel.WorkbookManager = class WorkbookManager {
 		}
 		if (config.freeze_rows > 0) {
 			board._frozen_rows = config.freeze_rows;
-			frappe.model.user_settings.save(board.doctype, "excel_view_freeze_rows", config.freeze_rows);
-			setTimeout(() => { board.hot?.updateSettings({ fixedRowsTop: config.freeze_rows }); board.hot?.render(); }, 80);
+			frappe.model.user_settings.save(
+				board.doctype,
+				"excel_view_freeze_rows",
+				config.freeze_rows
+			);
+			setTimeout(() => {
+				board.hot?.updateSettings({ fixedRowsTop: config.freeze_rows });
+				board.hot?.render();
+			}, 80);
 		}
 		if (config.hide_gridlines) {
 			board.$hot_container?.addClass("ev-hide-gridlines");
@@ -765,9 +851,7 @@ frappe.views.excel.WorkbookManager = class WorkbookManager {
 	_update_save_label(title) {
 		const $tb = $(this.board.toolbar);
 		$tb.find(".ev-wb-save-label").text(
-			title
-				? (title.length > 22 ? title.slice(0, 20) + "…" : title)
-				: __("Save View"),
+			title ? (title.length > 22 ? title.slice(0, 20) + "…" : title) : __("Save View")
 		);
 		// Show × only when a workbook is active
 		$tb.find(".ev-wb-deselect-btn").toggleClass("hide", !title);
@@ -789,7 +873,7 @@ frappe.views.excel.WorkbookManager = class WorkbookManager {
 	 * and survive the board destroy; the new board re-renders into them.
 	 */
 	async _deselect() {
-		const board     = this.board;
+		const board = this.board;
 		const list_view = board.list_view; // save ref — board is about to be destroyed
 
 		// 1. Clear user-settings LOCAL CACHE synchronously so the new board's
@@ -809,23 +893,23 @@ frappe.views.excel.WorkbookManager = class WorkbookManager {
 			// Workbook identity
 			excel_current_workbook: null,
 			// Grid state
-			excel_columns:          null,
-			excel_ct_columns:       null,
-			excel_hidden_cols:      null,
-			excel_hidden_rows:      [],
-			excel_row_heights:      [],
+			excel_columns: null,
+			excel_ct_columns: null,
+			excel_hidden_cols: null,
+			excel_hidden_rows: [],
+			excel_row_heights: [],
 			// Formatting (CF rules are user_settings-only, not cleared on deselect)
-			excel_format_store:     null,
+			excel_format_store: null,
 			// View settings
-			excel_view_freeze:      0,
+			excel_view_freeze: 0,
 			excel_view_freeze_rows: 0,
-			excel_hide_gridlines:   false,
-			excel_focus_cell:       null,
+			excel_hide_gridlines: false,
+			excel_focus_cell: null,
 			// Overlays
-			excel_chart_overlays:   [],
+			excel_chart_overlays: [],
 			// Multi-sheet + Smart Lookup (V3.2)
-			excel_sheets:           null,
-			excel_smart_lookups:    null,
+			excel_sheets: null,
+			excel_smart_lookups: null,
 		});
 		frappe.model.user_settings[dt] = cleared; // commit synchronous clear
 

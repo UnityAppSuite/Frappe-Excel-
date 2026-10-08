@@ -19,10 +19,7 @@ frappe.views.excel.DataManager = class DataManager {
 		this.board = opts.board;
 		// { doc_name: { fieldname: value, ... }, ... }
 		this._save_queue = {};
-		this._save_debounced = frappe.utils.debounce(
-			this._flush_saves.bind(this),
-			800
-		);
+		this._save_debounced = frappe.utils.debounce(this._flush_saves.bind(this), 800);
 		this._dirty = false;
 	}
 
@@ -88,8 +85,16 @@ frappe.views.excel.DataManager = class DataManager {
 			const col_def = columns.find((c) => c.data === fieldname);
 			// Skip formula/join columns — they exist only in the grid, never in the DB
 			// Skip _is_new rows — they are pending inline inserts, not yet in the DB
-			if (!doc || doc._is_new || !col_def || col_def._readonly || col_def._is_name_col
-				|| col_def._is_formula_col || col_def._is_join_col) return;
+			if (
+				!doc ||
+				doc._is_new ||
+				!col_def ||
+				col_def._readonly ||
+				col_def._is_name_col ||
+				col_def._is_formula_col ||
+				col_def._is_join_col
+			)
+				return;
 
 			const doc_name = doc.name;
 			if (!doc_name || !fieldname) return;
@@ -105,7 +110,9 @@ frappe.views.excel.DataManager = class DataManager {
 
 		this._dirty = true;
 		this._show_dirty_indicator();
-		this._save_debounced();
+		// Manual-save mode: edits wait until Ctrl+S (or leaving the page). Otherwise
+		// they are saved about a second after the last edit.
+		if (!this.board.manual_save) this._save_debounced();
 	}
 
 	/**
@@ -131,21 +138,38 @@ frappe.views.excel.DataManager = class DataManager {
 				error: () => {},
 			});
 			const errors = r.message?.errors || [];
+			this._mark_failed_cells(errors, updates);
 			if (errors.length) {
-				// Show the first error in the friendly dialog; toast a count if multiple
+				// Show the first error in the friendly dialog; toast a count if multiple.
+				// Every failed cell is also marked red (see _mark_failed_cells).
 				const first = errors[0];
 				frappe.views.excel.show_error(
-					{ _server_messages: JSON.stringify([JSON.stringify({ message: first.error })]) },
+					{
+						_server_messages: JSON.stringify([
+							JSON.stringify({ message: first.error }),
+						]),
+					},
 					errors.length > 1
 						? __("{0} record(s) could not be saved", [errors.length])
 						: __("Saving {0}", [first.name])
 				);
-			} else {
-				this._dirty = false;
-				this._clear_dirty_indicator();
-				frappe.views.excel.toast(__("Saved"), "success", 2000);
 			}
+			// Refused rows were reverted by the reload, so they are no longer waiting.
+			// Only edits typed while this request was running are still unsaved.
+			if (!errors.length || !Object.keys(this._save_queue).length) {
+				this._dirty = Object.keys(this._save_queue).length > 0;
+				if (!this._dirty) this._clear_dirty_indicator();
+			}
+			if (!errors.length) frappe.views.excel.toast(__("Saved"), "success", 2000);
 		} catch (err) {
+			// The whole request failed (session expired, network down, no permission). Nothing
+			// was stored, so put the edits back: Ctrl+S retries them and the leave warning
+			// stays on. Edits typed since the request went out win over the older ones.
+			Object.entries(queue).forEach(([name, fields]) => {
+				this._save_queue[name] = { ...fields, ...(this._save_queue[name] || {}) };
+			});
+			this._dirty = true;
+			this._show_dirty_indicator();
 			frappe.views.excel.show_error(err, __("Saving changes to {0}", [doctype]));
 		}
 	}
@@ -182,10 +206,7 @@ frappe.views.excel.DataManager = class DataManager {
 		} else {
 			frappe.show_alert(
 				{
-					message: __(
-						"{0} record(s) deleted",
-						[to_delete.length]
-					),
+					message: __("{0} record(s) deleted", [to_delete.length]),
 					indicator: "green",
 				},
 				2
@@ -211,5 +232,40 @@ frappe.views.excel.DataManager = class DataManager {
 	 */
 	is_dirty() {
 		return this._dirty || Object.keys(this._save_queue).length > 0;
+	}
+
+	// ── Failed rows ───────────────────────────────────────────────────────────
+
+	/**
+	 * Colour every cell the server refused, with the server's message as a tooltip.
+	 * The server returns one entry per failed row: {name, error, fields: [fieldnames]}.
+	 * A failed cell stays marked until the user edits it again.
+	 */
+	_mark_failed_cells(errors, updates) {
+		const board = this.board;
+		if (!board._failed_cells) board._failed_cells = new Map();
+		const plain = (s) =>
+			String(s || "")
+				.replace(/<[^>]*>/g, "")
+				.trim();
+
+		// A successful save of a cell clears an older mark on it.
+		const failed_rows = new Set(errors.map((e) => e.name));
+		updates.forEach((u) => {
+			if (failed_rows.has(u.name)) return;
+			Object.keys(u.fields).forEach((f) => board._failed_cells.delete(`${u.name}|${f}`));
+		});
+
+		errors.forEach((e) => {
+			const upd = updates.find((u) => u.name === e.name);
+			const fields = e.fields || Object.keys(upd?.fields || {});
+			fields.forEach((f) => board._failed_cells.set(`${e.name}|${f}`, plain(e.error)));
+		});
+		board.hot?.render();
+
+		if (errors.length) {
+			// The server did not store these edits: reload so the cells show what is saved.
+			setTimeout(() => board.list_view?.refresh(), 300);
+		}
 	}
 };

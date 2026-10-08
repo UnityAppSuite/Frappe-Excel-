@@ -1,0 +1,41 @@
+{
+ "actions": [],
+ "allow_rename": 0,
+ "creation": "2026-10-07 00:00:00.000000",
+ "doctype": "DocType",
+ "engine": "InnoDB",
+ "field_order": [
+  "manual_save"
+ ],
+ "fields": [
+  {
+   "default": "0",
+   "description": "When ticked, edits in the Excel View grid are NOT saved automatically. They wait until the user presses Ctrl+S (or leaves the page). When unticked (the default), edits are saved about one second after each change.",
+   "fieldname": "manual_save",
+   "fieldtype": "Check",
+   "label": "Manual Save (Ctrl+S)"
+  }
+ ],
+ "index_web_pages_for_search": 0,
+ "issingle": 1,
+ "links": [],
+ "modified": "2026-10-07 00:00:00.000000",
+ "modified_by": "Administrator",
+ "module": "Excel View",
+ "name": "Excel View Settings",
+ "owner": "Administrator",
+ "permissions": [
+  {
+   "create": 1,
+   "email": 1,
+   "print": 1,
+   "read": 1,
+   "role": "System Manager",
+   "share": 1,
+   "write": 1
+  }
+ ],
+ "sort_field": "modified",
+ "sort_order": "DESC",
+ "states": []
+}
