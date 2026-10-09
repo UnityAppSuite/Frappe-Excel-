@@ -55,6 +55,10 @@ class SelectEditor extends Handsontable.editors.BaseEditor {
 			minWidth: "120px",
 		});
 
+		// Pressing the mouse on the list must not reach the grid: it reads that as a click
+		// outside the cell, closes the editor and saves the OLD value before "change" fires.
+		this._select.addEventListener("mousedown", (e) => e.stopPropagation());
+
 		// Click on an option → commit immediately
 		this._select.addEventListener("change", () => this.finishEditing());
 
@@ -102,7 +106,9 @@ class SelectEditor extends Handsontable.editors.BaseEditor {
 			source
 				.map(
 					(opt) =>
-						`<option value="${frappe.utils.escape_html(opt)}">${frappe.utils.escape_html(__(opt))}</option>`
+						`<option value="${frappe.utils.escape_html(
+							opt
+						)}">${frappe.utils.escape_html(__(opt))}</option>`
 				)
 				.join("");
 
